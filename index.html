@@ -1,0 +1,1532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HORIZON Apartment | Modern Luxury Living</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+        
+        :root {
+            --primary: #1a365d;
+            --secondary: #e2e8f0;
+            --accent: #4299e1;
+            --light: #f7fafc;
+            --dark: #2d3748;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+        
+        body {
+            color: var(--dark);
+            background-color: var(--light);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        section {
+            padding: 80px 0;
+        }
+        
+        h1, h2, h3, h4 {
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            font-size: 3.5rem;
+            color: var(--light);
+        }
+        
+        h2 {
+            font-size: 2.5rem;
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 50px;
+            position: relative;
+        }
+        
+        h2:after {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 4px;
+            background: var(--accent);
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+        
+        p {
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: var(--accent);
+            color: white;
+            padding: 14px 32px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 5px 15px rgba(66, 153, 225, 0.3);
+        }
+        
+        .btn:hover {
+            background-color: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(66, 153, 225, 0.4);
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--accent);
+            color: var(--accent);
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--accent);
+            color: white;
+        }
+        
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        /* Header and Navigation */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.95);
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            padding: 15px 0;
+            transition: var(--transition);
+        }
+        
+        header.scrolled {
+            padding: 10px 0;
+        }
+        
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            color: var(--accent);
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        nav li {
+            margin-left: 30px;
+        }
+        
+        nav a {
+            color: var(--dark);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        nav a:hover {
+            color: var(--accent);
+        }
+        
+        nav a:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            background: var(--accent);
+            left: 0;
+            bottom: -5px;
+            transition: var(--transition);
+        }
+        
+        nav a:hover:after {
+            width: 100%;
+        }
+        
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--primary);
+            cursor: pointer;
+        }
+        
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            background: linear-gradient(rgba(26, 54, 93, 0.8), rgba(26, 54, 93, 0.9)), url('https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: white;
+        }
+        
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 40px;
+            color: var(--secondary);
+        }
+        
+        /* About Section */
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: center;
+        }
+        
+        .about-image {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+        
+        /* Amenities Section */
+        .amenities {
+            background-color: var(--secondary);
+        }
+        
+        .amenities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+        
+        .amenity-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+        
+        .amenity-card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .amenity-icon {
+            font-size: 2.5rem;
+            color: var(--accent);
+            margin-bottom: 20px;
+        }
+        
+        .amenity-card h3 {
+            font-size: 1.5rem;
+        }
+        
+        /* Gallery Section */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .gallery-item {
+            border-radius: 10px;
+            overflow: hidden;
+            height: 250px;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+        
+        .gallery-item:hover img {
+            transform: scale(1.1);
+        }
+        
+        .gallery-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(26, 54, 93, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: var(--transition);
+        }
+        
+        .gallery-item:hover .gallery-overlay {
+            opacity: 1;
+        }
+        
+        .gallery-overlay i {
+            color: white;
+            font-size: 2rem;
+        }
+        
+        /* Location Section */
+        .location-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: center;
+        }
+        
+        .map-container {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            height: 400px;
+        }
+        
+        .map-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .location-info {
+            padding-right: 20px;
+        }
+        
+        .location-details {
+            margin-top: 30px;
+        }
+        
+        .location-detail {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .location-detail i {
+            color: var(--accent);
+            font-size: 1.2rem;
+            margin-right: 15px;
+            width: 25px;
+        }
+        
+        /* Contact Section */
+        .contact {
+            background-color: var(--secondary);
+        }
+        
+        .contact-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+        }
+        
+        .contact-form input,
+        .contact-form textarea {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        
+        .contact-form input:focus,
+        .contact-form textarea:focus {
+            border-color: var(--accent);
+            outline: none;
+        }
+        
+        .contact-form textarea {
+            height: 150px;
+            resize: vertical;
+        }
+        
+        .contact-info {
+            padding-left: 20px;
+        }
+        
+        .contact-detail {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        
+        .contact-detail i {
+            color: var(--accent);
+            font-size: 1.5rem;
+            margin-right: 20px;
+            width: 30px;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--primary);
+            color: white;
+            padding: 60px 0 30px;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        
+        .footer-column h3 {
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 25px;
+            position: relative;
+        }
+        
+        .footer-column h3:after {
+            content: '';
+            position: absolute;
+            width: 50px;
+            height: 3px;
+            background: var(--accent);
+            bottom: -10px;
+            left: 0;
+        }
+        
+        .footer-links {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+        
+        .footer-links a {
+            color: #cbd5e0;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        
+        .footer-links a:hover {
+            color: white;
+            padding-left: 5px;
+        }
+        
+        .social-icons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .social-icons a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            color: white;
+            transition: var(--transition);
+        }
+        
+        .social-icons a:hover {
+            background-color: var(--accent);
+            transform: translateY(-5px);
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #cbd5e0;
+            font-size: 0.9rem;
+        }
+        
+        /* Modal for Gallery */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .modal-content img {
+            width: 100%;
+            height: auto;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 2.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .close-modal:hover {
+            color: var(--accent);
+        }
+        
+        /* Admin Panel */
+        .admin-icon {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background-color: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            z-index: 1001;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+        
+        .admin-icon:hover {
+            background-color: var(--accent);
+            transform: scale(1.1);
+        }
+        
+        .admin-icon i {
+            font-size: 1.5rem;
+        }
+        
+        .admin-panel {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .admin-login {
+            background-color: white;
+            padding: 40px;
+            border-radius: 10px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+        
+        .admin-login h3 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        
+        .admin-login p {
+            margin-bottom: 30px;
+            color: var(--dark);
+        }
+        
+        .admin-login input {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            text-align: center;
+            letter-spacing: 3px;
+            font-weight: bold;
+        }
+        
+        .admin-login input:focus {
+            border-color: var(--accent);
+            outline: none;
+        }
+        
+        .admin-controls {
+            display: none;
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            z-index: 1001;
+            width: 300px;
+        }
+        
+        .admin-controls h3 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .admin-controls h3 i {
+            margin-right: 10px;
+            color: var(--accent);
+        }
+        
+        .admin-controls button {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 600;
+        }
+        
+        .admin-controls button:hover {
+            background-color: var(--primary);
+        }
+        
+        .admin-controls button.logout {
+            background-color: #e53e3e;
+        }
+        
+        .admin-controls button.logout:hover {
+            background-color: #c53030;
+        }
+        
+        .edit-mode {
+            outline: 2px dashed var(--accent);
+            padding: 5px;
+            min-height: 20px;
+        }
+        
+        .edit-mode-img {
+            outline: 4px dashed var(--accent);
+            position: relative;
+        }
+        
+        .edit-mode-img:after {
+            content: "Click to change";
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: var(--accent);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            z-index: 100;
+        }
+        
+        /* Image Upload Modal */
+        .image-upload-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .image-upload-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: var(--shadow);
+        }
+        
+        .image-upload-content h3 {
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+        
+        .image-upload-content input {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .image-preview {
+            width: 100%;
+            height: 200px;
+            background-color: #f7fafc;
+            border: 2px dashed #ddd;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .image-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        
+        .image-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            h1 {
+                font-size: 2.8rem;
+            }
+            
+            h2 {
+                font-size: 2.2rem;
+            }
+            
+            .about-content,
+            .location-content,
+            .contact-container {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            
+            .location-info,
+            .contact-info {
+                padding-right: 0;
+                padding-left: 0;
+            }
+            
+            .admin-controls {
+                top: 80px;
+                right: 10px;
+                width: 250px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.3rem;
+            }
+            
+            h2 {
+                font-size: 1.9rem;
+            }
+            
+            section {
+                padding: 60px 0;
+            }
+            
+            nav ul {
+                position: fixed;
+                top: 70px;
+                left: 0;
+                width: 100%;
+                background-color: white;
+                flex-direction: column;
+                align-items: center;
+                padding: 20px 0;
+                box-shadow: var(--shadow);
+                transform: translateY(-100%);
+                opacity: 0;
+                transition: var(--transition);
+                z-index: 999;
+            }
+            
+            nav ul.active {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            
+            nav li {
+                margin: 15px 0;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .hero {
+                height: 80vh;
+            }
+            
+            .admin-controls {
+                position: fixed;
+                top: auto;
+                bottom: 80px;
+                right: 10px;
+                width: calc(100% - 20px);
+                max-width: 300px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            h2 {
+                font-size: 1.7rem;
+            }
+            
+            .btn {
+                padding: 12px 25px;
+            }
+            
+            .gallery-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Admin Icon -->
+    <div class="admin-icon" id="adminIcon">
+        <i class="fas fa-user-cog"></i>
+    </div>
+
+    <!-- Admin Login Panel -->
+    <div class="admin-panel" id="adminPanel">
+        <div class="admin-login">
+            <h3>Admin Access</h3>
+            <p>Enter admin code to edit website content</p>
+            <input type="password" id="adminCode" placeholder="Enter 6-digit code" maxlength="6">
+            <button class="btn" id="adminLoginBtn">Access Admin Panel</button>
+            <p id="adminError" style="color: #e53e3e; margin-top: 10px; display: none;">Incorrect code. Try again.</p>
+        </div>
+    </div>
+
+    <!-- Admin Controls -->
+    <div class="admin-controls" id="adminControls">
+        <h3><i class="fas fa-cogs"></i> Admin Controls</h3>
+        <button id="enableEditBtn"><i class="fas fa-edit"></i> Enable Editing</button>
+        <button id="saveContentBtn"><i class="fas fa-save"></i> Save Changes</button>
+        <button id="changeImagesBtn"><i class="fas fa-image"></i> Change Images</button>
+        <button id="resetContentBtn"><i class="fas fa-undo"></i> Reset to Original</button>
+        <button class="logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </div>
+
+    <!-- Image Upload Modal -->
+    <div class="image-upload-modal" id="imageUploadModal">
+        <div class="image-upload-content">
+            <h3>Change Image</h3>
+            <p>Enter image URL or upload a file</p>
+            <input type="text" id="imageUrlInput" placeholder="https://example.com/image.jpg">
+            <p style="text-align: center; margin: 10px 0;">OR</p>
+            <input type="file" id="imageFileInput" accept="image/*">
+            <div class="image-preview" id="imagePreview">
+                <p>Preview will appear here</p>
+            </div>
+            <div class="image-buttons">
+                <button class="btn" id="applyImageBtn" style="flex: 1;">Apply Image</button>
+                <button class="btn btn-outline" id="cancelImageBtn" style="flex: 1;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header & Navigation -->
+    <header id="header">
+        <div class="container header-container">
+            <a href="#" class="logo"><i class="fas fa-building"></i> HORIZON</a>
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+            <nav>
+                <ul id="mainNav">
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#amenities">Amenities</a></li>
+                    <li><a href="#gallery">Gallery</a></li>
+                    <li><a href="#location">Location</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="container">
+            <div class="hero-content">
+                <h1 id="heroTitle">HORIZON APARTMENT</h1>
+                <p id="heroSubtitle">Experience modern luxury living with breathtaking views in the heart of the city. Your perfect home awaits.</p>
+                <div class="hero-buttons">
+                    <a href="#gallery" class="btn">View Gallery</a>
+                    <a href="#contact" class="btn btn-outline">Book a Visit</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about">
+        <div class="container">
+            <h2 id="aboutTitle">About Horizon</h2>
+            <div class="about-content">
+                <div class="about-text">
+                    <p id="aboutText1">Welcome to Horizon, where luxury meets comfort in the most prestigious neighborhood. Our apartments are designed with meticulous attention to detail, offering an unparalleled living experience.</p>
+                    <p id="aboutText2">Every unit features floor-to-ceiling windows, premium finishes, and smart home technology. Experience breathtaking city views and enjoy our world-class amenities designed for modern urban living.</p>
+                    <p id="aboutText3">Horizon is more than just an apartment—it's a lifestyle. Located in the vibrant downtown area, you'll have access to the best restaurants, shopping, and entertainment the city has to offer.</p>
+                    <a href="#amenities" class="btn">Explore Amenities</a>
+                </div>
+                <div class="about-image">
+                    <img id="aboutImage" src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Horizon Apartment Building">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Amenities Section -->
+    <section class="amenities" id="amenities">
+        <div class="container">
+            <h2 id="amenitiesTitle">Premium Amenities</h2>
+            <div class="amenities-grid">
+                <div class="amenity-card">
+                    <div class="amenity-icon">
+                        <i class="fas fa-swimming-pool"></i>
+                    </div>
+                    <h3 id="amenity1Title">Infinity Pool</h3>
+                    <p id="amenity1Text">Year-round heated infinity pool with panoramic city views and luxury cabanas.</p>
+                </div>
+                <div class="amenity-card">
+                    <div class="amenity-icon">
+                        <i class="fas fa-dumbbell"></i>
+                    </div>
+                    <h3 id="amenity2Title">Fitness Center</h3>
+                    <p id="amenity2Text">State-of-the-art gym with personal trainers, yoga studio, and wellness programs.</p>
+                </div>
+                <div class="amenity-card">
+                    <div class="amenity-icon">
+                        <i class="fas fa-wifi"></i>
+                    </div>
+                    <h3 id="amenity3Title">High-Speed Internet</h3>
+                    <p id="amenity3Text">Fiber-optic internet throughout the building with smart home integration.</p>
+                </div>
+                <div class="amenity-card">
+                    <div class="amenity-icon">
+                        <i class="fas fa-concierge-bell"></i>
+                    </div>
+                    <h3 id="amenity4Title">Concierge Service</h3>
+                    <p id="amenity4Text">24/7 concierge and security services for your convenience and safety.</p>
+                </div>
+                <div class="amenity-card">
+                    <div class="amenity-icon">
+                        <i class="fas fa-parking"></i>
+                    </div>
+                    <h3 id="amenity5Title">Secure Parking</h3>
+                    <p id="amenity5Text">Underground parking with EV charging stations and valet service available.</p>
+                </div>
+                <div class="amenity-card">
+                    <div class="amenity-icon">
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                    <h3 id="amenity6Title">Entertainment Lounge</h3>
+                    <p id="amenity6Text">Private dining rooms, entertainment lounge, and rooftop terrace for residents.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section id="gallery">
+        <div class="container">
+            <h2 id="galleryTitle">Gallery</h2>
+            <div class="gallery-grid">
+                <div class="gallery-item" data-image="1">
+                    <img id="galleryImage1" src="https://images.unsplash.com/photo-1613977257363-707ba9348227?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80" alt="Living Room">
+                    <div class="gallery-overlay">
+                        <i class="fas fa-search-plus"></i>
+                    </div>
+                </div>
+                <div class="gallery-item" data-image="2">
+                    <img id="galleryImage2" src="https://images.unsplash.com/photo-1616594039964-ae9021a400a0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80" alt="Kitchen">
+                    <div class="gallery-overlay">
+                        <i class="fas fa-search-plus"></i>
+                    </div>
+                </div>
+                <div class="gallery-item" data-image="3">
+                    <img id="galleryImage3" src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1458&q=80" alt="Bedroom">
+                    <div class="gallery-overlay">
+                        <i class="fas fa-search-plus"></i>
+                    </div>
+                </div>
+                <div class="gallery-item" data-image="4">
+                    <img id="galleryImage4" src="https://images.unsplash.com/photo-1613545325278-f24b0cae1224?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80" alt="Bathroom">
+                    <div class="gallery-overlay">
+                        <i class="fas fa-search-plus"></i>
+                    </div>
+                </div>
+                <div class="gallery-item" data-image="5">
+                    <img id="galleryImage5" src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80" alt="Pool Area">
+                    <div class="gallery-overlay">
+                        <i class="fas fa-search-plus"></i>
+                    </div>
+                </div>
+                <div class="gallery-item" data-image="6">
+                    <img id="galleryImage6" src="https://images.unsplash.com/photo-1571896349842-33c89424de2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1480&q=80" alt="Building Exterior">
+                    <div class="gallery-overlay">
+                        <i class="fas fa-search-plus"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Location Section -->
+    <section id="location">
+        <div class="container">
+            <h2 id="locationTitle">Location</h2>
+            <div class="location-content">
+                <div class="location-info">
+                    <p id="locationText1">Horizon is situated in the most desirable downtown location, offering easy access to business districts, entertainment, and cultural attractions.</p>
+                    <div class="location-details">
+                        <div class="location-detail">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span id="locationAddress">123 Skyline Boulevard, Downtown, Metropolis</span>
+                        </div>
+                        <div class="location-detail">
+                            <i class="fas fa-subway"></i>
+                            <span id="locationTransport">5-minute walk to Metro Station | 10-minute walk to Central Park</span>
+                        </div>
+                        <div class="location-detail">
+                            <i class="fas fa-utensils"></i>
+                            <span id="locationDining">Surrounded by top-rated restaurants, cafes, and bars</span>
+                        </div>
+                        <div class="location-detail">
+                            <i class="fas fa-shopping-bag"></i>
+                            <span id="locationShopping">Premium shopping district just steps away</span>
+                        </div>
+                    </div>
+                    <a href="#contact" class="btn">Get Directions</a>
+                </div>
+                <div class="map-container">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3024.177858804427!2d-73.98784428459418!3d40.70555197933207!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25a315cdf4c9b%3A0x8b934de5cae6f7a!2sDowntown%20Manhattan%2C%20New%20York%2C%20NY%2C%20USA!5e0!3m2!1sen!2s!4v1629999400000!5m2!1sen!2s" allowfullscreen="" loading="lazy"></iframe>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact" id="contact">
+        <div class="container">
+            <h2 id="contactTitle">Contact Us</h2>
+            <div class="contact-container">
+                <div class="contact-form">
+                    <form id="contactForm">
+                        <input type="text" placeholder="Your Name" required>
+                        <input type="email" placeholder="Your Email" required>
+                        <input type="tel" placeholder="Phone Number">
+                        <textarea placeholder="Your Message" required></textarea>
+                        <button type="submit" class="btn">Send Message</button>
+                    </form>
+                </div>
+                <div class="contact-info">
+                    <p id="contactText">Interested in visiting Horizon? Contact us to schedule a private tour or request more information about availability and pricing.</p>
+                    <div class="contact-detail">
+                        <i class="fas fa-phone"></i>
+                        <div>
+                            <h4 id="contactPhoneTitle">Phone</h4>
+                            <p id="contactPhone">+1 (555) 123-4567</p>
+                        </div>
+                    </div>
+                    <div class="contact-detail">
+                        <i class="fas fa-envelope"></i>
+                        <div>
+                            <h4 id="contactEmailTitle">Email</h4>
+                            <p id="contactEmail">info@horizon-apartment.com</p>
+                        </div>
+                    </div>
+                    <div class="contact-detail">
+                        <i class="fas fa-clock"></i>
+                        <div>
+                            <h4 id="contactHoursTitle">Visit Hours</h4>
+                            <p id="contactHours">Monday - Friday: 9am - 7pm<br>Saturday - Sunday: 10am - 5pm</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3 id="footerTitle">HORIZON</h3>
+                    <p id="footerDescription">Experience the pinnacle of luxury living at Horizon Apartment. Modern design, premium amenities, and breathtaking views in the heart of the city.</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#about">About Horizon</a></li>
+                        <li><a href="#amenities">Amenities</a></li>
+                        <li><a href="#gallery">Gallery</a></li>
+                        <li><a href="#location">Location</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Contact Info</h3>
+                    <ul class="footer-links">
+                        <li><i class="fas fa-map-marker-alt"></i> <span id="footerAddress">123 Skyline Blvd, Downtown</span></li>
+                        <li><i class="fas fa-phone"></i> <span id="footerPhone">+1 (555) 123-4567</span></li>
+                        <li><i class="fas fa-envelope"></i> <span id="footerEmail">info@horizon-apartment.com</span></li>
+                        <li><i class="fas fa-clock"></i> <span id="footerHours">Mon-Fri: 9am-7pm, Sat-Sun: 10am-5pm</span></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p id="copyrightText">&copy; 2023 Horizon Apartment. All rights reserved. | Designed for Modern Luxury Living</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Gallery Modal -->
+    <div class="modal" id="galleryModal">
+        <span class="close-modal" id="closeModal">&times;</span>
+        <div class="modal-content">
+            <img id="modalImage" src="" alt="Enlarged view">
+        </div>
+    </div>
+
+    <script>
+        // Admin Access System
+        const ADMIN_CODE = "626262";
+        let isAdmin = false;
+        let isEditMode = false;
+        let currentImageElement = null;
+        
+        // Admin Elements
+        const adminIcon = document.getElementById('adminIcon');
+        const adminPanel = document.getElementById('adminPanel');
+        const adminCodeInput = document.getElementById('adminCode');
+        const adminLoginBtn = document.getElementById('adminLoginBtn');
+        const adminError = document.getElementById('adminError');
+        const adminControls = document.getElementById('adminControls');
+        const enableEditBtn = document.getElementById('enableEditBtn');
+        const saveContentBtn = document.getElementById('saveContentBtn');
+        const changeImagesBtn = document.getElementById('changeImagesBtn');
+        const resetContentBtn = document.getElementById('resetContentBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        
+        // Image Upload Elements
+        const imageUploadModal = document.getElementById('imageUploadModal');
+        const imageUrlInput = document.getElementById('imageUrlInput');
+        const imageFileInput = document.getElementById('imageFileInput');
+        const imagePreview = document.getElementById('imagePreview');
+        const applyImageBtn = document.getElementById('applyImageBtn');
+        const cancelImageBtn = document.getElementById('cancelImageBtn');
+        
+        // Show admin panel when admin icon is clicked
+        adminIcon.addEventListener('click', () => {
+            adminPanel.style.display = 'flex';
+        });
+        
+        // Admin login
+        adminLoginBtn.addEventListener('click', () => {
+            const enteredCode = adminCodeInput.value;
+            
+            if (enteredCode === ADMIN_CODE) {
+                isAdmin = true;
+                adminPanel.style.display = 'none';
+                adminControls.style.display = 'block';
+                adminCodeInput.value = '';
+                adminError.style.display = 'none';
+                
+                // Store admin session in localStorage
+                localStorage.setItem('horizonAdmin', 'true');
+                
+                alert('Admin access granted! You can now edit the website.');
+            } else {
+                adminError.style.display = 'block';
+                adminCodeInput.value = '';
+                adminCodeInput.focus();
+            }
+        });
+        
+        // Check if already logged in
+        if (localStorage.getItem('horizonAdmin') === 'true') {
+            isAdmin = true;
+            adminControls.style.display = 'block';
+        }
+        
+        // Enable edit mode
+        enableEditBtn.addEventListener('click', () => {
+            isEditMode = !isEditMode;
+            
+            if (isEditMode) {
+                enableEditBtn.innerHTML = '<i class="fas fa-ban"></i> Disable Editing';
+                enableEditBtn.style.backgroundColor = '#e53e3e';
+                
+                // Make all editable elements contenteditable
+                document.querySelectorAll('[id^="hero"], [id^="about"], [id^="amenity"], [id^="gallery"], [id^="location"], [id^="contact"], [id^="footer"], [id^="copyright"]').forEach(el => {
+                    if (el.tagName !== 'IMG' && el.tagName !== 'IFRAME') {
+                        el.classList.add('edit-mode');
+                        el.setAttribute('contenteditable', 'true');
+                    }
+                });
+                
+                // Make images editable
+                document.querySelectorAll('#aboutImage, [id^="galleryImage"]').forEach(img => {
+                    img.classList.add('edit-mode-img');
+                    img.addEventListener('click', (e) => {
+                        if (isEditMode) {
+                            e.preventDefault();
+                            currentImageElement = img;
+                            imageUploadModal.style.display = 'flex';
+                            imageUrlInput.value = img.src;
+                            
+                            // Update preview
+                            const previewImg = document.createElement('img');
+                            previewImg.src = img.src;
+                            imagePreview.innerHTML = '';
+                            imagePreview.appendChild(previewImg);
+                        }
+                    });
+                });
+                
+                alert('Edit mode enabled! Click on any text to edit it. Click on images to change them.');
+            } else {
+                enableEditBtn.innerHTML = '<i class="fas fa-edit"></i> Enable Editing';
+                enableEditBtn.style.backgroundColor = '';
+                
+                // Remove contenteditable
+                document.querySelectorAll('.edit-mode').forEach(el => {
+                    el.classList.remove('edit-mode');
+                    el.removeAttribute('contenteditable');
+                });
+                
+                // Remove image edit mode
+                document.querySelectorAll('.edit-mode-img').forEach(img => {
+                    img.classList.remove('edit-mode-img');
+                    img.replaceWith(img.cloneNode(true));
+                });
+            }
+        });
+        
+        // Save content to localStorage
+        saveContentBtn.addEventListener('click', () => {
+            if (!isEditMode) {
+                alert('Please enable editing first.');
+                return;
+            }
+            
+            const contentData = {};
+            
+            // Collect all editable content
+            document.querySelectorAll('[id^="hero"], [id^="about"], [id^="amenity"], [id^="gallery"], [id^="location"], [id^="contact"], [id^="footer"], [id^="copyright"]').forEach(el => {
+                if (el.tagName !== 'IMG' && el.tagName !== 'IFRAME') {
+                    contentData[el.id] = el.innerHTML;
+                }
+            });
+            
+            // Save to localStorage
+            localStorage.setItem('horizonContent', JSON.stringify(contentData));
+            
+            // Save image URLs
+            const imageData = {
+                aboutImage: document.getElementById('aboutImage').src,
+                galleryImage1: document.getElementById('galleryImage1').src,
+                galleryImage2: document.getElementById('galleryImage2').src,
+                galleryImage3: document.getElementById('galleryImage3').src,
+                galleryImage4: document.getElementById('galleryImage4').src,
+                galleryImage5: document.getElementById('galleryImage5').src,
+                galleryImage6: document.getElementById('galleryImage6').src
+            };
+            
+            localStorage.setItem('horizonImages', JSON.stringify(imageData));
+            
+            alert('All changes have been saved! They will persist when you reload the page.');
+        });
+        
+        // Change images
+        changeImagesBtn.addEventListener('click', () => {
+            if (!isEditMode) {
+                alert('Please enable editing first.');
+                return;
+            }
+            
+            alert('In edit mode, you can click on any image to change it. Try clicking on the apartment image or gallery images.');
+        });
+        
+        // Reset content
+        resetContentBtn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to reset all content to the original? This cannot be undone.')) {
+                localStorage.removeItem('horizonContent');
+                localStorage.removeItem('horizonImages');
+                location.reload();
+            }
+        });
+        
+        // Logout
+        logoutBtn.addEventListener('click', () => {
+            isAdmin = false;
+            isEditMode = false;
+            adminControls.style.display = 'none';
+            localStorage.removeItem('horizonAdmin');
+            
+            // Disable edit mode if active
+            document.querySelectorAll('.edit-mode').forEach(el => {
+                el.classList.remove('edit-mode');
+                el.removeAttribute('contenteditable');
+            });
+            
+            document.querySelectorAll('.edit-mode-img').forEach(img => {
+                img.classList.remove('edit-mode-img');
+            });
+            
+            alert('Logged out successfully.');
+        });
+        
+        // Image upload functionality
+        imageUrlInput.addEventListener('input', () => {
+            const url = imageUrlInput.value;
+            if (url) {
+                const previewImg = document.createElement('img');
+                previewImg.src = url;
+                previewImg.onerror = () => {
+                    imagePreview.innerHTML = '<p>Invalid image URL</p>';
+                };
+                previewImg.onload = () => {
+                    imagePreview.innerHTML = '';
+                    imagePreview.appendChild(previewImg);
+                };
+            }
+        });
+        
+        imageFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const previewImg = document.createElement('img');
+                    previewImg.src = e.target.result;
+                    imagePreview.innerHTML = '';
+                    imagePreview.appendChild(previewImg);
+                    imageUrlInput.value = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        applyImageBtn.addEventListener('click', () => {
+            if (currentImageElement && imageUrlInput.value) {
+                currentImageElement.src = imageUrlInput.value;
+                imageUploadModal.style.display = 'none';
+                currentImageElement = null;
+                imageUrlInput.value = '';
+                imageFileInput.value = '';
+                imagePreview.innerHTML = '<p>Preview will appear here</p>';
+            }
+        });
+        
+        cancelImageBtn.addEventListener('click', () => {
+            imageUploadModal.style.display = 'none';
+            currentImageElement = null;
+            imageUrlInput.value = '';
+            imageFileInput.value = '';
+            imagePreview.innerHTML = '<p>Preview will appear here</p>';
+        });
+        
+        // Load saved content on page load
+        window.addEventListener('load', () => {
+            const savedContent = localStorage.getItem('horizonContent');
+            const savedImages = localStorage.getItem('horizonImages');
+            
+            if (savedContent) {
+                const contentData = JSON.parse(savedContent);
+                Object.keys(contentData).forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.innerHTML = contentData[id];
+                    }
+                });
+            }
+            
+            if (savedImages) {
+                const imageData = JSON.parse(savedImages);
+                Object.keys(imageData).forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.src = imageData[id];
+                    }
+                });
+            }
+        });
+        
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mainNav = document.getElementById('mainNav');
+        
+        mobileMenuBtn.addEventListener('click', () => {
+            mainNav.classList.toggle('active');
+            mobileMenuBtn.innerHTML = mainNav.classList.contains('active') 
+                ? '<i class="fas fa-times"></i>' 
+                : '<i class="fas fa-bars"></i>';
+        });
+        
+        // Close mobile menu when clicking on a link
+        document.querySelectorAll('nav a').forEach(link => {
+            link.addEventListener('click', () => {
+                mainNav.classList.remove('active');
+                mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+            });
+        });
+        
+        // Header scroll effect
+        window.addEventListener('scroll', () => {
+            const header = document.getElementById('header');
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+        
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                if(targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if(targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+        
+        // Gallery Modal
+        const galleryItems = document.querySelectorAll('.gallery-item');
+        const galleryModal = document.getElementById('galleryModal');
+        const modalImage = document.getElementById('modalImage');
+        const closeModal = document.getElementById('closeModal');
+        
+        galleryItems.forEach(item => {
+            item.addEventListener('click', () => {
+                if (isEditMode) return; // Don't open modal in edit mode
+                
+                const imageUrl = item.querySelector('img').src;
+                modalImage.src = imageUrl;
+                galleryModal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            });
+        });
+        
+        closeModal.addEventListener('click', () => {
+            galleryModal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        });
+        
+        galleryModal.addEventListener('click', (e) => {
+            if(e.target === galleryModal) {
+                galleryModal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        });
+        
+        // Contact Form Submission
+        const contactForm = document.getElementById('contactForm');
+        
+        contactForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            // Get form data
+            const formData = new FormData(contactForm);
+            const name = formData.get('name') || contactForm.querySelector('input[type="text"]').value;
+            const email = formData.get('email') || contactForm.querySelector('input[type="email"]').value;
+            
+            // In a real implementation, you would send this data to a server
+            // For this demo, we'll just show an alert
+            alert(`Thank you ${name}! We have received your message and will contact you at ${email} shortly.`);
+            
+            // Reset form
+            contactForm.reset();
+        });
+        
+        // Initialize with header scrolled if page loads with scroll
+        window.dispatchEvent(new Event('scroll'));
+    </script>
+</body>
+</html>
