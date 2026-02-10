@@ -3513,7 +3513,18 @@
             },
             adminAccessCode: "3232",
             adminChangeCode: "6262",
-            categories: [],
+            categories: [
+                { id: "starters", name: "starters", displayName: "Starters & Appetizers", isDefault: true },
+                { id: "mains", name: "mains", displayName: "Main Courses", isDefault: true },
+                { id: "burgers", name: "burgers", displayName: "Burgers & Sandwiches", isDefault: true },
+                { id: "pizza", name: "pizza", displayName: "Pizza", isDefault: true },
+                { id: "pasta", name: "pasta", displayName: "Pasta", isDefault: true },
+                { id: "salads", name: "salads", displayName: "Salads", isDefault: true },
+                { id: "sides", name: "sides", displayName: "Sides", isDefault: true },
+                { id: "desserts", name: "desserts", displayName: "Desserts", isDefault: true },
+                { id: "beverages", name: "beverages", displayName: "Beverages", isDefault: true },
+                { id: "specials", name: "specials", displayName: "Today's Specials", isDefault: true }
+            ],
             isAdminMode: false,
             pendingAdminAction: null,
             currentImageUpload: null,
@@ -3553,7 +3564,264 @@
         };
 
         // Default Menu Data with Tax Included in Prices
-        const defaultMenuItems = [];
+        const defaultMenuItems = [
+            // Starters & Appetizers
+            {
+                id: 1,
+                name: "Garlic Bread",
+                description: "Freshly baked bread with garlic butter and herbs",
+                price: 6.99,
+                category: "starters",
+                image: "",
+                tags: ["Vegetarian", "Popular"],
+                subcategories: [],
+                order: 1
+            },
+            {
+                id: 2,
+                name: "Bruschetta",
+                description: "Toasted bread topped with tomatoes, garlic, and basil",
+                price: 8.99,
+                category: "starters",
+                image: "",
+                tags: ["Vegetarian", "Fresh"],
+                subcategories: [],
+                order: 2
+            },
+            {
+                id: 3,
+                name: "Chicken Wings",
+                description: "Crispy chicken wings with your choice of sauce",
+                price: 12.99,
+                category: "starters",
+                image: "",
+                tags: ["Spicy", "Popular"],
+                subcategories: [
+                    {
+                        id: "sauce",
+                        name: "Sauce",
+                        options: [
+                            { id: "bbq", name: "BBQ", additionalPrice: 0 },
+                            { id: "buffalo", name: "Buffalo", additionalPrice: 0 },
+                            { id: "honey-garlic", name: "Honey Garlic", additionalPrice: 0 },
+                            { id: "spicy", name: "Extra Spicy", additionalPrice: 1.00 }
+                        ]
+                    }
+                ],
+                order: 3
+            },
+            // Main Courses
+            {
+                id: 4,
+                name: "Grilled Salmon",
+                description: "Atlantic salmon with lemon butter sauce and vegetables",
+                price: 24.99,
+                category: "mains",
+                image: "",
+                tags: ["Healthy", "Fresh"],
+                subcategories: [
+                    {
+                        id: "cooking-level",
+                        name: "Cooking Level",
+                        options: [
+                            { id: "medium-rare", name: "Medium Rare", additionalPrice: 0 },
+                            { id: "medium", name: "Medium", additionalPrice: 0 },
+                            { id: "medium-well", name: "Medium Well", additionalPrice: 0 },
+                            { id: "well-done", name: "Well Done", additionalPrice: 0 }
+                        ]
+                    }
+                ],
+                order: 4
+            },
+            {
+                id: 5,
+                name: "Steak Frites",
+                description: "8oz ribeye steak with garlic butter and fries",
+                price: 28.99,
+                category: "mains",
+                image: "",
+                tags: ["Popular", "Premium"],
+                subcategories: [
+                    {
+                        id: "cooking-level",
+                        name: "Cooking Level",
+                        options: [
+                            { id: "rare", name: "Rare", additionalPrice: 0 },
+                            { id: "medium-rare", name: "Medium Rare", additionalPrice: 0 },
+                            { id: "medium", name: "Medium", additionalPrice: 0 },
+                            { id: "medium-well", name: "Medium Well", additionalPrice: 0 },
+                            { id: "well-done", name: "Well Done", additionalPrice: 0 }
+                        ]
+                    }
+                ],
+                order: 5
+            },
+            // Burgers & Sandwiches
+            {
+                id: 6,
+                name: "Classic Burger",
+                description: "Beef patty with lettuce, tomato, cheese, and special sauce",
+                price: 16.99,
+                category: "burgers",
+                image: "",
+                tags: ["Popular", "Comfort Food"],
+                subcategories: [
+                    {
+                        id: "cheese",
+                        name: "Cheese",
+                        options: [
+                            { id: "cheddar", name: "Cheddar", additionalPrice: 0 },
+                            { id: "swiss", name: "Swiss", additionalPrice: 0 },
+                            { id: "pepper-jack", name: "Pepper Jack", additionalPrice: 1.00 },
+                            { id: "no-cheese", name: "No Cheese", additionalPrice: -1.00 }
+                        ]
+                    },
+                    {
+                        id: "doneness",
+                        name: "Doneness",
+                        options: [
+                            { id: "medium", name: "Medium", additionalPrice: 0 },
+                            { id: "medium-well", name: "Medium Well", additionalPrice: 0 },
+                            { id: "well-done", name: "Well Done", additionalPrice: 0 }
+                        ]
+                    }
+                ],
+                order: 6
+            },
+            // Pizza
+            {
+                id: 7,
+                name: "Margherita Pizza",
+                description: "Classic pizza with tomato, mozzarella, and basil",
+                price: 14.99,
+                category: "pizza",
+                image: "",
+                tags: ["Vegetarian", "Classic"],
+                subcategories: [
+                    {
+                        id: "size",
+                        name: "Size",
+                        options: [
+                            { id: "small", name: "Small (10\")", additionalPrice: -3.00 },
+                            { id: "medium", name: "Medium (12\")", additionalPrice: 0 },
+                            { id: "large", name: "Large (14\")", additionalPrice: 3.00 },
+                            { id: "x-large", name: "X-Large (16\")", additionalPrice: 6.00 }
+                        ]
+                    }
+                ],
+                order: 7
+            },
+            // Pasta
+            {
+                id: 8,
+                name: "Spaghetti Carbonara",
+                description: "Spaghetti with eggs, cheese, pancetta, and black pepper",
+                price: 18.99,
+                category: "pasta",
+                image: "",
+                tags: ["Creamy", "Classic"],
+                subcategories: [],
+                order: 8
+            },
+            // Salads
+            {
+                id: 9,
+                name: "Caesar Salad",
+                description: "Romaine lettuce with Caesar dressing, croutons, and parmesan",
+                price: 12.99,
+                category: "salads",
+                image: "",
+                tags: ["Vegetarian", "Healthy"],
+                subcategories: [
+                    {
+                        id: "add-protein",
+                        name: "Add Protein",
+                        options: [
+                            { id: "none", name: "No Protein", additionalPrice: 0 },
+                            { id: "chicken", name: "Grilled Chicken", additionalPrice: 4.00 },
+                            { id: "salmon", name: "Grilled Salmon", additionalPrice: 6.00 },
+                            { id: "shrimp", name: "Grilled Shrimp", additionalPrice: 5.00 }
+                        ]
+                    }
+                ],
+                order: 9
+            },
+            // Sides
+            {
+                id: 10,
+                name: "French Fries",
+                description: "Crispy golden fries with sea salt",
+                price: 5.99,
+                category: "sides",
+                image: "",
+                tags: ["Vegetarian", "Popular"],
+                subcategories: [
+                    {
+                        id: "size",
+                        name: "Size",
+                        options: [
+                            { id: "regular", name: "Regular", additionalPrice: 0 },
+                            { id: "large", name: "Large", additionalPrice: 2.00 }
+                        ]
+                    }
+                ],
+                order: 10
+            },
+            // Desserts
+            {
+                id: 11,
+                name: "Chocolate Lava Cake",
+                description: "Warm chocolate cake with molten center and vanilla ice cream",
+                price: 8.99,
+                category: "desserts",
+                image: "",
+                tags: ["Sweet", "Popular"],
+                subcategories: [],
+                order: 11
+            },
+            // Beverages
+            {
+                id: 12,
+                name: "Fresh Lemonade",
+                description: "Homemade lemonade with mint",
+                price: 4.99,
+                category: "beverages",
+                image: "",
+                tags: ["Refreshing", "Non-Alcoholic"],
+                subcategories: [
+                    {
+                        id: "size",
+                        name: "Size",
+                        options: [
+                            { id: "regular", name: "Regular (16oz)", additionalPrice: 0 },
+                            { id: "large", name: "Large (24oz)", additionalPrice: 1.50 }
+                        ]
+                    },
+                    {
+                        id: "sweetness",
+                        name: "Sweetness Level",
+                        options: [
+                            { id: "less-sugar", name: "Less Sugar", additionalPrice: 0 },
+                            { id: "regular", name: "Regular", additionalPrice: 0 },
+                            { id: "extra-sugar", name: "Extra Sugar", additionalPrice: 0 }
+                        ]
+                    }
+                ],
+                order: 12
+            },
+            // Today's Specials
+            {
+                id: 13,
+                name: "Chef's Special Pasta",
+                description: "Daily chef's creation with seasonal ingredients",
+                price: 21.99,
+                category: "specials",
+                image: "",
+                tags: ["Chef's Special", "Seasonal"],
+                subcategories: [],
+                order: 13
+            }
+        ];
 
         // 20 UNIQUE THEMES - MODERN AND COZY
         const themes = {
@@ -4654,7 +4922,14 @@
                 // Sort menu items by order
                 state.menuItems.sort((a, b) => (a.order || 0) - (b.order || 0));
             } else {
+                // Initialize with default menu items if none saved
                 state.menuItems = [...defaultMenuItems];
+                // Ensure all menu items have proper structure
+                state.menuItems.forEach(item => {
+                    if (!item.subcategories) item.subcategories = [];
+                    if (!item.hasOwnProperty('order')) item.order = item.id || 0;
+                });
+                saveToLocalStorage(); // Save defaults to localStorage
             }
 
             if (savedOrders) {
@@ -4664,6 +4939,21 @@
 
             if (savedCategories) {
                 state.categories = JSON.parse(savedCategories);
+            } else {
+                // Initialize with default categories if none saved
+                state.categories = [
+                    { id: "starters", name: "starters", displayName: "Starters & Appetizers", isDefault: true },
+                    { id: "mains", name: "mains", displayName: "Main Courses", isDefault: true },
+                    { id: "burgers", name: "burgers", displayName: "Burgers & Sandwiches", isDefault: true },
+                    { id: "pizza", name: "pizza", displayName: "Pizza", isDefault: true },
+                    { id: "pasta", name: "pasta", displayName: "Pasta", isDefault: true },
+                    { id: "salads", name: "salads", displayName: "Salads", isDefault: true },
+                    { id: "sides", name: "sides", displayName: "Sides", isDefault: true },
+                    { id: "desserts", name: "desserts", displayName: "Desserts", isDefault: true },
+                    { id: "beverages", name: "beverages", displayName: "Beverages", isDefault: true },
+                    { id: "specials", name: "specials", displayName: "Today's Specials", isDefault: true }
+                ];
+                saveToLocalStorage(); // Save defaults to localStorage
             }
 
             if (savedCustomization) {
@@ -6312,8 +6602,9 @@
             const categorySelect = document.getElementById('editItemCategory');
             categorySelect.innerHTML = '';
 
-            // Add all categories
-            state.categories.forEach(category => {
+            // Add all categories sorted by display name
+            const sortedCategories = [...state.categories].sort((a, b) => a.displayName.localeCompare(b.displayName));
+            sortedCategories.forEach(category => {
                 const option = document.createElement('option');
                 option.value = category.id;
                 option.textContent = category.displayName;
@@ -6344,11 +6635,11 @@
                 document.getElementById('editItemName').value = '';
                 document.getElementById('editItemDescription').value = '';
                 document.getElementById('editItemPrice').value = '';
-                document.getElementById('editItemCategory').value = state.categories.length > 0 ? state.categories[0].id : '';
+                document.getElementById('editItemCategory').value = sortedCategories.length > 0 ? sortedCategories[0].id : '';
                 document.getElementById('editItemTags').value = '';
 
                 // Clear image preview
-                    updateItemImagePreview('');
+                updateItemImagePreview('');
 
                 // Clear item ID
                 editForm.setAttribute('data-item-id', '');
@@ -6685,18 +6976,21 @@
             }
         }
 
-        // Function to load categories for admin
+        // UPDATED Function to load categories for admin (sorted by display name)
         function loadCategoriesForAdmin() {
             const categoriesListContainer = document.getElementById('categoriesListContainer');
 
             // Clear container
             categoriesListContainer.innerHTML = '';
 
-            // Display categories
+            // Display categories sorted by display name
             if (state.categories.length === 0) {
                 categoriesListContainer.innerHTML = '<p style="text-align: center; color: var(--gray); padding: 20px;">No categories added yet. Add your first category to get started.</p>';
             } else {
-                state.categories.forEach(category => {
+                // Sort categories by display name
+                const sortedCategories = [...state.categories].sort((a, b) => a.displayName.localeCompare(b.displayName));
+                
+                sortedCategories.forEach(category => {
                     // Count menu items in this category
                     const itemCount = state.menuItems.filter(item => item.category === category.id).length;
 
@@ -7294,16 +7588,26 @@
         // Function to reset menu
         function resetMenu() {
             if (confirm("This will delete your current menu and categories. Are you sure?")) {
-                // In a real app we'd load defaults. Since we don't have them hardcoded here,
-                // we'll just clear it for now or keep it as is.
-                // For safety, let's just warn correct behavior.
-                alert("Default menu data is not configured. Menu has not been changed.");
-
-                // If we had defaults:
-                // state.menuItems = [...defaultMenuItems];
-                // saveToLocalStorage();
-                // displayMenuItems('all');
-                // ... sync to Firestore ...
+                // Reset to default menu items and categories
+                state.menuItems = [...defaultMenuItems];
+                state.categories = [
+                    { id: "starters", name: "starters", displayName: "Starters & Appetizers", isDefault: true },
+                    { id: "mains", name: "mains", displayName: "Main Courses", isDefault: true },
+                    { id: "burgers", name: "burgers", displayName: "Burgers & Sandwiches", isDefault: true },
+                    { id: "pizza", name: "pizza", displayName: "Pizza", isDefault: true },
+                    { id: "pasta", name: "pasta", displayName: "Pasta", isDefault: true },
+                    { id: "salads", name: "salads", displayName: "Salads", isDefault: true },
+                    { id: "sides", name: "sides", displayName: "Sides", isDefault: true },
+                    { id: "desserts", name: "desserts", displayName: "Desserts", isDefault: true },
+                    { id: "beverages", name: "beverages", displayName: "Beverages", isDefault: true },
+                    { id: "specials", name: "specials", displayName: "Today's Specials", isDefault: true }
+                ];
+                
+                saveToLocalStorage();
+                loadMenuItemsForAdmin();
+                displayMenuItems('all');
+                updateCategoryTabs();
+                showNotification("Menu has been reset to default.");
             }
         }
 
@@ -7351,7 +7655,7 @@
             }
         }
 
-        // Function to update category tabs
+        // UPDATED Function to update category tabs (sorted by display name)
         function updateCategoryTabs() {
             categoryTabs.innerHTML = '';
 
@@ -7367,8 +7671,10 @@
             });
             categoryTabs.appendChild(allTab);
 
-            // Add other categories
-            state.categories.forEach(category => {
+            // Add other categories sorted by display name
+            const sortedCategories = [...state.categories].sort((a, b) => a.displayName.localeCompare(b.displayName));
+            
+            sortedCategories.forEach(category => {
                 const tab = document.createElement('button');
                 tab.className = 'category-tab';
                 tab.setAttribute('data-category', category.id);
