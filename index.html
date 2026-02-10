@@ -1944,6 +1944,116 @@
             margin-bottom: 0;
         }
 
+        /* NEW: Drag and Drop Reordering Styles */
+        .sortable-list-container {
+            background-color: var(--light);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .sortable-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sortable-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            border: 1px solid var(--light-gray);
+            cursor: grab;
+            transition: all 0.3s;
+            user-select: none;
+        }
+
+        .sortable-item:hover {
+            border-color: var(--primary);
+            background-color: rgba(230, 57, 70, 0.05);
+        }
+
+        .sortable-item.dragging {
+            opacity: 0.6;
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+
+        .sortable-item.drag-over {
+            border-top: 2px solid var(--primary);
+        }
+
+        .drag-handle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            margin-right: 15px;
+            color: var(--gray);
+            cursor: grab;
+        }
+
+        .drag-handle i {
+            font-size: 18px;
+        }
+
+        .sortable-item-content {
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sortable-item-info {
+            flex: 1;
+        }
+
+        .sortable-item-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--text);
+        }
+
+        .sortable-item-category {
+            font-size: 13px;
+            color: var(--gray);
+        }
+
+        .sortable-item-price {
+            font-weight: 600;
+            color: var(--primary);
+            margin-right: 15px;
+        }
+
+        .sortable-item-position {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            background-color: var(--light-gray);
+            border-radius: 50%;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text);
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .reorder-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--light-gray);
+        }
+
         /* Responsive */
         @media (max-width: 992px) {
             .theme-gallery {
@@ -2068,6 +2178,20 @@
             .subcategory-modal-container {
                 padding: 20px 15px;
                 max-height: 90vh;
+            }
+
+            .sortable-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .sortable-item-content {
+                width: 100%;
+                margin-top: 10px;
+            }
+
+            .drag-handle {
+                align-self: flex-start;
             }
         }
 
@@ -2505,6 +2629,7 @@
                     <button class="admin-tab" data-tab="categories">Category Management</button>
                     <button class="admin-tab" data-tab="orders">Order Management</button>
                     <button class="admin-tab" data-tab="customization">Visual Customization</button>
+                    <button class="admin-tab" data-tab="reorder">Reorder Menu</button>
                     <button class="admin-tab" data-tab="system">System Tools</button>
                 </div>
 
@@ -2864,6 +2989,39 @@
                     </div>
                 </div>
 
+                <!-- NEW: Reorder Menu Tab -->
+                <div class="admin-content" id="reorderTab">
+                    <h3 style="margin-bottom: 20px;">Reorder Menu Items</h3>
+                    <p style="margin-bottom: 25px; color: var(--gray);">
+                        Drag and drop menu items to reorder them. The order will be saved automatically and reflected in the customer menu.
+                    </p>
+
+                    <div class="sortable-list-container">
+                        <div class="sortable-list" id="sortableMenuList">
+                            <!-- Sortable menu items will be dynamically added here -->
+                        </div>
+                    </div>
+
+                    <div class="reorder-actions">
+                        <button class="btn btn-secondary" id="resetOrderBtn">
+                            <i class="fas fa-undo"></i> Reset to Default Order
+                        </button>
+                        <button class="btn btn-primary" id="saveOrderBtn">
+                            <i class="fas fa-save"></i> Save New Order
+                        </button>
+                    </div>
+
+                    <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid var(--light-gray);">
+                        <h4 style="margin-bottom: 15px;">Ordering Tips</h4>
+                        <ul style="color: var(--gray); padding-left: 20px;">
+                            <li>Drag items using the handle (<i class="fas fa-grip-vertical"></i>) on the left</li>
+                            <li>Items are ordered within their categories</li>
+                            <li>The order is saved automatically when you drop an item</li>
+                            <li>Changes are immediately visible to customers</li>
+                        </ul>
+                    </div>
+                </div>
+
                 <!-- System Tools Tab -->
                 <div class="admin-content" id="systemTab">
                     <h3 style="margin-bottom: 20px;">System Management</h3>
@@ -2987,6 +3145,7 @@
                 <button class="admin-tab" data-tab="categories">Category Management</button>
                 <button class="admin-tab" data-tab="orders">Order Management</button>
                 <button class="admin-tab" data-tab="customization">Visual Customization</button>
+                <button class="admin-tab" data-tab="reorder">Reorder Menu</button>
                 <button class="admin-tab" data-tab="system">System Tools</button>
             </div>
 
@@ -3142,6 +3301,29 @@
                     </button>
                     <button class="btn btn-primary" id="saveCustomizationBtnModal">
                         <i class="fas fa-save"></i> Save
+                    </button>
+                </div>
+            </div>
+
+            <!-- NEW: Reorder Menu Tab in Modal -->
+            <div class="admin-content" id="reorderTabModal">
+                <h3 style="margin-bottom: 20px;">Reorder Menu Items</h3>
+                <p style="margin-bottom: 25px; color: var(--gray);">
+                    Drag and drop menu items to reorder them. The order will be saved automatically.
+                </p>
+
+                <div class="sortable-list-container">
+                    <div class="sortable-list" id="sortableMenuListModal">
+                        <!-- Sortable menu items will be dynamically added here -->
+                    </div>
+                </div>
+
+                <div class="reorder-actions">
+                    <button class="btn btn-secondary" id="resetOrderBtnModal">
+                        <i class="fas fa-undo"></i> Reset Order
+                    </button>
+                    <button class="btn btn-primary" id="saveOrderBtnModal">
+                        <i class="fas fa-save"></i> Save Order
                     </button>
                 </div>
             </div>
@@ -3364,7 +3546,10 @@
             lastOrderUpdate: 0,
             // NEW: Temporary storage for subcategory selections
             currentSubcategorySelections: null,
-            currentMenuItemForSubcategories: null
+            currentMenuItemForSubcategories: null,
+            // NEW: Drag and drop state
+            dragSrcEl: null,
+            draggedItem: null
         };
 
         // Default Menu Data with Tax Included in Prices
@@ -3687,6 +3872,14 @@
         const orderNotification = document.getElementById('orderNotification');
         const orderNotificationText = document.getElementById('orderNotificationText');
 
+        // NEW: Reorder menu elements
+        const sortableMenuList = document.getElementById('sortableMenuList');
+        const sortableMenuListModal = document.getElementById('sortableMenuListModal');
+        const saveOrderBtn = document.getElementById('saveOrderBtn');
+        const resetOrderBtn = document.getElementById('resetOrderBtn');
+        const saveOrderBtnModal = document.getElementById('saveOrderBtnModal');
+        const resetOrderBtnModal = document.getElementById('resetOrderBtnModal');
+
         // Sound Elements
         const addToCartSound = document.getElementById('addToCartSound');
         const paymentConfirmSound = document.getElementById('paymentConfirmSound');
@@ -3961,6 +4154,31 @@
             addToCartWithOptionsBtn.addEventListener('click', function () {
                 addItemWithSubcategoryOptions();
             });
+
+            // NEW: Set up reorder menu buttons
+            if (saveOrderBtn) {
+                saveOrderBtn.addEventListener('click', function () {
+                    saveMenuOrder();
+                });
+            }
+
+            if (resetOrderBtn) {
+                resetOrderBtn.addEventListener('click', function () {
+                    resetMenuOrder();
+                });
+            }
+
+            if (saveOrderBtnModal) {
+                saveOrderBtnModal.addEventListener('click', function () {
+                    saveMenuOrderModal();
+                });
+            }
+
+            if (resetOrderBtnModal) {
+                resetOrderBtnModal.addEventListener('click', function () {
+                    resetMenuOrderModal();
+                });
+            }
 
             // Check if we should be in admin mode from previous session
             if (localStorage.getItem('dineEasyAdminMode') === 'true') {
@@ -4427,7 +4645,14 @@
                             });
                         });
                     }
+                    // Ensure all menu items have order property
+                    if (!item.hasOwnProperty('order')) {
+                        item.order = item.id || 0;
+                    }
                 });
+
+                // Sort menu items by order
+                state.menuItems.sort((a, b) => (a.order || 0) - (b.order || 0));
             } else {
                 state.menuItems = [...defaultMenuItems];
             }
@@ -4651,6 +4876,11 @@
                             initializeCustomizationTab();
                         }, 100);
                     }
+
+                    // If reorder tab is selected, load sortable list
+                    if (tabId === 'reorder') {
+                        loadSortableMenuList();
+                    }
                 });
             });
 
@@ -4764,6 +4994,398 @@
                     }
                 }
             });
+        }
+
+        // NEW FUNCTION: Load sortable menu list for drag and drop reordering
+        function loadSortableMenuList() {
+            const sortableList = document.getElementById('sortableMenuList');
+            if (!sortableList) return;
+
+            sortableList.innerHTML = '';
+
+            if (state.menuItems.length === 0) {
+                sortableList.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: var(--gray);">
+                        <i class="fas fa-utensils" style="font-size: 50px; margin-bottom: 15px; opacity: 0.5;"></i>
+                        <p>No menu items found. Add some items first!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Sort items by order property
+            const sortedItems = [...state.menuItems].sort((a, b) => (a.order || 0) - (b.order || 0));
+
+            sortedItems.forEach((item, index) => {
+                const sortableItem = document.createElement('div');
+                sortableItem.className = 'sortable-item';
+                sortableItem.setAttribute('draggable', 'true');
+                sortableItem.setAttribute('data-id', item.id);
+                sortableItem.setAttribute('data-order', item.order || index);
+
+                // Get category display name
+                const category = state.categories.find(cat => cat.id === item.category);
+                const categoryName = category ? category.displayName : item.category;
+
+                sortableItem.innerHTML = `
+                    <div class="drag-handle">
+                        <i class="fas fa-grip-vertical"></i>
+                    </div>
+                    <div class="sortable-item-position">${index + 1}</div>
+                    <div class="sortable-item-content">
+                        <div class="sortable-item-info">
+                            <div class="sortable-item-name">${item.name}</div>
+                            <div class="sortable-item-category">${categoryName}</div>
+                        </div>
+                        <div class="sortable-item-price">$${item.price.toFixed(2)}</div>
+                    </div>
+                `;
+
+                // Add drag and drop event listeners
+                sortableItem.addEventListener('dragstart', handleDragStart);
+                sortableItem.addEventListener('dragover', handleDragOver);
+                sortableItem.addEventListener('dragenter', handleDragEnter);
+                sortableItem.addEventListener('dragleave', handleDragLeave);
+                sortableItem.addEventListener('drop', handleDrop);
+                sortableItem.addEventListener('dragend', handleDragEnd);
+
+                sortableList.appendChild(sortableItem);
+            });
+
+            // Update button states
+            updateReorderButtons();
+        }
+
+        // NEW FUNCTION: Load sortable menu list for modal
+        function loadSortableMenuListModal() {
+            const sortableList = document.getElementById('sortableMenuListModal');
+            if (!sortableList) return;
+
+            sortableList.innerHTML = '';
+
+            if (state.menuItems.length === 0) {
+                sortableList.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: var(--gray);">
+                        <i class="fas fa-utensils" style="font-size: 50px; margin-bottom: 15px; opacity: 0.5;"></i>
+                        <p>No menu items found. Add some items first!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Sort items by order property
+            const sortedItems = [...state.menuItems].sort((a, b) => (a.order || 0) - (b.order || 0));
+
+            sortedItems.forEach((item, index) => {
+                const sortableItem = document.createElement('div');
+                sortableItem.className = 'sortable-item';
+                sortableItem.setAttribute('draggable', 'true');
+                sortableItem.setAttribute('data-id', item.id);
+                sortableItem.setAttribute('data-order', item.order || index);
+
+                // Get category display name
+                const category = state.categories.find(cat => cat.id === item.category);
+                const categoryName = category ? category.displayName : item.category;
+
+                sortableItem.innerHTML = `
+                    <div class="drag-handle">
+                        <i class="fas fa-grip-vertical"></i>
+                    </div>
+                    <div class="sortable-item-position">${index + 1}</div>
+                    <div class="sortable-item-content">
+                        <div class="sortable-item-info">
+                            <div class="sortable-item-name">${item.name}</div>
+                            <div class="sortable-item-category">${categoryName}</div>
+                        </div>
+                        <div class="sortable-item-price">$${item.price.toFixed(2)}</div>
+                    </div>
+                `;
+
+                // Add drag and drop event listeners
+                sortableItem.addEventListener('dragstart', handleDragStart);
+                sortableItem.addEventListener('dragover', handleDragOver);
+                sortableItem.addEventListener('dragenter', handleDragEnter);
+                sortableItem.addEventListener('dragleave', handleDragLeave);
+                sortableItem.addEventListener('drop', handleDrop);
+                sortableItem.addEventListener('dragend', handleDragEnd);
+
+                sortableList.appendChild(sortableItem);
+            });
+
+            // Update button states
+            updateReorderButtonsModal();
+        }
+
+        // NEW FUNCTION: Drag and drop event handlers
+        function handleDragStart(e) {
+            this.style.opacity = '0.6';
+            state.dragSrcEl = this;
+            state.draggedItem = this;
+            
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', this.innerHTML);
+            
+            // Add dragging class
+            this.classList.add('dragging');
+        }
+
+        function handleDragOver(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        }
+
+        function handleDragEnter(e) {
+            this.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            this.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            if (e.stopPropagation) {
+                e.stopPropagation();
+            }
+            
+            if (state.dragSrcEl !== this) {
+                // Get the sortable list container
+                const sortableList = this.closest('.sortable-list');
+                const items = Array.from(sortableList.children);
+                
+                // Find indices
+                const draggedIndex = items.indexOf(state.dragSrcEl);
+                const droppedIndex = items.indexOf(this);
+                
+                if (draggedIndex !== -1 && droppedIndex !== -1) {
+                    // Remove dragging class
+                    state.dragSrcEl.classList.remove('dragging');
+                    
+                    // Move the element in the DOM
+                    if (draggedIndex < droppedIndex) {
+                        sortableList.insertBefore(state.dragSrcEl, this.nextSibling);
+                    } else {
+                        sortableList.insertBefore(state.dragSrcEl, this);
+                    }
+                    
+                    // Update position numbers
+                    updateItemPositions(sortableList);
+                    
+                    // Show notification
+                    showNotification("Item order updated. Don't forget to save!");
+                }
+            }
+            
+            this.classList.remove('drag-over');
+            return false;
+        }
+
+        function handleDragEnd(e) {
+            this.style.opacity = '1';
+            
+            // Remove all drag-over classes
+            document.querySelectorAll('.sortable-item').forEach(item => {
+                item.classList.remove('dragging');
+                item.classList.remove('drag-over');
+            });
+            
+            // Update button states
+            updateReorderButtons();
+            if (document.getElementById('sortableMenuListModal')) {
+                updateReorderButtonsModal();
+            }
+        }
+
+        // NEW FUNCTION: Update item position numbers
+        function updateItemPositions(sortableList) {
+            const items = sortableList.querySelectorAll('.sortable-item');
+            items.forEach((item, index) => {
+                const positionElement = item.querySelector('.sortable-item-position');
+                if (positionElement) {
+                    positionElement.textContent = index + 1;
+                }
+            });
+        }
+
+        // NEW FUNCTION: Update reorder buttons state
+        function updateReorderButtons() {
+            const saveBtn = document.getElementById('saveOrderBtn');
+            const resetBtn = document.getElementById('resetOrderBtn');
+            
+            if (saveBtn && resetBtn) {
+                saveBtn.disabled = false;
+                resetBtn.disabled = false;
+            }
+        }
+
+        // NEW FUNCTION: Update reorder buttons state for modal
+        function updateReorderButtonsModal() {
+            const saveBtn = document.getElementById('saveOrderBtnModal');
+            const resetBtn = document.getElementById('resetOrderBtnModal');
+            
+            if (saveBtn && resetBtn) {
+                saveBtn.disabled = false;
+                resetBtn.disabled = false;
+            }
+        }
+
+        // NEW FUNCTION: Save menu order
+        function saveMenuOrder() {
+            const sortableList = document.getElementById('sortableMenuList');
+            if (!sortableList) return;
+
+            const items = sortableList.querySelectorAll('.sortable-item');
+            const newOrder = [];
+
+            // Collect items in their new order
+            items.forEach((item, index) => {
+                const itemId = parseInt(item.getAttribute('data-id'));
+                const menuItem = state.menuItems.find(item => item.id === itemId);
+                
+                if (menuItem) {
+                    // Update order property
+                    menuItem.order = index + 1;
+                    newOrder.push({
+                        id: menuItem.id,
+                        name: menuItem.name,
+                        order: index + 1
+                    });
+                }
+            });
+
+            // Sort the menu items array by order
+            state.menuItems.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+            // Save to localStorage
+            saveToLocalStorage();
+
+            // Update Firebase
+            updateMenuOrderInFirebase();
+
+            // Update the menu display
+            displayMenuItems('all');
+
+            // Update the sortable list positions
+            updateItemPositions(sortableList);
+
+            showNotification("Menu order saved successfully!");
+        }
+
+        // NEW FUNCTION: Save menu order for modal
+        function saveMenuOrderModal() {
+            const sortableList = document.getElementById('sortableMenuListModal');
+            if (!sortableList) return;
+
+            const items = sortableList.querySelectorAll('.sortable-item');
+            const newOrder = [];
+
+            // Collect items in their new order
+            items.forEach((item, index) => {
+                const itemId = parseInt(item.getAttribute('data-id'));
+                const menuItem = state.menuItems.find(item => item.id === itemId);
+                
+                if (menuItem) {
+                    // Update order property
+                    menuItem.order = index + 1;
+                    newOrder.push({
+                        id: menuItem.id,
+                        name: menuItem.name,
+                        order: index + 1
+                    });
+                }
+            });
+
+            // Sort the menu items array by order
+            state.menuItems.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+            // Save to localStorage
+            saveToLocalStorage();
+
+            // Update Firebase
+            updateMenuOrderInFirebase();
+
+            // Update the menu display
+            displayMenuItems('all');
+
+            // Update the sortable list positions
+            updateItemPositions(sortableList);
+
+            showNotification("Menu order saved successfully!");
+        }
+
+        // NEW FUNCTION: Update menu order in Firebase
+        function updateMenuOrderInFirebase() {
+            // Create a batch update for all menu items
+            const batch = db.batch();
+            
+            state.menuItems.forEach(item => {
+                const itemRef = db.collection("menu").doc(item.id.toString());
+                batch.update(itemRef, { order: item.order || 0 });
+            });
+            
+            batch.commit().then(() => {
+                console.log("Menu order updated in Firebase");
+            }).catch((error) => {
+                console.error("Error updating menu order in Firebase: ", error);
+                showNotification("Order saved locally, but there was an error updating Firebase.");
+            });
+        }
+
+        // NEW FUNCTION: Reset menu order
+        function resetMenuOrder() {
+            if (confirm("Reset menu order to default? This will restore the original ordering of items.")) {
+                // Reset order based on ID
+                state.menuItems.forEach((item, index) => {
+                    item.order = item.id || index + 1;
+                });
+
+                // Sort by ID
+                state.menuItems.sort((a, b) => (a.id || 0) - (b.id || 0));
+
+                // Save to localStorage
+                saveToLocalStorage();
+
+                // Update Firebase
+                updateMenuOrderInFirebase();
+
+                // Reload the sortable list
+                loadSortableMenuList();
+
+                // Update the menu display
+                displayMenuItems('all');
+
+                showNotification("Menu order reset to default!");
+            }
+        }
+
+        // NEW FUNCTION: Reset menu order for modal
+        function resetMenuOrderModal() {
+            if (confirm("Reset menu order to default? This will restore the original ordering of items.")) {
+                // Reset order based on ID
+                state.menuItems.forEach((item, index) => {
+                    item.order = item.id || index + 1;
+                });
+
+                // Sort by ID
+                state.menuItems.sort((a, b) => (a.id || 0) - (b.id || 0));
+
+                // Save to localStorage
+                saveToLocalStorage();
+
+                // Update Firebase
+                updateMenuOrderInFirebase();
+
+                // Reload the sortable list
+                loadSortableMenuListModal();
+
+                // Update the menu display
+                displayMenuItems('all');
+
+                showNotification("Menu order reset to default!");
+            }
         }
 
         // Function to initialize the updated customization tab with 20 themes
@@ -5197,6 +5819,11 @@
                     if (tabId === 'orders') {
                         loadOrdersForAdminModal();
                     }
+
+                    // If reorder tab is clicked, load sortable list for modal
+                    if (tabId === 'reorder') {
+                        loadSortableMenuListModal();
+                    }
                 });
             });
 
@@ -5563,7 +6190,10 @@
                 return;
             }
 
-            state.menuItems.forEach(item => {
+            // Sort menu items by order
+            const sortedItems = [...state.menuItems].sort((a, b) => (a.order || 0) - (b.order || 0));
+
+            sortedItems.forEach(item => {
                 const itemCard = document.createElement('div');
                 itemCard.className = 'admin-card';
 
@@ -5648,6 +6278,7 @@
                 ...JSON.parse(JSON.stringify(originalItem)),
                 id: state.menuItems.length > 0 ? Math.max(...state.menuItems.map(item => item.id)) + 1 : 1,
                 name: originalItem.name + " (Copy)",
+                order: state.menuItems.length + 1,
                 // Keep all other properties including subcategories, image, etc.
             };
 
@@ -5985,7 +6616,8 @@
                         category,
                         image: state.currentImageUpload || state.menuItems[index].image,
                         tags,
-                        subcategories: subcategories
+                        subcategories: subcategories,
+                        order: state.menuItems[index].order || state.menuItems[index].id || 0
                     };
                     state.menuItems[index] = updatedItem;
                 }
@@ -6000,7 +6632,8 @@
                     category,
                     image: state.currentImageUpload || '',
                     tags,
-                    subcategories: subcategories
+                    subcategories: subcategories,
+                    order: newId
                 };
                 state.menuItems.push(updatedItem);
             }
@@ -6940,13 +7573,16 @@
             }
         }
 
-        // UPDATED Function to display menu items (now shows customizable badge)
+        // UPDATED Function to display menu items (now shows customizable badge and respects order)
         function displayMenuItems(category) {
             menuGrid.innerHTML = '';
 
+            // Sort items by order
+            const sortedItems = [...state.menuItems].sort((a, b) => (a.order || 0) - (b.order || 0));
+
             const filteredItems = category === 'all'
-                ? state.menuItems
-                : state.menuItems.filter(item => item.category === category);
+                ? sortedItems
+                : sortedItems.filter(item => item.category === category);
 
             if (filteredItems.length === 0) {
                 menuGrid.innerHTML = `
@@ -7362,7 +7998,7 @@
                 }
             });
 
-            // 4. Menu Items with Subcategories
+            // 4. Menu Items with Subcategories and Order
             db.collection("menu").onSnapshot((snapshot) => {
                 if (!snapshot.empty) {
                     const cloudItems = [];
@@ -7389,7 +8025,14 @@
                                 });
                             });
                         }
+                        // Ensure all menu items have order property
+                        if (!item.hasOwnProperty('order')) {
+                            item.order = item.id || 0;
+                        }
                     });
+
+                    // Sort items by order
+                    state.menuItems.sort((a, b) => (a.order || 0) - (b.order || 0));
 
                     // Refresh displays
                     displayMenuItems('all');
@@ -7403,8 +8046,8 @@
                     saveToLocalStorage();
                     
                 } else if (state.menuItems.length > 0) {
-                    // Migration: Upload local menu items (including subcategories) to cloud
-                    console.log("Uploading local menu items with subcategories to cloud...");
+                    // Migration: Upload local menu items (including subcategories and order) to cloud
+                    console.log("Uploading local menu items with subcategories and order to cloud...");
                     state.menuItems.forEach(item => {
                         // Ensure ID is string for doc name, or use numeric ID
                         db.collection("menu").doc(item.id.toString()).set(item);
