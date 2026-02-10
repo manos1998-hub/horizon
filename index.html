@@ -3439,7 +3439,6 @@
                     selectTable(tableName);
                 });
             });
-            
 
             // Set up category tabs
             updateCategoryTabs();
@@ -5787,8 +5786,7 @@
         function resetMenu() {
             if (confirm("This will delete your current menu and categories. Are you sure?")) {
                 // In a real app we'd load defaults. Since we don't have them hardcoded here,
-                // we'll just clear it for now or keep it as is.
-                // For safety, let's just warn correct behavior.
+                // we'll just warn correct behavior.
                 alert("Default menu data is not configured. Menu has not been changed.");
 
                 // If we had defaults:
@@ -5810,20 +5808,6 @@
             }
             return false;
         }
-        // Function to handle table selection
-function selectTable(tableName) {
-    state.currentTable = tableName;
-    
-    // Check if the selected table is the "Admin" portal
-    if (tableName === 'Admin') {
-        showAdminCodePrompt();
-    } else {
-        // For regular tables, go straight to the menu
-        showSection('menuSection');
-        updateTableInfo();
-        showNotification(`Welcome! You are at ${tableName}`);
-    }
-}
 
         // Function to update restaurant UI
         function updateRestaurantUI() {
@@ -5974,12 +5958,13 @@ function selectTable(tableName) {
             myOrdersButton.style.display = 'none';
         }
 
-        // Function to select a table
+        // FIXED FUNCTION: Select a table - ONLY shows admin code prompt for exact "Admin" table
         function selectTable(tableName) {
             state.currentTable = tableName;
 
-            // Check if the table is "Admin"
-            if (tableName.toLowerCase() === "admin") {
+            // Check if the table is exactly "Admin" (case-sensitive)
+            if (tableName === "Admin") {
+                // Only show admin code prompt for the exact "Admin" table
                 showAdminCodePrompt();
                 return;
             } else {
