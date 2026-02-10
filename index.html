@@ -3042,7 +3042,7 @@
                 <div class="categories-management">
                     <div class="categories-list">
                         <h4 style="margin-bottom: 15px;">Existing Categories</h4>
-                        <div class="categories-list-container" id="categoriesListContainerModal">
+                        <div class="categories-listContainer" id="categoriesListContainerModal">
                             <!-- Categories will be dynamically added here -->
                         </div>
                     </div>
@@ -3997,6 +3997,7 @@
 
             if (existingItem) {
                 existingItem.quantity += 1;
+                existingItem.totalPrice = (menuItem.price + additionalPrice) * existingItem.quantity;
             } else {
                 state.cart.push({
                     id: menuItem.id,
@@ -4033,12 +4034,14 @@
             state.currentSubcategorySelections = {};
 
             // Reset selections
-            menuItem.subcategories.forEach(subcategory => {
-                // Select the first option by default
-                if (subcategory.options && subcategory.options.length > 0) {
-                    state.currentSubcategorySelections[subcategory.id] = subcategory.options[0].id;
-                }
-            });
+            if (menuItem.subcategories && menuItem.subcategories.length > 0) {
+                menuItem.subcategories.forEach(subcategory => {
+                    // Select the first option by default
+                    if (subcategory.options && subcategory.options.length > 0) {
+                        state.currentSubcategorySelections[subcategory.id] = subcategory.options[0].id;
+                    }
+                });
+            }
 
             // Update modal title and description
             subcategoryModalTitle.textContent = menuItem.name;
@@ -4049,6 +4052,19 @@
 
             // Clear options container
             subcategoryOptionsContainer.innerHTML = '';
+
+            // Check if item has subcategories
+            if (!menuItem.subcategories || menuItem.subcategories.length === 0) {
+                subcategoryOptionsContainer.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: var(--gray);">
+                        <i class="fas fa-info-circle" style="font-size: 40px; margin-bottom: 15px;"></i>
+                        <p>This item has no customization options.</p>
+                    </div>
+                `;
+                // Update price summary
+                updateSubcategoryPriceSummary();
+                return;
+            }
 
             // Add subcategory options
             menuItem.subcategories.forEach(subcategory => {
@@ -4380,6 +4396,16 @@
                 state.menuItems.forEach(item => {
                     if (!item.subcategories) {
                         item.subcategories = [];
+                    }
+                    // Ensure all subcategories have proper structure
+                    if (item.subcategories) {
+                        item.subcategories.forEach(subcategory => {
+                            if (!subcategory.id) subcategory.id = `subcategory-${Date.now()}`;
+                            if (!subcategory.options) subcategory.options = [];
+                            subcategory.options.forEach(option => {
+                                if (!option.id) option.id = `option-${Date.now()}`;
+                            });
+                        });
                     }
                 });
             } else {
@@ -5493,7 +5519,7 @@
             showNotification("Restaurant settings saved successfully.");
         }
 
-        // Function to load menu items for admin
+        // UPDATED Function to load menu items for admin with duplicate button
         function loadMenuItemsForAdmin() {
             const menuItemsList = document.getElementById('menuItemsList');
             menuItemsList.innerHTML = '';
@@ -5528,6 +5554,10 @@
                             <button class="admin-small-btn btn-primary edit-item" data-id="${item.id}">
                                 <i class="fas fa-edit"></i>
                             </button>
+                            <!-- NEW: Duplicate button added -->
+                            <button class="admin-small-btn btn-warning duplicate-item" data-id="${item.id}">
+                                <i class="fas fa-copy"></i>
+                            </button>
                             <button class="admin-small-btn btn-danger delete-item" data-id="${item.id}">
                                 <i class="fas fa-trash"></i>
                             </button>
@@ -5554,6 +5584,16 @@
                 });
             });
 
+            // NEW: Add event listener for duplicate buttons
+            document.querySelectorAll('.duplicate-item').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const itemId = parseInt(this.getAttribute('data-id'));
+                    showAdminChangePrompt(function() {
+                        duplicateMenuItem(itemId);
+                    });
+                });
+            });
+
             document.querySelectorAll('.delete-item').forEach(btn => {
                 btn.addEventListener('click', function () {
                     const itemId = parseInt(this.getAttribute('data-id'));
@@ -5562,6 +5602,40 @@
                     });
                 });
             });
+        }
+
+        // NEW FUNCTION: Duplicate a menu item
+        function duplicateMenuItem(itemId) {
+            const originalItem = state.menuItems.find(i => i.id === itemId);
+            if (!originalItem) return;
+
+            // Create a deep copy of the item
+            const duplicatedItem = {
+                ...JSON.parse(JSON.stringify(originalItem)),
+                id: state.menuItems.length > 0 ? Math.max(...state.menuItems.map(item => item.id)) + 1 : 1,
+                name: originalItem.name + " (Copy)",
+                // Keep all other properties including subcategories, image, etc.
+            };
+
+            // Add to menu items
+            state.menuItems.push(duplicatedItem);
+
+            // Save to Firestore
+            db.collection("menu").doc(duplicatedItem.id.toString()).set(duplicatedItem)
+                .then(() => {
+                    // Save to localStorage
+                    saveToLocalStorage();
+
+                    // Reload menu items
+                    loadMenuItemsForAdmin();
+                    displayMenuItems('all');
+
+                    showNotification(`"${originalItem.name}" duplicated successfully as "${duplicatedItem.name}".`);
+                })
+                .catch((error) => {
+                    console.error("Error duplicating menu item to Firestore: ", error);
+                    showNotification("Error duplicating menu item to cloud. Please check console.");
+                });
         }
 
         // Function to open edit menu item form
@@ -5609,7 +5683,7 @@
                 document.getElementById('editItemTags').value = '';
 
                 // Clear image preview
-                updateItemImagePreview('');
+                    updateItemImagePreview('');
 
                 // Clear item ID
                 editForm.setAttribute('data-item-id', '');
@@ -5800,7 +5874,7 @@
             reader.readAsDataURL(file);
         }
 
-        // UPDATED Function to save menu item with subcategories
+        // UPDATED Function to save menu item with subcategories to Firebase
         function saveMenuItem() {
             const itemId = document.getElementById('editMenuItemForm').getAttribute('data-item-id');
             const name = document.getElementById('editItemName').value;
@@ -5863,11 +5937,13 @@
                 });
             });
 
+            let updatedItem;
+
             if (itemId) {
                 // Update existing item
                 const index = state.menuItems.findIndex(item => item.id === parseInt(itemId));
                 if (index !== -1) {
-                    state.menuItems[index] = {
+                    updatedItem = {
                         ...state.menuItems[index],
                         name,
                         description,
@@ -5877,11 +5953,12 @@
                         tags,
                         subcategories: subcategories
                     };
+                    state.menuItems[index] = updatedItem;
                 }
             } else {
                 // Add new item
                 const newId = state.menuItems.length > 0 ? Math.max(...state.menuItems.map(item => item.id)) + 1 : 1;
-                state.menuItems.push({
+                updatedItem = {
                     id: newId,
                     name,
                     description,
@@ -5890,28 +5967,35 @@
                     image: state.currentImageUpload || '',
                     tags,
                     subcategories: subcategories
-                });
+                };
+                state.menuItems.push(updatedItem);
             }
 
-            // Save to Firestore (Menu)
-            // Use the item we just modified/added
-            const savedItem = itemId ? state.menuItems[index] : state.menuItems[state.menuItems.length - 1];
-            db.collection("menu").doc(savedItem.id.toString()).set(savedItem);
+            // Save to Firebase Firestore with subcategories
+            db.collection("menu").doc(updatedItem.id.toString()).set(updatedItem)
+                .then(() => {
+                    console.log("Menu item saved to Firestore with subcategories:", updatedItem.subcategories);
+                    
+                    // Save to localStorage
+                    saveToLocalStorage();
 
-            saveToLocalStorage();
+                    // Hide form and show list
+                    document.getElementById('editMenuItemForm').style.display = 'none';
+                    document.getElementById('menuItemsList').style.display = 'block';
 
-            // Hide form and show list
-            document.getElementById('editMenuItemForm').style.display = 'none';
-            document.getElementById('menuItemsList').style.display = 'block';
+                    // Reset current image upload
+                    state.currentImageUpload = null;
 
-            // Reset current image upload
-            state.currentImageUpload = null;
+                    // Reload menu items
+                    loadMenuItemsForAdmin();
+                    displayMenuItems('all');
 
-            // Reload menu items
-            loadMenuItemsForAdmin();
-            displayMenuItems('all');
-
-            showNotification(itemId ? "Menu item updated successfully." : "Menu item added successfully.");
+                    showNotification(itemId ? "Menu item updated successfully." : "Menu item added successfully.");
+                })
+                .catch((error) => {
+                    console.error("Error saving menu item to Firestore: ", error);
+                    showNotification("Error saving menu item to cloud. Please check console.");
+                });
         }
 
         // Function to delete menu item
@@ -5920,12 +6004,17 @@
                 state.menuItems = state.menuItems.filter(item => item.id !== itemId);
 
                 // Delete from Firestore
-                db.collection("menu").doc(itemId.toString()).delete();
-
-                saveToLocalStorage();
-                loadMenuItemsForAdmin();
-                displayMenuItems('all');
-                showNotification("Menu item deleted successfully.");
+                db.collection("menu").doc(itemId.toString()).delete()
+                    .then(() => {
+                        saveToLocalStorage();
+                        loadMenuItemsForAdmin();
+                        displayMenuItems('all');
+                        showNotification("Menu item deleted successfully.");
+                    })
+                    .catch((error) => {
+                        console.error("Error deleting menu item from Firestore: ", error);
+                        showNotification("Error deleting menu item from cloud. Please check console.");
+                    });
             }
         }
 
@@ -5992,30 +6081,37 @@
             }
 
             // Add new category
-            state.categories.push({
+            const newCategory = {
                 id: categoryName,
                 name: categoryName,
                 displayName: displayName,
                 isDefault: false
-            });
+            };
+            
+            state.categories.push(newCategory);
 
             // Save to Firestore (Categories)
-            const newCategory = state.categories[state.categories.length - 1];
-            db.collection("categories").doc(newCategory.id).set(newCategory);
+            db.collection("categories").doc(newCategory.id).set(newCategory)
+                .then(() => {
+                    // Save to localStorage
+                    saveToLocalStorage();
 
-            saveToLocalStorage();
+                    // Clear inputs
+                    categoryNameInput.value = '';
+                    displayNameInput.value = '';
 
-            // Clear inputs
-            categoryNameInput.value = '';
-            displayNameInput.value = '';
+                    // Reload categories
+                    loadCategoriesForAdmin();
 
-            // Reload categories
-            loadCategoriesForAdmin();
+                    // Update category tabs in main menu
+                    updateCategoryTabs();
 
-            // Update category tabs in main menu
-            updateCategoryTabs();
-
-            showNotification(`Category "${displayName}" added successfully.`);
+                    showNotification(`Category "${displayName}" added successfully.`);
+                })
+                .catch((error) => {
+                    console.error("Error saving category to Firestore: ", error);
+                    showNotification("Error saving category to cloud. Please check console.");
+                });
         }
 
         // Function to delete a category
@@ -6036,17 +6132,22 @@
                 state.categories = state.categories.filter(cat => cat.id !== categoryId);
 
                 // Delete from Firestore
-                db.collection("categories").doc(categoryId).delete();
+                db.collection("categories").doc(categoryId).delete()
+                    .then(() => {
+                        saveToLocalStorage();
 
-                saveToLocalStorage();
+                        // Reload categories
+                        loadCategoriesForAdmin();
 
-                // Reload categories
-                loadCategoriesForAdmin();
+                        // Update category tabs in main menu
+                        updateCategoryTabs();
 
-                // Update category tabs in main menu
-                updateCategoryTabs();
-
-                showNotification(`Category "${category.displayName}" deleted successfully.`);
+                        showNotification(`Category "${category.displayName}" deleted successfully.`);
+                    })
+                    .catch((error) => {
+                        console.error("Error deleting category from Firestore: ", error);
+                        showNotification("Error deleting category from cloud. Please check console.");
+                    });
             }
         }
 
@@ -7203,11 +7304,16 @@
                 }
             });
 
-            // 4. Menu Items
+            // 4. Menu Items with Subcategories
             db.collection("menu").onSnapshot((snapshot) => {
                 if (!snapshot.empty) {
                     const cloudItems = [];
-                    snapshot.forEach(doc => cloudItems.push(doc.data()));
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        cloudItems.push(data);
+                    });
+                    
+                    // IMPORTANT: Replace local menu items with cloud data
                     state.menuItems = cloudItems;
 
                     // Ensure all menu items have subcategories array if not present
@@ -7215,18 +7321,32 @@
                         if (!item.subcategories) {
                             item.subcategories = [];
                         }
+                        // Ensure all subcategories have proper structure
+                        if (item.subcategories) {
+                            item.subcategories.forEach(subcategory => {
+                                if (!subcategory.id) subcategory.id = `subcategory-${Date.now()}`;
+                                if (!subcategory.options) subcategory.options = [];
+                                subcategory.options.forEach(option => {
+                                    if (!option.id) option.id = `option-${Date.now()}`;
+                                });
+                            });
+                        }
                     });
 
                     // Refresh displays
-                    displayMenuItems(state.currentCategory);
+                    displayMenuItems('all');
 
                     // If Admin, refresh admin list
                     if (state.isAdminMode) {
                         loadMenuItemsForAdmin();
                     }
+                    
+                    // Save to localStorage as backup
+                    saveToLocalStorage();
+                    
                 } else if (state.menuItems.length > 0) {
-                    // Migration: Upload local menu items
-                    console.log("Uploading local menu items to cloud...");
+                    // Migration: Upload local menu items (including subcategories) to cloud
+                    console.log("Uploading local menu items with subcategories to cloud...");
                     state.menuItems.forEach(item => {
                         // Ensure ID is string for doc name, or use numeric ID
                         db.collection("menu").doc(item.id.toString()).set(item);
