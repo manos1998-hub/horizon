@@ -3433,12 +3433,13 @@
             applyCustomization();
 
             // Set up table selection buttons
-            ddocument.querySelectorAll('.table-btn').forEach(btn => {
-    btn.addEventListener('click', function () {
-        const tableName = this.getAttribute('data-table');
-        selectTable(tableName); // This calls the function updated above
-    });
-});
+            document.querySelectorAll('.table-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const tableName = this.getAttribute('data-table');
+                    selectTable(tableName);
+                });
+            });
+            
 
             // Set up category tabs
             updateCategoryTabs();
