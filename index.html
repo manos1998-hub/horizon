@@ -2003,163 +2003,6 @@
 
 <body>
     <!-- Header -->
-    <body>
-    <header>
-        <div class="container nav-container">
-            <div class="logo"><i class="fas fa-utensils"></i> DineEasy</div>
-            <div id="adminToggle" style="cursor:pointer; color: var(--secondary);" onclick="toggleAdmin()">Admin Mode</div>
-        </div>
-    </header>
-
-    <section id="menuSection" class="app-section active-section">
-        <div class="container">
-            <div class="category-tabs" id="categoryTabs"></div>
-            <div id="menuDisplay"></div>
-        </div>
-    </section>
-
-    <section id="adminSection" class="app-section">
-        <div class="container">
-            <h2>Management Panel</h2>
-            <div class="admin-panel">
-                <h3>Add New Subcategory</h3>
-                <div class="form-group">
-                    <input type="text" id="newSubCatName" placeholder="Subcategory Name (e.g. Italian Pizzas)">
-                </div>
-                <div class="form-group">
-                    <select id="parentCategorySelect"></select>
-                </div>
-                <button class="btn btn-primary" onclick="addSubcategory()">Add Subcategory</button>
-            </div>
-
-            <div class="admin-panel" style="margin-top: 20px;">
-                <h3>Add Item to Subcategory</h3>
-                <div class="form-group">
-                    <input type="text" id="itemName" placeholder="Item Name">
-                </div>
-                <div class="form-group">
-                    <input type="number" id="itemPrice" placeholder="Price ($)">
-                </div>
-                <div class="form-group">
-                    <select id="subCategorySelect"></select>
-                </div>
-                <button class="btn btn-primary" onclick="addItem()">Add Item</button>
-            </div>
-            <button class="btn" style="margin-top:20px" onclick="toggleAdmin()">Back to Menu</button>
-        </div>
-    </section>
-
-    <script>
-        // Data Structure
-        let state = {
-            categories: [
-                { id: 'cat1', name: 'Main Dishes' },
-                { id: 'cat2', name: 'Drinks' }
-            ],
-            subcategories: [
-                { id: 'sub1', parentId: 'cat1', name: 'Pizzas' },
-                { id: 'sub2', parentId: 'cat1', name: 'Pasta' }
-            ],
-            items: [
-                { name: 'Margherita', price: 12.50, subCatId: 'sub1' },
-                { name: 'Carbonara', price: 14.00, subCatId: 'sub2' }
-            ],
-            activeCategory: 'cat1'
-        };
-
-        function init() {
-            renderTabs();
-            renderMenu();
-            populateDropdowns();
-        }
-
-        function renderTabs() {
-            const container = document.getElementById('categoryTabs');
-            container.innerHTML = state.categories.map(cat => `
-                <button class="category-tab ${state.activeCategory === cat.id ? 'active' : ''}" 
-                        onclick="switchCategory('${cat.id}')">
-                    ${cat.name}
-                </button>
-            `).join('');
-        }
-
-        function switchCategory(id) {
-            state.activeCategory = id;
-            renderTabs();
-            renderMenu();
-        }
-
-        function renderMenu() {
-            const display = document.getElementById('menuDisplay');
-            const relevantSubs = state.subcategories.filter(s => s.parentId === state.activeCategory);
-            
-            display.innerHTML = relevantSubs.map(sub => {
-                const subItems = state.items.filter(i => i.subCatId === sub.id);
-                return `
-                    <div class="subcategory-section">
-                        <h3 class="subcategory-title">${sub.name}</h3>
-                        <div class="menu-grid">
-                            ${subItems.map(item => `
-                                <div class="menu-item">
-                                    <div class="item-header">
-                                        <span class="item-name">${item.name}</span>
-                                        <span class="item-price">$${item.price.toFixed(2)}</span>
-                                    </div>
-                                    <button class="add-btn">Add to Order</button>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function populateDropdowns() {
-            document.getElementById('parentCategorySelect').innerHTML = state.categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-            document.getElementById('subCategorySelect').innerHTML = state.subcategories.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
-        }
-
-        function addSubcategory() {
-            const name = document.getElementById('newSubCatName').value;
-            const parentId = document.getElementById('parentCategorySelect').value;
-            if(!name) return;
-            
-            const newId = 'sub' + Date.now();
-            state.subcategories.push({ id: newId, parentId: parentId, name: name });
-            document.getElementById('newSubCatName').value = '';
-            populateDropdowns();
-            renderMenu();
-            alert('Subcategory added!');
-        }
-
-        function addItem() {
-            const name = document.getElementById('itemName').value;
-            const price = parseFloat(document.getElementById('itemPrice').value);
-            const subId = document.getElementById('subCategorySelect').value;
-            
-            if(!name || isNaN(price)) return;
-            
-            state.items.push({ name: name, price: price, subCatId: subId });
-            document.getElementById('itemName').value = '';
-            document.getElementById('itemPrice').value = '';
-            renderMenu();
-            alert('Item added to subcategory!');
-        }
-
-        function toggleAdmin() {
-            const menu = document.getElementById('menuSection');
-            const admin = document.getElementById('adminSection');
-            if(menu.classList.contains('active-section')) {
-                menu.classList.remove('active-section');
-                admin.classList.add('active-section');
-            } else {
-                admin.classList.remove('active-section');
-                menu.classList.add('active-section');
-            }
-        }
-
-        init();
-    </script>
     <header>
         <div class="container nav-container">
             <div class="logo" id="restaurantLogo">
@@ -3596,6 +3439,7 @@
                     selectTable(tableName);
                 });
             });
+            
 
             // Set up category tabs
             updateCategoryTabs();
@@ -5943,7 +5787,8 @@
         function resetMenu() {
             if (confirm("This will delete your current menu and categories. Are you sure?")) {
                 // In a real app we'd load defaults. Since we don't have them hardcoded here,
-                // we'll just warn correct behavior.
+                // we'll just clear it for now or keep it as is.
+                // For safety, let's just warn correct behavior.
                 alert("Default menu data is not configured. Menu has not been changed.");
 
                 // If we had defaults:
@@ -5965,6 +5810,20 @@
             }
             return false;
         }
+        // Function to handle table selection
+function selectTable(tableName) {
+    state.currentTable = tableName;
+    
+    // Check if the selected table is the "Admin" portal
+    if (tableName === 'Admin') {
+        showAdminCodePrompt();
+    } else {
+        // For regular tables, go straight to the menu
+        showSection('menuSection');
+        updateTableInfo();
+        showNotification(`Welcome! You are at ${tableName}`);
+    }
+}
 
         // Function to update restaurant UI
         function updateRestaurantUI() {
@@ -6115,13 +5974,12 @@
             myOrdersButton.style.display = 'none';
         }
 
-        // FIXED FUNCTION: Select a table - ONLY shows admin code prompt for exact "Admin" table
+        // Function to select a table
         function selectTable(tableName) {
             state.currentTable = tableName;
 
-            // Check if the table is exactly "Admin" (case-sensitive)
-            if (tableName === "Admin") {
-                // Only show admin code prompt for the exact "Admin" table
+            // Check if the table is "Admin"
+            if (tableName.toLowerCase() === "admin") {
                 showAdminCodePrompt();
                 return;
             } else {
