@@ -3041,71 +3041,7 @@
             appId: "1:730100337020:web:dd3dc58846c8207a693cf9"
         };
 
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
-        // Application State
-        const state = {
-            currentTable: null,
-            cart: [],
-            selectedPaymentMethod: null,
-            selectedPaymentTime: null,
-            currentOrderNumber: null,
-            restaurantInfo: {
-                name: "DineEasy",
-                taxRate: 8,
-                estimatedPrepTime: "15-25",
-                logoImage: "",
-                welcomeMessage: ""
-            },
-            menuItems: [],
-            orders: [],
-            orderStats: {
-                totalOrders: 0,
-                totalRevenue: 0,
-                avgOrderValue: 0,
-                pendingOrders: 0,
-                preparingOrders: 0,
-                readyOrders: 0,
-                servedOrders: 0,
-                cancelledOrders: 0,
-                removedOrders: 0
-            },
-            adminAccessCode: "3232",
-            adminChangeCode: "6262",
-            categories: [],
-            isAdminMode: false,
-            pendingAdminAction: null,
-            currentImageUpload: null,
-            customization: {
-                primary: "#e63946",
-                primaryDark: "#c1121f",
-                secondary: "#457b9d",
-                light: "#f8f9fa",
-                dark: "#212529",
-                gray: "#6c757d",
-                lightGray: "#e9ecef",
-                success: "#2a9d8f",
-                warning: "#e9c46a",
-                danger: "#dc3545",
-                shadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
-                radius: "12px",
-                background: "#fefefe",
-                text: "#212529",
-                cardBg: "#ffffff",
-                headerBg: "#ffffff",
-                menuBg: "#ffffff",
-                cartBg: "#ffffff",
-                paymentBg: "#ffffff",
-                buttonText: "#ffffff",
-                fontPrimary: "'Poppins', sans-serif",
-                fontSecondary: "'Playfair Display', serif"
-            },
-            currentTheme: "default",
-            currentFont: "poppins",
-            lastOrderUpdate: 0
-        };
+        
 
         // Default Menu Data with Tax Included in Prices
         const defaultMenuItems = [];
