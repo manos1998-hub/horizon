@@ -416,7 +416,7 @@
                     <div class="categories-management">
                         <div class="categories-list">
                             <h4 style="margin-bottom:15px;">Existing Categories</h4>
-                            <div class="categories-list-container" id="categoriesListContainer"></div>
+                            <div class="categories-listContainer" id="categoriesListContainer"></div>
                         </div>
                         <div class="add-category-form">
                             <h4 style="margin-bottom:15px;">Add New Category</h4>
@@ -3382,7 +3382,7 @@
                         <div style="display:flex;align-items:center;gap:5px"><div style="width:12px;height:12px;background-color:#fff3cd;border-radius:2px"></div><span>Pending: ${state.orderStats.pendingOrders}</span></div>
                         <div style="display:flex;align-items:center;gap:5px"><div style="width:12px;height:12px;background-color:#d1ecf1;border-radius:2px"></div><span>Preparing: ${state.orderStats.preparingOrders}</span></div>
                         <div style="display:flex;align-items:center;gap:5px"><div style="width:12px;height:12px;background-color:#d4edda;border-radius:2px"></div><span>Ready: ${state.orderStats.readyOrders}</span></div>
-                        <div style="display:flex;align-items:center;gap:5px"><div style="width:12px;height:12px;background-color:#cce5ff;border-radius:2px"></div><span>Served: ${state.orderStats.servedOrders}</span></div>
+                        <div style="display:flex;align-items:center;gap=5px"><div style="width:12px;height:12px;background-color:#cce5ff;border-radius:2px"></div><span>Served: ${state.orderStats.servedOrders}</span></div>
                         <div style="display:flex;align-items:center;gap:5px"><div style="width:12px;height:12px;background-color:#f8d7da;border-radius:2px"></div><span>Cancelled: ${state.orderStats.cancelledOrders}</span></div>
                         <div style="display:flex;align-items:center;gap:5px"><div style="width:12px;height:12px;background-color:#6c757d;border-radius:2px"></div><span>Removed: ${state.orderStats.removedOrders}</span></div>
                     </div>
@@ -3533,9 +3533,16 @@
             if (tableName === 'Admin') {
                 showAdminCodePrompt();
             } else {
+                tableInfo.innerHTML = `<i class="fas fa-chair"></i> ${tableName}`;
+                menuSubtitle.textContent = `Select items to add to your order for ${tableName}`;
+                cartSubtitle.textContent = `Your order for ${tableName}`;
+                localStorage.setItem('dineEasyTable', tableName);
+                showNotification(`Table ${tableName} selected. Welcome!`);
+                resetCart();
+                updateCategoryTabs();
+                displayMenuItems('all');
+                myOrdersButton.style.display = 'flex';
                 showSection('menuSection');
-                updateTableInfo();
-                showNotification(`Welcome! You are at ${tableName}`);
             }
         }
 
@@ -3665,25 +3672,6 @@
             tableInfo.innerHTML = `<i class="fas fa-qrcode"></i> Scan QR to begin`;
             menuSubtitle.textContent = 'Select items to add to your order';
             myOrdersButton.style.display = 'none';
-        }
-
-        function selectTable(tableName) {
-            state.currentTable = tableName;
-            if (tableName.toLowerCase() === "admin") {
-                showAdminCodePrompt();
-                return;
-            } else {
-                tableInfo.innerHTML = `<i class="fas fa-chair"></i> ${tableName}`;
-                menuSubtitle.textContent = `Select items to add to your order for ${tableName}`;
-                cartSubtitle.textContent = `Your order for ${tableName}`;
-                localStorage.setItem('dineEasyTable', tableName);
-                showNotification(`Table ${tableName} selected. Welcome!`);
-                resetCart();
-                updateCategoryTabs();
-                displayMenuItems('all');
-                myOrdersButton.style.display = 'flex';
-                showSection('menuSection');
-            }
         }
 
         function showSection(sectionId) {
@@ -3871,14 +3859,6 @@
             const total = calculateTotal();
             document.getElementById('paymentSubtotal').textContent = `$${subtotal.toFixed(2)}`;
             document.getElementById('paymentTotal').textContent = `$${total.toFixed(2)}`;
-        }
-
-        function updateTableInfo() {
-            if (state.currentTable) {
-                tableInfo.innerHTML = `<i class="fas fa-chair"></i> ${state.currentTable}`;
-            } else {
-                tableInfo.innerHTML = `<i class="fas fa-qrcode"></i> Scan QR to begin`;
-            }
         }
 
         function showNotification(message) {
