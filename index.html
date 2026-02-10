@@ -1646,6 +1646,203 @@
             color: var(--primary);
             font-size: 20px;
         }
+                /* NEW: Subcategory Modal Styles */
+        .subcategory-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .subcategory-container {
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 30px;
+            position: relative;
+        }
+
+        .subcategory-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: var(--gray);
+            cursor: pointer;
+        }
+
+        .subcategory-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--text);
+        }
+
+        .subcategory-description {
+            color: var(--gray);
+            margin-bottom: 25px;
+        }
+
+        .subcategory-group {
+            margin-bottom: 25px;
+            border-bottom: 1px solid var(--light-gray);
+            padding-bottom: 20px;
+        }
+
+        .subcategory-group:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .subcategory-group-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--text);
+        }
+
+        .subcategory-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .subcategory-option {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            border: 2px solid var(--light-gray);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .subcategory-option:hover {
+            border-color: var(--primary);
+            background-color: rgba(230, 57, 70, 0.05);
+        }
+
+        .subcategory-option.selected {
+            border-color: var(--primary);
+            background-color: rgba(230, 57, 70, 0.1);
+        }
+
+        .option-name {
+            font-weight: 500;
+        }
+
+        .option-price {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .subcategory-required {
+            color: var(--danger);
+            font-size: 12px;
+            margin-left: 5px;
+        }
+
+        .selected-options-summary {
+            background-color: rgba(69, 123, 157, 0.1);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            margin-bottom: 25px;
+        }
+
+        .selected-options-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--secondary);
+        }
+
+        .selected-option-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .selected-option-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .selected-option-total {
+            border-top: 1px solid rgba(69, 123, 157, 0.3);
+            padding-top: 10px;
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+        }
+
+        .subcategory-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        /* Subcategory Management Styles */
+        .subcategories-management {
+            margin-top: 30px;
+            border-top: 2px solid var(--light-gray);
+            padding-top: 20px;
+        }
+
+        .subcategory-item {
+            background-color: var(--light);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid var(--light-gray);
+        }
+
+        .subcategory-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .subcategory-name {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .subcategory-option-list {
+            margin-top: 15px;
+        }
+
+        .subcategory-option-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: var(--card-bg);
+            border-radius: 6px;
+            margin-bottom: 8px;
+            border: 1px solid var(--light-gray);
+        }
+
+        .add-subcategory-btn,
+        .add-option-btn {
+            margin-top: 10px;
+            width: 100%;
+        }
 
         /* Admin Dashboard Section (Shown only in Admin Mode) */
         .admin-dashboard-section {
@@ -2422,7 +2619,22 @@
                             <input type="text" class="admin-input" id="editItemTags"
                                 placeholder="Vegetarian, Popular, Spicy">
                         </div>
-
+                                              <!-- NEW: Subcategory Management -->
+                        <div class="subcategories-management">
+                            <h4 style="margin-bottom: 15px;">Subcategories & Options</h4>
+                            <p style="margin-bottom: 20px; color: var(--gray);">
+                                Add subcategories like "Size", "Sugar Level", etc. with options that can have extra prices.
+                            </p>
+                            
+                            <div id="subcategoriesList">
+                                <!-- Subcategories will be dynamically added here -->
+                            </div>
+                            
+                            <button class="btn btn-secondary add-subcategory-btn" id="addSubcategoryBtn">
+                                <i class="fas fa-plus"></i> Add Subcategory
+                            </button>
+                        </div>
+                        
                         <div class="payment-actions">
                             <button class="btn btn-secondary" id="cancelEditBtn">
                                 <i class="fas fa-times"></i> Cancel
@@ -2961,6 +3173,42 @@
             <div class="admin-code-icon">
                 <i class="fas fa-lock"></i>
             </div>
+                <!-- NEW: Subcategory Selection Modal -->
+    <div class="subcategory-modal" id="subcategoryModal">
+        <div class="subcategory-container">
+            <button class="subcategory-close" id="subcategoryClose">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <h3 class="subcategory-title" id="subcategoryItemName">Item Name</h3>
+            <p class="subcategory-description" id="subcategoryItemDescription">Item description</p>
+
+            <div id="subcategoryGroups">
+                <!-- Subcategory groups will be dynamically added here -->
+            </div>
+
+            <div class="selected-options-summary" id="selectedOptionsSummary" style="display: none;">
+                <div class="selected-options-title">Selected Options</div>
+                <div id="selectedOptionsList">
+                    <!-- Selected options will be dynamically added here -->
+                </div>
+                <div class="selected-option-total">
+                    <span>Total Price:</span>
+                    <span id="subcategoryTotalPrice">$0.00</span>
+                </div>
+            </div>
+
+            <div class="subcategory-actions">
+                <button class="btn btn-secondary" id="cancelSubcategoryBtn">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button class="btn btn-primary" id="addToCartWithOptionsBtn">
+                    <i class="fas fa-cart-plus"></i> Add to Cart
+                </button>
+            </div>
+        </div>
+    </div>
+            
             <h3 class="admin-code-title">Admin Access Required</h3>
             <p class="admin-code-subtitle">Please enter the admin code to continue</p>
             <input type="password" class="admin-code-input" id="adminCodeInput" placeholder="Enter 4-digit code"
@@ -3041,10 +3289,149 @@
             appId: "1:730100337020:web:dd3dc58846c8207a693cf9"
         };
 
-        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Application State
+        const state = {
+            currentTable: null,
+            cart: [],
+            selectedPaymentMethod: null,
+            selectedPaymentTime: null,
+            currentOrderNumber: null,
+            restaurantInfo: {
+                name: "DineEasy",
+                taxRate: 8,
+                estimatedPrepTime: "15-25",
+                logoImage: "",
+                welcomeMessage: ""
+            },
+            menuItems: [],
+            orders: [],
+            orderStats: {
+                totalOrders: 0,
+                totalRevenue: 0,
+                avgOrderValue: 0,
+                pendingOrders: 0,
+                preparingOrders: 0,
+                readyOrders: 0,
+                servedOrders: 0,
+                cancelledOrders: 0,
+                removedOrders: 0
+            },
+            adminAccessCode: "3232",
+            adminChangeCode: "6262",
+            categories: [],
+            isAdminMode: false,
+            pendingAdminAction: null,
+            currentImageUpload: null,
+            customization: {
+                primary: "#e63946",
+                primaryDark: "#c1121f",
+                secondary: "#457b9d",
+                light: "#f8f9fa",
+                dark: "#212529",
+                gray: "#6c757d",
+                lightGray: "#e9ecef",
+                success: "#2a9d8f",
+                warning: "#e9c46a",
+                danger: "#dc3545",
+                shadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
+                radius: "12px",
+                background: "#fefefe",
+                text: "#212529",
+                cardBg: "#ffffff",
+                headerBg: "#ffffff",
+                menuBg: "#ffffff",
+                cartBg: "#ffffff",
+                paymentBg: "#ffffff",
+                buttonText: "#ffffff",
+                fontPrimary: "'Poppins', sans-serif",
+                fontSecondary: "'Playfair Display', serif"
+            },
+            currentTheme: "default",
+            currentFont: "poppins",
+            lastOrderUpdate: 0
+        };
 
         // Default Menu Data with Tax Included in Prices
-        const defaultMenuItems = [];
+                // Updated Default Menu Data with Subcategories
+        const defaultMenuItems = [
+            {
+                id: 1,
+                name: "Freddo Espresso",
+                description: "Enjoy a cool and refreshing freddo espresso, perfect for hot days. The perfect combination of rich coffee and ice will give you the energy you need to continue your day.",
+                price: 2.20,
+                category: "coffee",
+                image: "",
+                tags: ["Coffee", "Cold", "Popular"],
+                subcategories: [
+                    {
+                        name: "Size",
+                        required: true,
+                        options: [
+                            { name: "Regular", extraPrice: 0.00 },
+                            { name: "Grande (with 3 espresso shots)", extraPrice: 0.30 },
+                            { name: "XLarge (with 4 espresso shots)", extraPrice: 1.10 }
+                        ]
+                    },
+                    {
+                        name: "Sugar Level",
+                        required: true,
+                        options: [
+                            { name: "Very Sweet", extraPrice: 0.00 },
+                            { name: "Medium to Sweet", extraPrice: 0.00 },
+                            { name: "A Little", extraPrice: 0.00 },
+                            { name: "Sweet", extraPrice: 0.00 },
+                            { name: "Medium", extraPrice: 0.00 },
+                            { name: "Plain (No Sugar)", extraPrice: 0.00 }
+                        ]
+                    },
+                    {
+                        name: "Sugar Type",
+                        required: false,
+                        options: [
+                            { name: "White Sugar", extraPrice: 0.00 },
+                            { name: "Brown Sugar", extraPrice: 0.00 },
+                            { name: "Sweetener", extraPrice: 0.00 },
+                            { name: "Stevia", extraPrice: 0.00 },
+                            { name: "Honey", extraPrice: 0.50 }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 2,
+                name: "Margherita Pizza",
+                description: "Classic pizza with tomato sauce, mozzarella cheese, and fresh basil.",
+                price: 12.99,
+                category: "pizza",
+                image: "",
+                tags: ["Italian", "Vegetarian", "Popular"],
+                subcategories: [
+                    {
+                        name: "Size",
+                        required: true,
+                        options: [
+                            { name: "Small (25cm)", extraPrice: 0.00 },
+                            { name: "Medium (30cm)", extraPrice: 3.00 },
+                            { name: "Large (35cm)", extraPrice: 6.00 }
+                        ]
+                    },
+                    {
+                        name: "Extra Toppings",
+                        required: false,
+                        options: [
+                            { name: "Extra Cheese", extraPrice: 1.50 },
+                            { name: "Pepperoni", extraPrice: 2.00 },
+                            { name: "Mushrooms", extraPrice: 1.00 },
+                            { name: "Olives", extraPrice: 1.00 }
+                        ]
+                    }
+                ]
+            }
+        ];
 
         // 20 UNIQUE THEMES - MODERN AND COZY
         const themes = {
@@ -3342,6 +3729,17 @@
         const adminChangeCodeInput = document.getElementById('adminChangeCodeInput');
         const submitChangeCodeBtn = document.getElementById('submitChangeCodeBtn');
         const cancelChangeBtn = document.getElementById('cancelChangeBtn');
+                // NEW: Subcategory Modal Elements
+        const subcategoryModal = document.getElementById('subcategoryModal');
+        const subcategoryClose = document.getElementById('subcategoryClose');
+        const subcategoryItemName = document.getElementById('subcategoryItemName');
+        const subcategoryItemDescription = document.getElementById('subcategoryItemDescription');
+        const subcategoryGroups = document.getElementById('subcategoryGroups');
+        const selectedOptionsSummary = document.getElementById('selectedOptionsSummary');
+        const selectedOptionsList = document.getElementById('selectedOptionsList');
+        const subcategoryTotalPrice = document.getElementById('subcategoryTotalPrice');
+        const cancelSubcategoryBtn = document.getElementById('cancelSubcategoryBtn');
+        const addToCartWithOptionsBtn = document.getElementById('addToCartWithOptionsBtn');
 
         // NEW: Refresh buttons for admin order management
         const refreshAdminOrdersBtn = document.getElementById('refreshAdminOrdersBtn');
@@ -3550,6 +3948,10 @@
 
             // Admin functionality
             setupAdminPanel();
+             // NEW: Set up subcategory modal
+             // NEW: Set up subcategory modal
+            setupSubcategoryModal();
+
 
             // NEW: Set up admin order refresh buttons
             if (refreshAdminOrdersBtn) {
@@ -3974,6 +4376,11 @@
 
             // Load admin data
             loadAdminDashboardData();
+
+                        // NEW: Set up subcategory management
+            document.getElementById('addSubcategoryBtn').addEventListener('click', function () {
+                addNewSubcategory();
+            });
 
             // Save admin mode state
             localStorage.setItem('dineEasyAdminMode', 'true');
@@ -4633,6 +5040,250 @@
             updateLogoPreview();
         }
 
+                // NEW: Setup subcategory modal
+        function setupSubcategoryModal() {
+            subcategoryClose.addEventListener('click', function () {
+                subcategoryModal.style.display = 'none';
+            });
+
+            cancelSubcategoryBtn.addEventListener('click', function () {
+                subcategoryModal.style.display = 'none';
+            });
+
+            addToCartWithOptionsBtn.addEventListener('click', function () {
+                addToCartWithSelectedOptions();
+            });
+        }
+
+        // NEW: Function to open subcategory modal
+        function openSubcategoryModal(itemId) {
+            const menuItem = state.menuItems.find(item => item.id === itemId);
+            if (!menuItem) return;
+
+            state.currentMenuItemId = itemId;
+            
+            // Update modal title and description
+            subcategoryItemName.textContent = menuItem.name;
+            subcategoryItemDescription.textContent = menuItem.description;
+            
+            // Clear previous content
+            subcategoryGroups.innerHTML = '';
+            selectedOptionsList.innerHTML = '';
+            selectedOptionsSummary.style.display = 'none';
+            
+            // Check if item has subcategories
+            if (!menuItem.subcategories || menuItem.subcategories.length === 0) {
+                // If no subcategories, add directly to cart
+                addToCart(itemId);
+                subcategoryModal.style.display = 'none';
+                return;
+            }
+            
+            // Create subcategory groups
+            menuItem.subcategories.forEach((subcategory, subIndex) => {
+                const groupDiv = document.createElement('div');
+                groupDiv.className = 'subcategory-group';
+                groupDiv.setAttribute('data-subcategory-index', subIndex);
+                
+                const groupTitle = document.createElement('div');
+                groupTitle.className = 'subcategory-group-title';
+                groupTitle.textContent = subcategory.name;
+                if (subcategory.required) {
+                    const requiredSpan = document.createElement('span');
+                    requiredSpan.className = 'subcategory-required';
+                    requiredSpan.textContent = '*Required';
+                    groupTitle.appendChild(requiredSpan);
+                }
+                
+                groupDiv.appendChild(groupTitle);
+                
+                const optionsDiv = document.createElement('div');
+                optionsDiv.className = 'subcategory-options';
+                
+                subcategory.options.forEach((option, optIndex) => {
+                    const optionDiv = document.createElement('div');
+                    optionDiv.className = 'subcategory-option';
+                    optionDiv.setAttribute('data-subcategory-index', subIndex);
+                    optionDiv.setAttribute('data-option-index', optIndex);
+                    
+                    // Check if this option should be pre-selected
+                    let isSelected = false;
+                    if (subcategory.required && optIndex === 0) {
+                        isSelected = true;
+                        optionDiv.classList.add('selected');
+                    }
+                    
+                    optionDiv.innerHTML = `
+                        <div class="option-name">${option.name}</div>
+                        <div class="option-price">${option.extraPrice > 0 ? `+$${option.extraPrice.toFixed(2)}` : 'Included'}</div>
+                    `;
+                    
+                    optionDiv.addEventListener('click', function () {
+                        // For required subcategories, only one option can be selected
+                        if (subcategory.required) {
+                            // Remove selected class from all options in this subcategory
+                            optionsDiv.querySelectorAll('.subcategory-option').forEach(opt => {
+                                opt.classList.remove('selected');
+                            });
+                        }
+                        
+                        // Toggle selection for this option
+                        if (optionDiv.classList.contains('selected')) {
+                            optionDiv.classList.remove('selected');
+                        } else {
+                            optionDiv.classList.add('selected');
+                        }
+                        
+                        // Update selected options summary
+                        updateSelectedOptionsSummary(menuItem);
+                    });
+                    
+                    optionsDiv.appendChild(optionDiv);
+                });
+                
+                groupDiv.appendChild(optionsDiv);
+                subcategoryGroups.appendChild(groupDiv);
+            });
+            
+            // Show the modal
+            subcategoryModal.style.display = 'flex';
+            
+            // Update selected options summary initially
+            updateSelectedOptionsSummary(menuItem);
+        }
+
+        // NEW: Update selected options summary
+        function updateSelectedOptionsSummary(menuItem) {
+            const selectedOptions = [];
+            let totalPrice = menuItem.price;
+            
+            // Get all selected options
+            document.querySelectorAll('.subcategory-group').forEach((group, subIndex) => {
+                const selectedOption = group.querySelector('.subcategory-option.selected');
+                if (selectedOption) {
+                    const optionIndex = parseInt(selectedOption.getAttribute('data-option-index'));
+                    const subcategory = menuItem.subcategories[subIndex];
+                    const option = subcategory.options[optionIndex];
+                    
+                    selectedOptions.push({
+                        subcategory: subcategory.name,
+                        option: option.name,
+                        extraPrice: option.extraPrice
+                    });
+                    
+                    totalPrice += option.extraPrice;
+                }
+            });
+            
+            // Update the summary display
+            if (selectedOptions.length > 0) {
+                selectedOptionsList.innerHTML = '';
+                
+                selectedOptions.forEach(option => {
+                    const optionItem = document.createElement('div');
+                    optionItem.className = 'selected-option-item';
+                    optionItem.innerHTML = `
+                        <span>${option.subcategory}: ${option.option}</span>
+                        <span>${option.extraPrice > 0 ? `+$${option.extraPrice.toFixed(2)}` : 'Included'}</span>
+                    `;
+                    selectedOptionsList.appendChild(optionItem);
+                });
+                
+                // Update total price
+                subcategoryTotalPrice.textContent = `$${totalPrice.toFixed(2)}`;
+                
+                // Show the summary
+                selectedOptionsSummary.style.display = 'block';
+            } else {
+                selectedOptionsSummary.style.display = 'none';
+            }
+        }
+
+        // NEW: Add to cart with selected options
+        function addToCartWithSelectedOptions() {
+            const menuItem = state.menuItems.find(item => item.id === state.currentMenuItemId);
+            if (!menuItem) {
+                subcategoryModal.style.display = 'none';
+                return;
+            }
+            
+            // Check if all required subcategories have been selected
+            let allRequiredSelected = true;
+            const selectedOptions = [];
+            let totalPrice = menuItem.price;
+            
+            menuItem.subcategories.forEach((subcategory, subIndex) => {
+                const selectedOption = document.querySelector(`.subcategory-group[data-subcategory-index="${subIndex}"] .subcategory-option.selected`);
+                
+                if (subcategory.required && !selectedOption) {
+                    allRequiredSelected = false;
+                    return;
+                }
+                
+                if (selectedOption) {
+                    const optionIndex = parseInt(selectedOption.getAttribute('data-option-index'));
+                    const option = subcategory.options[optionIndex];
+                    
+                    selectedOptions.push({
+                        subcategory: subcategory.name,
+                        option: option.name,
+                        extraPrice: option.extraPrice
+                    });
+                    
+                    totalPrice += option.extraPrice;
+                }
+            });
+            
+            if (!allRequiredSelected) {
+                showNotification('Please select all required options');
+                return;
+            }
+            
+            // Check if item already exists in cart with same options
+            const existingItemIndex = state.cart.findIndex(item => {
+                if (item.id !== menuItem.id) return false;
+                
+                // Check if options are the same
+                if (item.selectedOptions.length !== selectedOptions.length) return false;
+                
+                // Compare each option
+                for (let i = 0; i < item.selectedOptions.length; i++) {
+                    const cartOption = item.selectedOptions[i];
+                    const newOption = selectedOptions[i];
+                    
+                    if (cartOption.subcategory !== newOption.subcategory || 
+                        cartOption.option !== newOption.option) {
+                        return false;
+                    }
+                }
+                
+                return true;
+            });
+            
+            if (existingItemIndex !== -1) {
+                // Increment quantity of existing item
+                state.cart[existingItemIndex].quantity += 1;
+            } else {
+                // Add new item to cart
+                state.cart.push({
+                    id: menuItem.id,
+                    name: menuItem.name,
+                    basePrice: menuItem.price,
+                    price: totalPrice, // Price with options
+                    quantity: 1,
+                    selectedOptions: selectedOptions
+                });
+            }
+            
+            // Update cart display
+            updateCart();
+            
+            // Close modal
+            subcategoryModal.style.display = 'none';
+            
+            // Show notification
+            showNotification(`${menuItem.name} added to cart`);
+        }
         // Function to initialize modal customization tab
         function initializeModalCustomizationTab() {
             // Create theme gallery for modal
@@ -5999,69 +6650,97 @@ function selectTable(tableName) {
                 return;
             }
 
-            filteredItems.forEach(item => {
-                const menuItemElement = document.createElement('div');
-                menuItemElement.className = 'menu-item';
+                            filteredItems.forEach(item => {
+                    const menuItemElement = document.createElement('div');
+                    menuItemElement.className = 'menu-item';
 
-                const imageStyle = item.image && item.image.trim() !== ''
-                    ? `background-image: url('${item.image}')`
-                    : 'background-color: var(--light-gray)';
+                    // Check if item has subcategories
+                    const hasSubcategories = item.subcategories && item.subcategories.length > 0;
+                    const subcategoryIndicator = hasSubcategories ? 
+                        `<div class="item-tag" style="background-color: rgba(69, 123, 157, 0.2); color: var(--secondary);">
+                            <i class="fas fa-list"></i> Customizable
+                        </div>` : '';
 
-                menuItemElement.innerHTML = `
-                    <div class="item-image" style="${imageStyle}"></div>
-                    <div class="item-content">
-                        <div class="item-header">
-                            <div class="item-name">${item.name}</div>
-                            <div class="item-price">$${item.price.toFixed(2)}</div>
-                        </div>
-                        <div class="item-description">${item.description}</div>
-                        <div class="item-footer">
-                            <div class="item-tags">
-                                ${item.tags.map(tag => `<span class="item-tag">${tag}</span>`).join('')}
+                    const imageStyle = item.image && item.image.trim() !== ''
+                        ? `background-image: url('${item.image}')`
+                        : 'background-color: var(--light-gray)';
+
+                    menuItemElement.innerHTML = `
+                        <div class="item-image" style="${imageStyle}"></div>
+                        <div class="item-content">
+                            <div class="item-header">
+                                <div class="item-name">${item.name}</div>
+                                <div class="item-price">$${item.price.toFixed(2)}</div>
                             </div>
-                            <button class="add-to-cart" data-id="${item.id}">
-                                <i class="fas fa-plus"></i>
-                            </button>
+                            <div class="item-description">${item.description}</div>
+                            <div class="item-footer">
+                                <div class="item-tags">
+                                    ${subcategoryIndicator}
+                                    ${item.tags.map(tag => `<span class="item-tag">${tag}</span>`).join('')}
+                                </div>
+                                <button class="add-to-cart" data-id="${item.id}">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                `;
+                    `;
 
-                menuGrid.appendChild(menuItemElement);
+                    menuGrid.appendChild(menuItemElement);
 
-                menuItemElement.querySelector('.add-to-cart').addEventListener('click', function () {
-                    addToCart(item.id);
+                    // Add click event to the entire menu item card
+                    menuItemElement.addEventListener('click', function (e) {
+                        // Don't trigger if clicking the add to cart button
+                        if (!e.target.closest('.add-to-cart')) {
+                            openSubcategoryModal(item.id);
+                        }
+                    });
+
+                    // Add to cart button event
+                    menuItemElement.querySelector('.add-to-cart').addEventListener('click', function (e) {
+                        e.stopPropagation(); // Prevent triggering the card click event
+                        openSubcategoryModal(item.id);
+                    });
                 });
-            });
         }
 
         // Function to add an item to the cart
+              // UPDATED: Function to add an item to the cart (now uses subcategory modal)
         function addToCart(itemId) {
             if (state.isAdminMode) return;
 
             const menuItem = state.menuItems.find(item => item.id === itemId);
             if (!menuItem) return;
 
-            const existingItem = state.cart.find(item => item.id === itemId);
-
-            if (existingItem) {
-                existingItem.quantity += 1;
+            // If item has subcategories, open the modal
+            if (menuItem.subcategories && menuItem.subcategories.length > 0) {
+                openSubcategoryModal(itemId);
             } else {
-                state.cart.push({
-                    id: menuItem.id,
-                    name: menuItem.name,
-                    price: menuItem.price,
-                    quantity: 1
-                });
+                // If no subcategories, add directly to cart
+                const existingItem = state.cart.find(item => item.id === itemId);
+
+                if (existingItem) {
+                    existingItem.quantity += 1;
+                } else {
+                    state.cart.push({
+                        id: menuItem.id,
+                        name: menuItem.name,
+                        basePrice: menuItem.price,
+                        price: menuItem.price,
+                        quantity: 1,
+                        selectedOptions: []
+                    });
+                }
+
+                updateCart();
+                showNotification(`${menuItem.name} added to cart`);
+
+                // Play add to cart sound
+                playAddToCartSound();
             }
-
-            updateCart();
-            showNotification(`${menuItem.name} added to cart`);
-
-            // Play add to cart sound
-            playAddToCartSound();
         }
 
         // Function to update the cart display
+                // UPDATED: Function to update the cart display
         function updateCart() {
             if (state.isAdminMode) return;
 
@@ -6080,22 +6759,30 @@ function selectTable(tableName) {
                 state.cart.forEach(item => {
                     const cartItemElement = document.createElement('div');
                     cartItemElement.className = 'cart-item';
+                    
+                    // Build options text
+                    let optionsText = '';
+                    if (item.selectedOptions && item.selectedOptions.length > 0) {
+                        optionsText = item.selectedOptions.map(opt => `${opt.subcategory}: ${opt.option}`).join(', ');
+                    }
+                    
                     cartItemElement.innerHTML = `
                         <div class="cart-item-info">
                             <div class="cart-item-name">${item.name}</div>
+                            ${optionsText ? `<div class="cart-item-suboptions">${optionsText}</div>` : ''}
                             <div class="cart-item-price">$${item.price.toFixed(2)}</div>
                         </div>
                         <div class="cart-item-controls">
                             <div class="quantity-control">
-                                <button class="quantity-btn decrease" data-id="${item.id}">
+                                <button class="quantity-btn decrease" data-id="${item.id}" data-options="${encodeURIComponent(JSON.stringify(item.selectedOptions))}">
                                     <i class="fas fa-minus"></i>
                                 </button>
                                 <span class="quantity">${item.quantity}</span>
-                                <button class="quantity-btn increase" data-id="${item.id}">
+                                <button class="quantity-btn increase" data-id="${item.id}" data-options="${encodeURIComponent(JSON.stringify(item.selectedOptions))}">
                                     <i class="fas fa-plus"></i>
                                 </button>
                             </div>
-                            <div class="remove-item" data-id="${item.id}">
+                            <div class="remove-item" data-id="${item.id}" data-options="${encodeURIComponent(JSON.stringify(item.selectedOptions))}">
                                 <i class="fas fa-trash"></i>
                             </div>
                         </div>
@@ -6103,29 +6790,69 @@ function selectTable(tableName) {
                     cartItems.appendChild(cartItemElement);
                 });
 
+                // Add event listeners for cart controls
                 document.querySelectorAll('.decrease').forEach(btn => {
                     btn.addEventListener('click', function () {
                         const itemId = parseInt(this.getAttribute('data-id'));
-                        updateCartItemQuantity(itemId, -1);
+                        const options = JSON.parse(decodeURIComponent(this.getAttribute('data-options')));
+                        updateCartItemQuantity(itemId, options, -1);
                     });
                 });
 
                 document.querySelectorAll('.increase').forEach(btn => {
                     btn.addEventListener('click', function () {
                         const itemId = parseInt(this.getAttribute('data-id'));
-                        updateCartItemQuantity(itemId, 1);
+                        const options = JSON.parse(decodeURIComponent(this.getAttribute('data-options')));
+                        updateCartItemQuantity(itemId, options, 1);
                     });
                 });
 
                 document.querySelectorAll('.remove-item').forEach(btn => {
                     btn.addEventListener('click', function () {
                         const itemId = parseInt(this.getAttribute('data-id'));
-                        removeFromCart(itemId);
+                        const options = JSON.parse(decodeURIComponent(this.getAttribute('data-options')));
+                        removeFromCart(itemId, options);
                     });
                 });
             }
 
             updateCartSummary();
+        }
+
+        // UPDATED: Function to update cart item quantity with options
+        function updateCartItemQuantity(itemId, options, change) {
+            // Find the item with matching ID and options
+            const itemIndex = state.cart.findIndex(item => 
+                item.id === itemId && 
+                JSON.stringify(item.selectedOptions) === JSON.stringify(options)
+            );
+
+            if (itemIndex !== -1) {
+                state.cart[itemIndex].quantity += change;
+
+                if (state.cart[itemIndex].quantity <= 0) {
+                    state.cart.splice(itemIndex, 1);
+                }
+
+                updateCart();
+            }
+        }
+
+        // UPDATED: Function to remove an item from cart with options
+        function removeFromCart(itemId, options) {
+            // Find the item with matching ID and options
+            const itemIndex = state.cart.findIndex(item => 
+                item.id === itemId && 
+                JSON.stringify(item.selectedOptions) === JSON.stringify(options)
+            );
+
+            if (itemIndex !== -1) {
+                const item = state.cart[itemIndex];
+                state.cart.splice(itemIndex, 1);
+                updateCart();
+
+                showNotification(`${item.name} removed from cart`);
+            }
         }
 
         // Function to update cart item quantity
@@ -6244,7 +6971,98 @@ function selectTable(tableName) {
                 console.error("Error getting real-time updates: ", error);
             });
         }
+                // NEW: Function to add new subcategory in admin panel
+        function addNewSubcategory() {
+            const subcategoriesList = document.getElementById('subcategoriesList');
+            
+            const subcategoryIndex = document.querySelectorAll('.subcategory-item').length;
+            
+            const subcategoryDiv = document.createElement('div');
+            subcategoryDiv.className = 'subcategory-item';
+            subcategoryDiv.setAttribute('data-index', subcategoryIndex);
+            
+            subcategoryDiv.innerHTML = `
+                <div class="subcategory-header">
+                    <div class="subcategory-name">New Subcategory</div>
+                    <div class="admin-card-actions">
+                        <button class="admin-small-btn btn-danger remove-subcategory" data-index="${subcategoryIndex}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-label">Subcategory Name</label>
+                    <input type="text" class="admin-input subcategory-name-input" placeholder="e.g., Size, Sugar Level">
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-label">
+                        <input type="checkbox" class="subcategory-required-input"> Required (Customer must select one option)
+                    </label>
+                </div>
+                <div class="subcategory-option-list" id="subcategoryOptions${subcategoryIndex}">
+                    <!-- Options will be added here -->
+                </div>
+                <button class="btn btn-secondary add-option-btn" data-subcategory="${subcategoryIndex}">
+                    <i class="fas fa-plus"></i> Add Option
+                </button>
+            `;
+            
+            subcategoriesList.appendChild(subcategoryDiv);
+            
+            // Add event listener for remove button
+            subcategoryDiv.querySelector('.remove-subcategory').addEventListener('click', function() {
+                if (confirm("Are you sure you want to remove this subcategory?")) {
+                    subcategoryDiv.remove();
+                }
+            });
+            
+            // Add event listener for add option button
+            subcategoryDiv.querySelector('.add-option-btn').addEventListener('click', function() {
+                addNewOption(subcategoryIndex);
+            });
+            
+            // Add initial option
+            addNewOption(subcategoryIndex);
+        }
 
+        // NEW: Function to add new option to a subcategory
+        function addNewOption(subcategoryIndex) {
+            const optionsList = document.getElementById(`subcategoryOptions${subcategoryIndex}`);
+            if (!optionsList) return;
+            
+            const optionIndex = optionsList.querySelectorAll('.subcategory-option-item').length;
+            
+            const optionDiv = document.createElement('div');
+            optionDiv.className = 'subcategory-option-item';
+            optionDiv.setAttribute('data-option-index', optionIndex);
+            
+            optionDiv.innerHTML = `
+                <div style="display: flex; gap: 10px; width: 100%;">
+                    <div style="flex: 1;">
+                        <input type="text" class="admin-input option-name-input" placeholder="Option name" style="width: 100%;">
+                    </div>
+                    <div style="width: 120px;">
+                        <input type="number" class="admin-input option-price-input" placeholder="Extra price" step="0.01" min="0" value="0.00" style="width: 100%;">
+                    </div>
+                    <div>
+                        <button class="admin-small-btn btn-danger remove-option" data-subcategory="${subcategoryIndex}" data-option="${optionIndex}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            optionsList.appendChild(optionDiv);
+            
+            // Add event listener for remove option button
+            optionDiv.querySelector('.remove-option').addEventListener('click', function() {
+                if (optionsList.querySelectorAll('.subcategory-option-item').length > 1) {
+                    optionDiv.remove();
+                } else {
+                    showNotification("At least one option is required");
+                }
+            });
+        }
         // Function to save a single order to Firestore
         function saveOrderToFirestore(order) {
             db.collection("orders").doc(order.orderNumber).set(order)
