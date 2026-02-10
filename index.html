@@ -888,7 +888,7 @@
         .order-item {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
             padding: 12px 0;
             border-bottom: 1px solid var(--light-gray);
             color: var(--text);
@@ -900,7 +900,7 @@
 
         .order-item-name {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             gap: 10px;
         }
 
@@ -915,10 +915,30 @@
             justify-content: center;
             font-size: 14px;
             font-weight: 600;
+            flex-shrink: 0;
         }
 
         .order-item-price {
             font-weight: 500;
+            text-align: right;
+            flex-shrink: 0;
+            margin-left: 10px;
+        }
+
+        .order-item-details {
+            flex: 1;
+        }
+
+        .order-item-options {
+            margin-top: 5px;
+            font-size: 13px;
+            color: var(--gray);
+        }
+
+        .order-item-option {
+            display: block;
+            margin-left: 10px;
+            line-height: 1.4;
         }
 
         .order-total {
@@ -5429,8 +5449,8 @@
                                     <div>${item.name}</div>
                                 </div>
                                 <div>$${itemPrice.toFixed(2)}</div>
+                                ${optionsText}
                             </div>
-                            ${optionsText}
                         `;
                     }).join('');
                 } else {
@@ -5439,6 +5459,19 @@
 
                     itemsSummary = firstItems.map(item => {
                         let itemPrice = item.totalPrice || (item.price * item.quantity);
+                        let optionsText = '';
+                        
+                        // NEW: Add subcategory options to display
+                        if (item.selectedOptions && item.selectedOptions.length > 0) {
+                            optionsText = '<div style="font-size: 12px; color: var(--gray); margin-left: 34px;">';
+                            item.selectedOptions.forEach(opt => {
+                                const priceText = opt.additionalPrice > 0 ? ` (+$${opt.additionalPrice.toFixed(2)})` : 
+                                                opt.additionalPrice < 0 ? ` (-$${Math.abs(opt.additionalPrice).toFixed(2)})` : '';
+                                optionsText += `${opt.subcategoryName}: ${opt.optionName}${priceText}<br>`;
+                            });
+                            optionsText += '</div>';
+                        }
+                        
                         return `
                             <div class="order-item-summary">
                                 <div class="order-item-summary-name">
@@ -5446,6 +5479,7 @@
                                     <div>${item.name}</div>
                                 </div>
                                 <div>$${itemPrice.toFixed(2)}</div>
+                                ${optionsText}
                             </div>
                         `;
                     }).join('');
@@ -6209,15 +6243,22 @@
                         break;
                 }
 
-                // Items summary
+                // Items summary with options
                 const itemsSummary = order.items.map(item => {
                     let itemText = `${item.quantity}x ${item.name}`;
+                    
                     // NEW: Add subcategory options to display
                     if (item.selectedOptions && item.selectedOptions.length > 0) {
-                        itemText += ' (Customized)';
+                        itemText += '<br>';
+                        item.selectedOptions.forEach(opt => {
+                            const priceText = opt.additionalPrice > 0 ? ` (+$${opt.additionalPrice.toFixed(2)})` : 
+                                            opt.additionalPrice < 0 ? ` (-$${Math.abs(opt.additionalPrice).toFixed(2)})` : '';
+                            itemText += `&nbsp;&nbsp;&nbsp;&nbsp;${opt.subcategoryName}: ${opt.optionName}${priceText}<br>`;
+                        });
                     }
+                    
                     return itemText;
-                }).join(', ');
+                }).join('<br>');
 
                 orderCard.innerHTML = `
                     <div class="admin-card-header">
@@ -6231,7 +6272,7 @@
                     </div>
                     <p style="margin-bottom: 10px; font-size: 14px;">
                         <strong>Table:</strong> ${order.table}<br>
-                        <strong>Items:</strong> ${itemsSummary}<br>
+                        <strong>Items:</strong><br> ${itemsSummary}<br>
                         <strong>Total:</strong> $${order.total.toFixed(2)}<br>
                         <strong>Payment:</strong> ${order.paymentMethod === 'card' ? 'Card' : 'Cash'} (${order.paymentTime === 'now' ? 'Pay Now' : 'Pay Later'})
                     </p>
@@ -6309,8 +6350,22 @@
                         break;
                 }
 
-                // Items summary
-                const itemsSummary = order.items.map(item => `${item.quantity}x ${item.name}`).join(', ');
+                // Items summary with options
+                const itemsSummary = order.items.map(item => {
+                    let itemText = `${item.quantity}x ${item.name}`;
+                    
+                    // NEW: Add subcategory options to display
+                    if (item.selectedOptions && item.selectedOptions.length > 0) {
+                        itemText += '<br>';
+                        item.selectedOptions.forEach(opt => {
+                            const priceText = opt.additionalPrice > 0 ? ` (+$${opt.additionalPrice.toFixed(2)})` : 
+                                            opt.additionalPrice < 0 ? ` (-$${Math.abs(opt.additionalPrice).toFixed(2)})` : '';
+                            itemText += `&nbsp;&nbsp;&nbsp;&nbsp;${opt.subcategoryName}: ${opt.optionName}${priceText}<br>`;
+                        });
+                    }
+                    
+                    return itemText;
+                }).join('<br>');
 
                 orderCard.innerHTML = `
                     <div class="admin-card-header">
@@ -6324,7 +6379,7 @@
                     </div>
                     <p style="margin-bottom: 10px; font-size: 14px;">
                         <strong>Table:</strong> ${order.table}<br>
-                        <strong>Items:</strong> ${itemsSummary}<br>
+                        <strong>Items:</strong><br> ${itemsSummary}<br>
                         <strong>Total:</strong> $${order.total.toFixed(2)}<br>
                         <strong>Payment:</strong> ${order.paymentMethod === 'card' ? 'Card' : 'Cash'} (${order.paymentTime === 'now' ? 'Pay Now' : 'Pay Later'})
                     </p>
@@ -6734,13 +6789,14 @@
                 const orderItemElement = document.createElement('div');
                 orderItemElement.className = 'order-item';
                 
+                // Get item options text
                 let optionsHTML = '';
                 if (item.selectedOptions && item.selectedOptions.length > 0) {
-                    optionsHTML = '<div style="font-size: 13px; color: var(--gray); margin-left: 38px;">';
+                    optionsHTML = '<div class="order-item-options">';
                     item.selectedOptions.forEach(opt => {
                         const priceText = opt.additionalPrice > 0 ? ` (+$${opt.additionalPrice.toFixed(2)})` : 
                                         opt.additionalPrice < 0 ? ` (-$${Math.abs(opt.additionalPrice).toFixed(2)})` : '';
-                        optionsHTML += `${opt.subcategoryName}: ${opt.optionName}${priceText}<br>`;
+                        optionsHTML += `<div class="order-item-option">${opt.subcategoryName}: ${opt.optionName}${priceText}</div>`;
                     });
                     optionsHTML += '</div>';
                 }
@@ -6748,10 +6804,12 @@
                 orderItemElement.innerHTML = `
                     <div class="order-item-name">
                         <div class="order-item-quantity">${item.quantity}</div>
-                        <div>${item.name}</div>
+                        <div class="order-item-details">
+                            <div>${item.name}</div>
+                            ${optionsHTML}
+                        </div>
                     </div>
                     <div class="order-item-price">$${itemTotal.toFixed(2)}</div>
-                    ${optionsHTML}
                 `;
                 confirmationItems.appendChild(orderItemElement);
             });
