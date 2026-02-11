@@ -359,7 +359,7 @@
             </div>
             <div class="header-right">
                 <button class="my-orders-button" id="myOrdersButton" style="display: none;">
-                    <i class="fas fa-clipboard-list"></i> My Orders
+                    <i class="fas fa-clipboard-list"></i> Οι Παραγγελίες μου
                 </button>
                 <div class="table-info" id="tableInfo">
                     <i class="fas fa-qrcode"></i> Scan QR to begin
@@ -418,7 +418,7 @@
                     <div class="summary-row"><span>Subtotal (tax included)</span><span id="subtotal">$0.00</span></div>
                     <div class="summary-row summary-total"><span>Total</span><span class="amount" id="total">$0.00</span></div>
                     <div class="payment-actions">
-                        <button class="btn btn-secondary" id="backToMenuBtn"><i class="fas fa-arrow-left"></i> Back to Menu</button>
+                        <button class="btn btn-secondary" id="backToMenuBtn"><i class="fas fa-arrow-left"></i> Πίσω στο Μενού</button>
                         <button class="btn btn-primary" id="proceedToPaymentBtn">Proceed to Payment <i class="fas fa-arrow-right"></i></button>
                     </div>
                 </div>
@@ -461,12 +461,12 @@
 
     <section id="myOrdersSection" class="app-section">
         <div class="container my-orders-container">
-            <h2 class="section-title">My Orders</h2>
+            <h2 class="section-title">Οι Παραγγελίες μου</h2>
             <p class="section-subtitle" id="myOrdersSubtitle">View all your current and past orders</p>
             <div class="orders-list" id="ordersList"></div>
             <div class="payment-actions">
-                <button class="btn btn-secondary" id="backToMenuFromOrdersBtn"><i class="fas fa-arrow-left"></i> Back to Menu</button>
-                <button class="btn btn-primary" id="placeNewOrderBtn"><i class="fas fa-plus"></i> Place New Order</button>
+                <button class="btn btn-secondary" id="backToMenuFromOrdersBtn"><i class="fas fa-arrow-left"></i> Πίσω στο Μενού</button>
+                <button class="btn btn-primary" id="placeNewOrderBtn"><i class="fas fa-plus"></i> Νέα Παραγγελία</button>
             </div>
         </div>
     </section>
@@ -480,7 +480,7 @@
                 <p class="order-message">Thank you for your order. Your food will be prepared shortly.</p>
                 <div class="payment-actions" style="justify-content: center; gap: 15px;">
                     <button class="btn btn-success" id="newOrderBtn"><i class="fas fa-utensils"></i> Start New Order</button>
-                    <button class="btn btn-secondary" id="viewMyOrdersBtn"><i class="fas fa-clipboard-list"></i> View My Orders</button>
+                    <button class="btn btn-secondary" id="viewMyOrdersBtn"><i class="fas fa-clipboard-list"></i> Προβολή των Παραγγελιών μου</button>
                 </div>
             </div>
             <div class="order-details">
@@ -1494,7 +1494,7 @@
             state.isAdminMode = false; state.currentTable = null;
             document.body.classList.remove('admin-mode');
             document.querySelector('.header-center').innerHTML = '<button class="help-button" id="headerHelpButton"><i class="fas fa-headset"></i> Χρειάζεστε βοήθεια?</button>';
-            document.querySelector('.header-right').innerHTML = '<button class="my-orders-button" id="myOrdersButton" style="display: none;"><i class="fas fa-clipboard-list"></i> My Orders</button><div class="table-info" id="tableInfo"><i class="fas fa-qrcode"></i> Scan QR to begin</div>';
+            document.querySelector('.header-right').innerHTML = '<button class="my-orders-button" id="myOrdersButton" style="display: none;"><i class="fas fa-clipboard-list"></i> Οι Παραγγελίες μου</button><div class="table-info" id="tableInfo"><i class="fas fa-qrcode"></i> Scan QR to begin</div>';
             document.getElementById('headerHelpButton').addEventListener('click', function() { showHelpNotification(); });
             cartFloating.style.display = 'flex';
             showSection('scannerSection');
