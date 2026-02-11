@@ -199,7 +199,8 @@
         .admin-input, .admin-textarea, .admin-select { width: 100%; padding: 10px 15px; border: 1px solid var(--light-gray); border-radius: 8px; font-family: var(--font-primary); font-size: 14px; background-color: var(--card-bg); color: var(--text); }
         .admin-textarea { min-height: 100px; resize: vertical; }
         .admin-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; margin-bottom: 25px; }
-        .admin-card { background-color: var(--light); border-radius: 10px; padding: 20px; border: 1px solid var(--light-gray); }
+        .admin-card { background-color: var(--light); border-radius: 10px; padding: 20px; border: 1px solid var(--light-gray); transition: all 0.2s; }
+        .admin-card:active { opacity: 0.7; }
         .admin-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .admin-card-title { font-weight: 600; font-size: 16px; color: var(--text); }
         .admin-card-actions { display: flex; gap: 8px; }
@@ -305,6 +306,11 @@
         /* ===== NEW STYLE FOR COMMENT FIELDS ===== */
         .comment-field { margin: 10px 0; }
         .comment-field textarea { width: 100%; padding: 10px; border: 1px solid var(--light-gray); border-radius: 8px; font-family: var(--font-primary); resize: vertical; }
+        /* ===== DRAG AND DROP STYLES ===== */
+        .admin-card.dragging { opacity: 0.5; cursor: grabbing; }
+        .admin-card[draggable="true"] { cursor: grab; }
+        .admin-card[draggable="true"]:active { cursor: grabbing; }
+        .drag-handle { cursor: grab; padding: 5px; margin-right: 8px; color: var(--gray); }
 
         @media (max-width: 992px) { .theme-gallery { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); } .font-options { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); } }
         @media (max-width: 768px) { 
@@ -805,7 +811,7 @@
                 logoImage: "",
                 welcomeMessage: ""
             },
-            menuItems: [],   // Each item may have "options" array
+            menuItems: [],   // Each item may have "options" array and "displayOrder"
             orders: [],
             adminAccessCode: "3232",
             adminChangeCode: "6262",
@@ -952,11 +958,20 @@
 
                 const menuSnapshot = await db.collection('menuItems').get();
                 if (!menuSnapshot.empty) {
-                    state.menuItems = menuSnapshot.docs.map(doc => ({
-                        id: Number(doc.id),
-                        ...doc.data(),
-                        options: doc.data().options || []   // ensure options array exists
-                    }));
+                    state.menuItems = menuSnapshot.docs.map(doc => {
+                        const data = doc.data();
+                        // Ensure displayOrder exists, default to id or increment later
+                        if (data.displayOrder === undefined) {
+                            data.displayOrder = Number(doc.id) || 999;
+                        }
+                        return {
+                            id: Number(doc.id),
+                            ...data,
+                            options: data.options || []
+                        };
+                    });
+                    // Sort by displayOrder
+                    state.menuItems.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
                 } else {
                     state.menuItems = [];
                 }
@@ -1092,7 +1107,9 @@
         // ========== DISPLAY MENU ITEMS (with options indicator) ==========
         function displayMenuItems(category) {
             menuGrid.innerHTML = '';
-            const filteredItems = category === 'all' ? state.menuItems : state.menuItems.filter(item => item.category === category);
+            const filteredItems = category === 'all' ? 
+                [...state.menuItems].sort((a,b) => (a.displayOrder || 0) - (b.displayOrder || 0)) : 
+                state.menuItems.filter(item => item.category === category).sort((a,b) => (a.displayOrder || 0) - (b.displayOrder || 0));
             if (filteredItems.length === 0) { 
                 menuGrid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--gray);"><i class="fas fa-utensils" style="font-size: 50px; margin-bottom: 15px; opacity: 0.5;"></i><p>No items in this category yet.</p></div>'; 
                 return; 
@@ -1161,8 +1178,6 @@
                 JSON.stringify(item.selectedOptions.filter(o => !o.isComment)) === JSON.stringify(cartItem.selectedOptions.filter(o => !o.isComment))
             );
             if (existingIndex !== -1) {
-                // If identical non‑comment options, merge quantities but keep comments? Better to keep separate if comments differ.
-                // To keep it simple: if comments differ, we treat as different items.
                 const existingItem = state.cart[existingIndex];
                 const sameComments = JSON.stringify(existingItem.selectedOptions.filter(o => o.isComment)) === JSON.stringify(cartItem.selectedOptions.filter(o => o.isComment));
                 if (sameComments) {
@@ -1373,7 +1388,6 @@
         }
 
         function updateCartItemQuantity(itemId, options, change) {
-            // For comment fields, we compare full options including comments
             const index = state.cart.findIndex(item => 
                 item.id === itemId && 
                 JSON.stringify(item.selectedOptions) === JSON.stringify(options)
@@ -1586,6 +1600,79 @@
         }
         function showHelpNotification() { if (state.currentTable) showNotification(`Ένας σερβιτόρος θα σας εξυπηρετήσει σύντομα.`); else showNotification('Ένας σερβιτόρος θα σας εξυπηρετήσει σύντομα.'); }
 
+        // ========== DRAG AND DROP REORDER FUNCTIONS ==========
+        function makeAdminGridDraggable(containerId) {
+            const grid = document.getElementById(containerId);
+            if (!grid) return;
+            
+            let draggedItem = null;
+            
+            // Attach dragstart to each card
+            grid.addEventListener('dragstart', (e) => {
+                if (e.target.classList.contains('admin-card') || e.target.closest('.admin-card')) {
+                    const card = e.target.classList.contains('admin-card') ? e.target : e.target.closest('.admin-card');
+                    draggedItem = card;
+                    card.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/plain', card.dataset.itemId || '');
+                }
+            });
+            
+            grid.addEventListener('dragend', (e) => {
+                if (draggedItem) {
+                    draggedItem.classList.remove('dragging');
+                    draggedItem = null;
+                }
+            });
+            
+            grid.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+            });
+            
+            grid.addEventListener('drop', (e) => {
+                e.preventDefault();
+                if (!draggedItem) return;
+                
+                const targetCard = e.target.classList.contains('admin-card') ? e.target : e.target.closest('.admin-card');
+                if (!targetCard || targetCard === draggedItem) return;
+                
+                // Get positions
+                const parent = grid;
+                const items = Array.from(parent.children).filter(el => el.classList.contains('admin-card'));
+                const draggedIndex = items.indexOf(draggedItem);
+                const targetIndex = items.indexOf(targetCard);
+                
+                if (draggedIndex === -1 || targetIndex === -1) return;
+                
+                // Reorder DOM
+                if (draggedIndex < targetIndex) {
+                    parent.insertBefore(draggedItem, targetCard.nextSibling);
+                } else {
+                    parent.insertBefore(draggedItem, targetCard);
+                }
+                
+                // Update displayOrder in state and Firestore
+                const updatedItems = Array.from(parent.children).filter(el => el.classList.contains('admin-card'));
+                updatedItems.forEach((card, idx) => {
+                    const itemId = parseInt(card.dataset.itemId);
+                    const menuItem = state.menuItems.find(i => i.id === itemId);
+                    if (menuItem) {
+                        menuItem.displayOrder = idx;
+                    }
+                });
+                
+                // Save to Firestore
+                saveToFirestore().then(() => {
+                    // Refresh the menu display if visible
+                    if (document.querySelector('#menuSection.active-section')) {
+                        displayMenuItems('all');
+                    }
+                    showNotification("Menu order updated");
+                });
+            });
+        }
+
         // ========== ADMIN DASHBOARD DATA ==========
         function loadAdminDashboardData() {
             document.getElementById('adminRestaurantName').value = state.restaurantInfo.name;
@@ -1632,6 +1719,11 @@
                     }
                 }
             });
+            
+            // Initialize drag and drop for admin grid after loading
+            setTimeout(() => {
+                makeAdminGridDraggable('menuItemsList');
+            }, 500);
         }
 
         function updateLogoPreview() {
@@ -1649,15 +1741,19 @@
             await saveToFirestore(); updateRestaurantUI(); showNotification("Restaurant settings saved.");
         }
 
-        // ========== ADMIN MENU ITEMS (with options UI + DUPLICATE BUTTON + COMMENT FIELD) ==========
+        // ========== ADMIN MENU ITEMS (with options UI + DUPLICATE BUTTON + COMMENT FIELD + DRAG DROP) ==========
         function loadMenuItemsForAdmin() {
             const menuItemsList = document.getElementById('menuItemsList'); menuItemsList.innerHTML = '';
             if (state.menuItems.length === 0) { menuItemsList.innerHTML = '<p style="text-align: center; color: var(--gray);">No menu items found.</p>'; return; }
-            state.menuItems.forEach(item => {
+            // Sort by displayOrder
+            const sortedItems = [...state.menuItems].sort((a,b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+            sortedItems.forEach(item => {
                 const itemCard = document.createElement('div'); itemCard.className = 'admin-card';
+                itemCard.setAttribute('draggable', 'true');
+                itemCard.setAttribute('data-item-id', item.id);
                 const hasImage = item.image && item.image.trim() !== '';
                 const imageContent = hasImage ? `<div style="height: 120px; background-image: url('${item.image}'); background-size: cover; background-position: center; border-radius: 8px; margin-bottom: 10px;"></div>` : `<div style="height: 120px; background-color: var(--light-gray); border-radius: 8px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; color: var(--gray);"><i class="fas fa-utensils"></i></div>`;
-                itemCard.innerHTML = `${imageContent}<div class="admin-card-header"><div class="admin-card-title">${item.name}</div><div class="admin-card-actions"><button class="admin-small-btn btn-primary edit-item" data-id="${item.id}"><i class="fas fa-edit"></i></button><button class="admin-small-btn btn-secondary duplicate-item" data-id="${item.id}"><i class="fas fa-copy"></i></button><button class="admin-small-btn btn-danger delete-item" data-id="${item.id}"><i class="fas fa-trash"></i></button></div></div><p style="margin-bottom: 10px; font-size: 14px;">${item.description}</p><div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-weight: 600; color: var(--primary);">$${item.price.toFixed(2)}</span><span style="font-size: 12px; color: var(--gray);">${getCategoryDisplayName(item.category)}</span></div><div class="tag-display">${item.tags.map(tag => `<span class="tag-item">${tag}</span>`).join('')}</div>`;
+                itemCard.innerHTML = `<div style="display:flex; align-items:center; margin-bottom:5px;"><i class="fas fa-grip-vertical drag-handle"></i></div>${imageContent}<div class="admin-card-header"><div class="admin-card-title">${item.name}</div><div class="admin-card-actions"><button class="admin-small-btn btn-primary edit-item" data-id="${item.id}"><i class="fas fa-edit"></i></button><button class="admin-small-btn btn-secondary duplicate-item" data-id="${item.id}"><i class="fas fa-copy"></i></button><button class="admin-small-btn btn-danger delete-item" data-id="${item.id}"><i class="fas fa-trash"></i></button></div></div><p style="margin-bottom: 10px; font-size: 14px;">${item.description}</p><div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-weight: 600; color: var(--primary);">$${item.price.toFixed(2)}</span><span style="font-size: 12px; color: var(--gray);">${getCategoryDisplayName(item.category)}</span></div><div class="tag-display">${item.tags.map(tag => `<span class="tag-item">${tag}</span>`).join('')}</div>`;
                 if (item.options && item.options.length) {
                     itemCard.innerHTML += `<div style="margin-top:10px; font-size:12px; color:var(--secondary);"><i class="fas fa-tasks"></i> ${item.options.length} option group(s)</div>`;
                 }
@@ -1666,6 +1762,9 @@
             document.querySelectorAll('.edit-item').forEach(btn => { btn.addEventListener('click', function() { const itemId = parseInt(this.getAttribute('data-id')); openEditMenuItemForm(itemId); }); });
             document.querySelectorAll('.duplicate-item').forEach(btn => { btn.addEventListener('click', function() { const itemId = parseInt(this.getAttribute('data-id')); duplicateMenuItem(itemId); }); });
             document.querySelectorAll('.delete-item').forEach(btn => { btn.addEventListener('click', function() { const itemId = parseInt(this.getAttribute('data-id')); showAdminChangePrompt(() => deleteMenuItem(itemId)); }); });
+            
+            // Re-attach drag and drop
+            makeAdminGridDraggable('menuItemsList');
         }
 
         // NEW: Duplicate a menu item
@@ -1673,10 +1772,12 @@
             const original = state.menuItems.find(item => item.id === itemId);
             if (!original) return;
             const newId = state.menuItems.length > 0 ? Math.max(...state.menuItems.map(item => item.id)) + 1 : 1;
+            const maxOrder = state.menuItems.reduce((max, i) => Math.max(max, i.displayOrder || 0), 0);
             const newItem = {
                 ...original,
                 id: newId,
-                name: `${original.name} (copy)`
+                name: `${original.name} (copy)`,
+                displayOrder: maxOrder + 1
             };
             state.menuItems.push(newItem);
             await saveToFirestore();
@@ -1908,11 +2009,13 @@
                 }
             } else {
                 const newId = state.menuItems.length > 0 ? Math.max(...state.menuItems.map(item => item.id)) + 1 : 1;
+                const maxOrder = state.menuItems.reduce((max, i) => Math.max(max, i.displayOrder || 0), 0);
                 state.menuItems.push({
                     id: newId, name, description, price, category,
                     image: state.currentImageUpload || '',
                     tags,
-                    options: options
+                    options: options,
+                    displayOrder: maxOrder + 1
                 });
             }
 
@@ -2092,7 +2195,7 @@
         function darkenColor(color, percent) { const num = parseInt(color.replace("#", ""), 16); const amt = Math.round(2.55 * percent); const R = (num >> 16) - amt; const G = (num >> 8 & 0x00FF) - amt; const B = (num & 0x0000FF) - amt; return "#" + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 + (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 + (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1); }
         function getContrastColor(hexcolor) { const r = parseInt(hexcolor.substr(1, 2), 16); const g = parseInt(hexcolor.substr(3, 2), 16); const b = parseInt(hexcolor.substr(5, 2), 16); const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000; return (yiq >= 128) ? '#000000' : '#ffffff'; }
 
-        // ========== MODAL ADMIN (simplified) ==========
+        // ========== MODAL ADMIN (simplified) – also need drag drop here, but we'll do separately if needed ==========
         function setupAdminPanel() {
             adminClose.addEventListener('click', () => adminPanel.style.display = 'none');
             document.querySelectorAll('#adminPanel .admin-tab').forEach(tab => {
@@ -2103,6 +2206,10 @@
                     document.querySelectorAll('#adminPanel .admin-content').forEach(content => content.classList.remove('active'));
                     document.getElementById(tabId + 'TabModal').classList.add('active');
                     if (tabId === 'customization') setTimeout(() => initializeModalCustomizationTab(), 100);
+                    if (tabId === 'menu') setTimeout(() => {
+                        // Also make modal menu items draggable
+                        makeAdminGridDraggable('menuItemsListModal');
+                    }, 500);
                 });
             });
             document.getElementById('adminRestaurantNameModal').value = state.restaurantInfo.name;
@@ -2110,7 +2217,36 @@
             document.getElementById('adminPrepTimeModal').value = state.restaurantInfo.estimatedPrepTime;
             document.getElementById('adminWelcomeMessageModal').value = state.restaurantInfo.welcomeMessage || '';
             updateLogoPreview();
+            
+            // Load menu items for modal with drag drop
+            loadMenuItemsForAdminModal();
         }
+
+        function loadMenuItemsForAdminModal() {
+            const menuItemsList = document.getElementById('menuItemsListModal'); 
+            if (!menuItemsList) return;
+            menuItemsList.innerHTML = '';
+            if (state.menuItems.length === 0) { menuItemsList.innerHTML = '<p style="text-align: center; color: var(--gray);">No menu items found.</p>'; return; }
+            const sortedItems = [...state.menuItems].sort((a,b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+            sortedItems.forEach(item => {
+                const itemCard = document.createElement('div'); itemCard.className = 'admin-card';
+                itemCard.setAttribute('draggable', 'true');
+                itemCard.setAttribute('data-item-id', item.id);
+                const hasImage = item.image && item.image.trim() !== '';
+                const imageContent = hasImage ? `<div style="height: 120px; background-image: url('${item.image}'); background-size: cover; background-position: center; border-radius: 8px; margin-bottom: 10px;"></div>` : `<div style="height: 120px; background-color: var(--light-gray); border-radius: 8px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; color: var(--gray);"><i class="fas fa-utensils"></i></div>`;
+                itemCard.innerHTML = `<div style="display:flex; align-items:center; margin-bottom:5px;"><i class="fas fa-grip-vertical drag-handle"></i></div>${imageContent}<div class="admin-card-header"><div class="admin-card-title">${item.name}</div><div class="admin-card-actions"><button class="admin-small-btn btn-primary edit-item-modal" data-id="${item.id}"><i class="fas fa-edit"></i></button><button class="admin-small-btn btn-secondary duplicate-item-modal" data-id="${item.id}"><i class="fas fa-copy"></i></button><button class="admin-small-btn btn-danger delete-item-modal" data-id="${item.id}"><i class="fas fa-trash"></i></button></div></div><p style="margin-bottom: 10px; font-size: 14px;">${item.description}</p><div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-weight: 600; color: var(--primary);">$${item.price.toFixed(2)}</span><span style="font-size: 12px; color: var(--gray);">${getCategoryDisplayName(item.category)}</span></div><div class="tag-display">${item.tags.map(tag => `<span class="tag-item">${tag}</span>`).join('')}</div>`;
+                if (item.options && item.options.length) {
+                    itemCard.innerHTML += `<div style="margin-top:10px; font-size:12px; color:var(--secondary);"><i class="fas fa-tasks"></i> ${item.options.length} option group(s)</div>`;
+                }
+                menuItemsList.appendChild(itemCard);
+            });
+            document.querySelectorAll('.edit-item-modal').forEach(btn => { btn.addEventListener('click', function() { const itemId = parseInt(this.getAttribute('data-id')); openEditMenuItemForm(itemId); adminPanel.style.display = 'none'; }); });
+            document.querySelectorAll('.duplicate-item-modal').forEach(btn => { btn.addEventListener('click', function() { const itemId = parseInt(this.getAttribute('data-id')); duplicateMenuItem(itemId); }); });
+            document.querySelectorAll('.delete-item-modal').forEach(btn => { btn.addEventListener('click', function() { const itemId = parseInt(this.getAttribute('data-id')); showAdminChangePrompt(() => deleteMenuItem(itemId)); }); });
+            
+            makeAdminGridDraggable('menuItemsListModal');
+        }
+
         function initializeModalCustomizationTab() {
             const themeGalleryModal = document.getElementById('themeGalleryModal'); if (!themeGalleryModal) return;
             themeGalleryModal.innerHTML = '';
