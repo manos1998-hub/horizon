@@ -1493,7 +1493,7 @@
         function exitAdminMode() {
             state.isAdminMode = false; state.currentTable = null;
             document.body.classList.remove('admin-mode');
-            document.querySelector('.header-center').innerHTML = '<button class="help-button" id="headerHelpButton"><i class="fas fa-headset"></i> Need Help?</button>';
+            document.querySelector('.header-center').innerHTML = '<button class="help-button" id="headerHelpButton"><i class="fas fa-headset"></i>Χρειάζεστε Βοήθεια?</button>';
             document.querySelector('.header-right').innerHTML = '<button class="my-orders-button" id="myOrdersButton" style="display: none;"><i class="fas fa-clipboard-list"></i> My Orders</button><div class="table-info" id="tableInfo"><i class="fas fa-qrcode"></i> Scan QR to begin</div>';
             document.getElementById('headerHelpButton').addEventListener('click', function() { showHelpNotification(); });
             cartFloating.style.display = 'flex';
