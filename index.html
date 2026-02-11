@@ -5095,18 +5095,42 @@
         container.appendChild(card);
     });
     // attach events
-    container.querySelectorAll('.edit-item').forEach(btn => 
-        btn.addEventListener('click', e => openEditMenuItemForm(+e.currentTarget.dataset.id)));
-    container.querySelectorAll('.delete-item').forEach(btn => 
-        btn.addEventListener('click', e => showAdminChangePrompt(() => deleteMenuItem(+e.currentTarget.dataset.id))));
-    container.querySelectorAll('.duplicate-item').forEach(btn => 
-        btn.addEventListener('click', e => showAdminChangePrompt(() => duplicateMenuItem(+e.currentTarget.dataset.id))));
-    container.querySelectorAll('.move-up').forEach(btn => 
-        btn.addEventListener('click', e => showAdminChangePrompt(() => moveMenuItem(+e.currentTarget.dataset.id, 'up'))));
-    container.querySelectorAll('.move-down').forEach(btn => 
-        btn.addEventListener('click', e => showAdminChangePrompt(() => moveMenuItem(+e.currentTarget.dataset.id, 'down'))));
-    }
+   // ===== ATTACH EVENT LISTENERS (FIXED) =====
+        container.querySelectorAll('.edit-item').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = +this.dataset.id;
+                openEditMenuItemForm(id);
+            });
+        });
 
+        container.querySelectorAll('.delete-item').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = +this.dataset.id;
+                showAdminChangePrompt(() => deleteMenuItem(id));
+            });
+        });
+
+        container.querySelectorAll('.duplicate-item').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = +this.dataset.id;
+                showAdminChangePrompt(() => duplicateMenuItem(id));
+            });
+        });
+
+        container.querySelectorAll('.move-up').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = +this.dataset.id;
+                showAdminChangePrompt(() => moveMenuItem(id, 'up'));
+            });
+        });
+
+        container.querySelectorAll('.move-down').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = +this.dataset.id;
+                showAdminChangePrompt(() => moveMenuItem(id, 'down'));
+            });
+        });
+        }    
     function loadMenuItemsForAdminModal() {
     const container = document.getElementById('menuItemsListModal');
     if (!container) return;
@@ -5143,19 +5167,43 @@
         `;
         container.appendChild(card);
     });
-    container.querySelectorAll('.edit-item').forEach(btn => 
-        btn.addEventListener('click', e => openEditMenuItemForm(+e.currentTarget.dataset.id)));
-    container.querySelectorAll('.delete-item').forEach(btn => 
-        btn.addEventListener('click', e => showAdminChangePrompt(() => deleteMenuItem(+e.currentTarget.dataset.id))));
-    container.querySelectorAll('.duplicate-item').forEach(btn => 
-        btn.addEventListener('click', e => showAdminChangePrompt(() => duplicateMenuItem(+e.currentTarget.dataset.id))));
-    container.querySelectorAll('.move-up').forEach(btn => 
-        btn.addEventListener('click', e => showAdminChangePrompt(() => moveMenuItem(+e.currentTarget.dataset.id, 'up'))));
-    container.querySelectorAll('.move-down').forEach(btn => 
-        btn.addEventListener('click', e => showAdminChangePrompt(() => moveMenuItem(+e.currentTarget.dataset.id, 'down'))));
+    // ===== FIXED EVENT LISTENERS for loadMenuItemsForAdminModal =====
+        container.querySelectorAll('.edit-item').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = +this.dataset.id;      // ✅ capture ID immediately
+                openEditMenuItemForm(id);
+            });
+        });
+
+        container.querySelectorAll('.delete-item').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = +this.dataset.id;
+                showAdminChangePrompt(() => deleteMenuItem(id));  // ✅ pass a function that uses 'id'
+            });
+        });
+
+        container.querySelectorAll('.duplicate-item').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = +this.dataset.id;
+                showAdminChangePrompt(() => duplicateMenuItem(id));
+            });
+        });
+
+        container.querySelectorAll('.move-up').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = +this.dataset.id;
+                showAdminChangePrompt(() => moveMenuItem(id, 'up'));
+            });
+        });
+
+        container.querySelectorAll('.move-down').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = +this.dataset.id;
+                showAdminChangePrompt(() => moveMenuItem(id, 'down'));
+            });
+        });
+
     }
-
-
         // Function to open edit menu item form
         function openEditMenuItemForm(itemId) {
             const editForm = document.getElementById('editMenuItemForm');
@@ -5384,14 +5432,27 @@
                 `;
                 container.appendChild(div);
             });
-            container.querySelectorAll('.move-category-up').forEach(btn => 
-                btn.addEventListener('click', e => showAdminChangePrompt(() => moveCategory(e.currentTarget.dataset.id, 'up'))));
-            container.querySelectorAll('.move-category-down').forEach(btn => 
-                btn.addEventListener('click', e => showAdminChangePrompt(() => moveCategory(e.currentTarget.dataset.id, 'down'))));
-            container.querySelectorAll('.delete-category').forEach(btn => 
-                btn.addEventListener('click', e => showAdminChangePrompt(() => deleteCategory(e.currentTarget.dataset.id))));
-        }
+            container.querySelectorAll('.move-category-up').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.dataset.id;
+                showAdminChangePrompt(() => moveCategory(id, 'up'));
+            });
+             });
 
+            container.querySelectorAll('.move-category-down').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.dataset.id;
+                showAdminChangePrompt(() => moveCategory(id, 'down'));
+            });
+        });
+
+        container.querySelectorAll('.delete-category').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.dataset.id;
+                showAdminChangePrompt(() => deleteCategory(id));
+            });
+        });
+    }
         function loadCategoriesForAdminModal() {
             const container = document.getElementById('categoriesListContainerModal');
             if (!container) return;
