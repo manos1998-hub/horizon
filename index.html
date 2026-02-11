@@ -374,6 +374,13 @@
             background-color: var(--light-gray);
             color: var(--text);
         }
+        /* NEW: Subcategory display for menu items */
+        .item-subcategories {
+            font-size: 12px;
+            color: var(--secondary);
+            margin-bottom: 10px;
+            margin-top: -5px;
+        }
 
         .add-to-cart {
             background-color: var(--primary);
@@ -6312,6 +6319,14 @@ function selectTable(tableName) {
                             <div class="item-price">$${item.price.toFixed(2)}</div>
                         </div>
                         <div class="item-description">${item.description}</div>
+                        
+                        ${item.subcategories && item.subcategories.length ? 
+                            `<div class="item-subcategories">
+                                <i class="fas fa-tag" style="margin-right: 5px;"></i>
+                                ${item.subcategories.join(' · ')}
+                            </div>` 
+                            : ''}
+                        
                         <div class="item-footer">
                             <div class="item-tags">
                                 ${item.tags.map(tag => `<span class="item-tag">${tag}</span>`).join('')}
