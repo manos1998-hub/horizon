@@ -836,7 +836,7 @@
             },
             currentTheme: "default",
             currentFont: "poppins",
-            // Firestore real‑time listener for orders (admin mode)
+            // Permanent orders listener (for real‑time customer updates)
             ordersListener: null
         };
 
@@ -1597,7 +1597,7 @@
             await saveToFirestore(); updateRestaurantUI(); showNotification("Restaurant settings saved.");
         }
 
-        // ========== ADMIN MENU ITEMS (with options UI) ==========
+        // ========== ADMIN MENU ITEMS (with options UI + DUPLICATE BUTTON) ==========
         function loadMenuItemsForAdmin() {
             const menuItemsList = document.getElementById('menuItemsList'); menuItemsList.innerHTML = '';
             if (state.menuItems.length === 0) { menuItemsList.innerHTML = '<p style="text-align: center; color: var(--gray);">No menu items found.</p>'; return; }
@@ -1605,14 +1605,32 @@
                 const itemCard = document.createElement('div'); itemCard.className = 'admin-card';
                 const hasImage = item.image && item.image.trim() !== '';
                 const imageContent = hasImage ? `<div style="height: 120px; background-image: url('${item.image}'); background-size: cover; background-position: center; border-radius: 8px; margin-bottom: 10px;"></div>` : `<div style="height: 120px; background-color: var(--light-gray); border-radius: 8px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; color: var(--gray);"><i class="fas fa-utensils"></i></div>`;
-                itemCard.innerHTML = `${imageContent}<div class="admin-card-header"><div class="admin-card-title">${item.name}</div><div class="admin-card-actions"><button class="admin-small-btn btn-primary edit-item" data-id="${item.id}"><i class="fas fa-edit"></i></button><button class="admin-small-btn btn-danger delete-item" data-id="${item.id}"><i class="fas fa-trash"></i></button></div></div><p style="margin-bottom: 10px; font-size: 14px;">${item.description}</p><div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-weight: 600; color: var(--primary);">$${item.price.toFixed(2)}</span><span style="font-size: 12px; color: var(--gray);">${getCategoryDisplayName(item.category)}</span></div><div class="tag-display">${item.tags.map(tag => `<span class="tag-item">${tag}</span>`).join('')}</div>`;
+                itemCard.innerHTML = `${imageContent}<div class="admin-card-header"><div class="admin-card-title">${item.name}</div><div class="admin-card-actions"><button class="admin-small-btn btn-primary edit-item" data-id="${item.id}"><i class="fas fa-edit"></i></button><button class="admin-small-btn btn-secondary duplicate-item" data-id="${item.id}"><i class="fas fa-copy"></i></button><button class="admin-small-btn btn-danger delete-item" data-id="${item.id}"><i class="fas fa-trash"></i></button></div></div><p style="margin-bottom: 10px; font-size: 14px;">${item.description}</p><div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-weight: 600; color: var(--primary);">$${item.price.toFixed(2)}</span><span style="font-size: 12px; color: var(--gray);">${getCategoryDisplayName(item.category)}</span></div><div class="tag-display">${item.tags.map(tag => `<span class="tag-item">${tag}</span>`).join('')}</div>`;
                 if (item.options && item.options.length) {
                     itemCard.innerHTML += `<div style="margin-top:10px; font-size:12px; color:var(--secondary);"><i class="fas fa-tasks"></i> ${item.options.length} option group(s)</div>`;
                 }
                 menuItemsList.appendChild(itemCard);
             });
             document.querySelectorAll('.edit-item').forEach(btn => { btn.addEventListener('click', function() { const itemId = parseInt(this.getAttribute('data-id')); openEditMenuItemForm(itemId); }); });
+            document.querySelectorAll('.duplicate-item').forEach(btn => { btn.addEventListener('click', function() { const itemId = parseInt(this.getAttribute('data-id')); duplicateMenuItem(itemId); }); });
             document.querySelectorAll('.delete-item').forEach(btn => { btn.addEventListener('click', function() { const itemId = parseInt(this.getAttribute('data-id')); showAdminChangePrompt(() => deleteMenuItem(itemId)); }); });
+        }
+
+        // NEW: Duplicate a menu item
+        async function duplicateMenuItem(itemId) {
+            const original = state.menuItems.find(item => item.id === itemId);
+            if (!original) return;
+            const newId = state.menuItems.length > 0 ? Math.max(...state.menuItems.map(item => item.id)) + 1 : 1;
+            const newItem = {
+                ...original,
+                id: newId,
+                name: `${original.name} (copy)`
+            };
+            state.menuItems.push(newItem);
+            await saveToFirestore();
+            loadMenuItemsForAdmin();
+            displayMenuItems('all');
+            showNotification(`"${newItem.name}" duplicated.`);
         }
 
         function openEditMenuItemForm(itemId) {
@@ -2063,6 +2081,22 @@
             updateCategoryTabs();
             displayMenuItems('all');
             setupAdminPanel();
+
+            // ---- PERMANENT ORDERS LISTENER FOR REAL‑TIME CUSTOMER UPDATES ----
+            if (!state.ordersListener) {
+                state.ordersListener = db.collection('orders').onSnapshot((snapshot) => {
+                    state.orders = snapshot.docs.map(doc => ({
+                        ...doc.data(),
+                        orderNumber: doc.id
+                    }));
+                    // Refresh "My Orders" if the customer is viewing it and not in admin mode
+                    if (!state.isAdminMode && document.querySelector('#myOrdersSection.active-section')) {
+                        loadMyOrders();
+                    }
+                }, (error) => {
+                    console.error("Permanent orders snapshot error:", error);
+                });
+            }
 
             // Event listeners
             document.querySelectorAll('.table-btn').forEach(btn => btn.addEventListener('click', function() { selectTable(this.getAttribute('data-table')); }));
