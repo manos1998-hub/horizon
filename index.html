@@ -10,7 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <style>
-        /* ========== COMPLETE ORIGINAL STYLES (unchanged) ========== */
+        /* ========== COMPLETE ORIGINAL STYLES ========== */
         :root {
             --primary: #e63946;
             --primary-dark: #c1121f;
@@ -273,6 +273,36 @@
         .admin-code-subtitle { color: var(--gray); margin-bottom: 25px; }
         .admin-code-input { width: 100%; padding: 15px; border: 2px solid var(--light-gray); border-radius: 8px; font-size: 18px; text-align: center; letter-spacing: 3px; margin-bottom: 20px; font-family: 'Poppins', monospace; background-color: var(--card-bg); color: var(--text); }
         .admin-code-input:focus { border-color: var(--primary); outline: none; }
+
+        /* ===== NEW STYLES FOR SUBCATEGORIES (OPTIONS) ===== */
+        .item-options-indicator { font-size: 12px; color: var(--secondary); margin-top: 8px; display: flex; align-items: center; gap: 5px; }
+        .item-options-indicator i { font-size: 12px; }
+        .options-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); z-index: 2001; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .options-modal-container { background-color: var(--card-bg); border-radius: var(--radius); max-width: 600px; width: 100%; max-height: 80vh; overflow-y: auto; padding: 30px; box-shadow: var(--shadow); }
+        .options-modal-title { font-family: var(--font-secondary); font-size: 24px; margin-bottom: 5px; color: var(--text); }
+        .options-modal-price { color: var(--primary); font-weight: 600; font-size: 20px; margin-bottom: 20px; }
+        .option-group { margin-bottom: 25px; border-bottom: 1px solid var(--light-gray); padding-bottom: 20px; }
+        .option-group-title { font-weight: 600; margin-bottom: 15px; color: var(--text); display: flex; align-items: center; gap: 8px; }
+        .option-group-title i { color: var(--secondary); }
+        .choice-item { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding-left: 10px; }
+        .choice-label { display: flex; align-items: center; gap: 10px; cursor: pointer; flex: 1; }
+        .choice-name { color: var(--text); }
+        .choice-price { color: var(--gray); font-size: 14px; }
+        .choice-price-positive { color: var(--success); }
+        .choice-price-negative { color: var(--danger); }
+        .options-total { margin-top: 20px; padding-top: 20px; border-top: 2px solid var(--light-gray); display: flex; justify-content: space-between; font-size: 18px; font-weight: 600; }
+        .options-total-amount { color: var(--primary); }
+        .options-modal-actions { display: flex; gap: 15px; margin-top: 25px; }
+        .option-group-radio, .option-group-checkbox { display: flex; flex-direction: column; gap: 8px; }
+        .admin-options-section { margin-top: 25px; padding: 20px; background-color: var(--light); border-radius: 10px; }
+        .admin-option-group { background-color: var(--card-bg); border-radius: 8px; padding: 15px; margin-bottom: 15px; border: 1px solid var(--light-gray); }
+        .admin-option-group-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .admin-option-group-title { font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .admin-choice-item { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .admin-choice-input { flex: 1; }
+        .admin-choice-price { width: 100px; }
+        .add-choice-btn { margin-top: 10px; }
+
         @media (max-width: 992px) { .theme-gallery { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); } .font-options { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); } }
         @media (max-width: 768px) { 
             .theme-gallery { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); } 
@@ -296,6 +326,9 @@
             .categories-management { flex-direction: column; } 
             .upload-actions { flex-direction: column; } 
             .color-customization { grid-template-columns: 1fr; } 
+            .options-modal-container { padding: 20px; } 
+            .choice-item { flex-direction: column; align-items: flex-start; gap: 5px; } 
+            .options-modal-actions { flex-direction: column; } 
         }
         @media (max-width: 480px) { 
             .theme-gallery { grid-template-columns: repeat(2, 1fr); } 
@@ -311,7 +344,7 @@
     </style>
 </head>
 <body>
-    <!-- ========== HEADER (unchanged) ========== -->
+    <!-- ========== HEADER ========== -->
     <header>
         <div class="container nav-container">
             <div class="logo" id="restaurantLogo">
@@ -335,7 +368,7 @@
         </div>
     </header>
 
-    <!-- ========== MAIN SECTIONS (unchanged) ========== -->
+    <!-- ========== MAIN SECTIONS ========== -->
     <section id="scannerSection" class="app-section active-section">
         <div class="container scanner-section">
             <div class="scanner-container">
@@ -518,6 +551,7 @@
                             </div>
                         </div>
                         <div class="admin-form-group"><label class="admin-label">Tags (separate with commas)</label><input type="text" class="admin-input" id="editItemTags" placeholder="Vegetarian, Popular, Spicy"></div>
+                        <!-- Options / Subcategories will be injected here dynamically via JavaScript -->
                         <div class="payment-actions">
                             <button class="btn btn-secondary" id="cancelEditBtn"><i class="fas fa-times"></i> Cancel</button>
                             <button class="btn btn-primary" id="saveMenuItemBtn"><i class="fas fa-save"></i> Save Changes</button>
@@ -548,7 +582,7 @@
                     <div class="customization-panel">
                         <div class="customization-section">
                             <div class="section-title-small"><i class="fas fa-palette"></i> Choose a Theme (20 Unique Options)</div>
-                            <p style="margin-bottom: 20px; color: var(--gray);">Select from our collection of 20 modern and cozy themes. Each theme is designed to create a unique dining experience for your customers.</p>
+                            <p style="margin-bottom: 20px; color: var(--gray);">Select from our collection of 20 modern and cozy themes.</p>
                             <div class="theme-gallery" id="themeGallery"></div>
                             <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--light-gray);">
                                 <div style="font-weight: 500; margin-bottom: 10px; color: var(--text);">Current Theme: <span id="currentThemeName">Default</span> <span class="theme-category" id="currentThemeCategory">Modern</span></div>
@@ -722,6 +756,13 @@
         </div>
     </div>
 
+    <!-- ===== NEW MODAL FOR ITEM OPTIONS ===== -->
+    <div class="options-modal" id="optionsModal">
+        <div class="options-modal-container">
+            <div id="optionsModalContent"></div>
+        </div>
+    </div>
+
     <!-- Cart Floating Button -->
     <div class="cart-floating" id="cartFloating">
         <i class="fas fa-shopping-cart"></i>
@@ -761,7 +802,7 @@
                 logoImage: "",
                 welcomeMessage: ""
             },
-            menuItems: [],   // Start with empty array – no default products!
+            menuItems: [],   // Each item may have "options" array
             orders: [],
             adminAccessCode: "3232",
             adminChangeCode: "6262",
@@ -798,8 +839,7 @@
         };
 
         // ========== DEFAULT DATA ==========
-        const defaultMenuItems = []; // 🔥 NO DEFAULT PRODUCTS – COMPLETELY EMPTY!
-        // Keep default categories so admin can add items – they are useful.
+        const defaultMenuItems = []; // NO DEFAULT PRODUCTS – completely empty
         const defaultCategories = [
             { id: "pizza", name: "pizza", displayName: "Pizza", isDefault: true },
             { id: "salads", name: "salads", displayName: "Salads", isDefault: true },
@@ -851,7 +891,7 @@
             { id: "lightGray", label: "Light Gray", description: "Background for subtle elements" }
         ];
 
-        // ========== DOM ELEMENTS (unchanged) ==========
+        // ========== DOM ELEMENTS ==========
         const scannerSection = document.getElementById('scannerSection');
         const menuSection = document.getElementById('menuSection');
         const cartSection = document.getElementById('cartSection');
@@ -895,27 +935,27 @@
         const adminChangeCodeInput = document.getElementById('adminChangeCodeInput');
         const submitChangeCodeBtn = document.getElementById('submitChangeCodeBtn');
         const cancelChangeBtn = document.getElementById('cancelChangeBtn');
+        const optionsModal = document.getElementById('optionsModal');
+        const optionsModalContent = document.getElementById('optionsModalContent');
 
         // ========== FIRESTORE LOAD & SAVE ==========
         async function loadFromFirestore() {
             try {
-                // Restaurant Info
                 const restaurantDoc = await db.collection('settings').doc('restaurantInfo').get();
                 if (restaurantDoc.exists) state.restaurantInfo = restaurantDoc.data();
                 else await db.collection('settings').doc('restaurantInfo').set(state.restaurantInfo);
 
-                // Menu Items – NO DEFAULT PRODUCTS! If Firestore empty, start with empty array.
                 const menuSnapshot = await db.collection('menuItems').get();
                 if (!menuSnapshot.empty) {
                     state.menuItems = menuSnapshot.docs.map(doc => ({
                         id: Number(doc.id),
-                        ...doc.data()
+                        ...doc.data(),
+                        options: doc.data().options || []   // ensure options array exists
                     }));
                 } else {
-                    state.menuItems = []; // 🔥 No default products – completely empty
+                    state.menuItems = [];
                 }
 
-                // Orders
                 const ordersSnapshot = await db.collection('orders').get();
                 if (!ordersSnapshot.empty) {
                     state.orders = ordersSnapshot.docs.map(doc => ({
@@ -924,7 +964,6 @@
                     }));
                 }
 
-                // Categories – keep default categories for usability
                 const categoriesDoc = await db.collection('settings').doc('categories').get();
                 if (categoriesDoc.exists) {
                     state.categories = categoriesDoc.data().list || [];
@@ -933,15 +972,12 @@
                     await db.collection('settings').doc('categories').set({ list: state.categories });
                 }
 
-                // Customization
                 const customDoc = await db.collection('settings').doc('customization').get();
                 if (customDoc.exists) state.customization = customDoc.data();
                 else await db.collection('settings').doc('customization').set(state.customization);
 
-                // Determine theme & font
                 determineCurrentTheme();
                 determineCurrentFont();
-
             } catch (error) {
                 console.error("Firestore load error:", error);
             }
@@ -950,28 +986,19 @@
         async function saveToFirestore() {
             try {
                 await db.collection('settings').doc('restaurantInfo').set(state.restaurantInfo);
-                
-                // Save menu items
                 await Promise.all(state.menuItems.map(item => 
                     db.collection('menuItems').doc(item.id.toString()).set(item)
                 ));
-                
-                // Delete removed menu items
                 const existingIds = (await db.collection('menuItems').get()).docs.map(d => d.id);
                 const currentIds = state.menuItems.map(i => i.id.toString());
                 await Promise.all(existingIds.filter(id => !currentIds.includes(id)).map(id => 
                     db.collection('menuItems').doc(id).delete()
                 ));
-
                 await db.collection('settings').doc('categories').set({ list: state.categories });
                 await db.collection('settings').doc('customization').set(state.customization);
-                
-                // ===== FIX: NOW ALSO DELETES ORDERS REMOVED FROM STATE =====
-                // Save orders
                 await Promise.all(state.orders.map(order => 
                     db.collection('orders').doc(order.orderNumber).set(order)
                 ));
-                // Delete removed orders (i.e. those in Firestore but not in state.orders)
                 const existingOrderDocs = await db.collection('orders').get();
                 const existingOrderIds = existingOrderDocs.docs.map(d => d.id);
                 const currentOrderIds = state.orders.map(o => o.orderNumber);
@@ -1056,6 +1083,8 @@
                 categoryTabs.appendChild(tab);
             });
         }
+
+        // ========== DISPLAY MENU ITEMS (with options indicator) ==========
         function displayMenuItems(category) {
             menuGrid.innerHTML = '';
             const filteredItems = category === 'all' ? state.menuItems : state.menuItems.filter(item => item.category === category);
@@ -1067,71 +1096,289 @@
                 const menuItemElement = document.createElement('div');
                 menuItemElement.className = 'menu-item';
                 const imageStyle = item.image && item.image.trim() !== '' ? `background-image: url('${item.image}')` : 'background-color: var(--light-gray)';
-                menuItemElement.innerHTML = `<div class="item-image" style="${imageStyle}"></div><div class="item-content"><div class="item-header"><div class="item-name">${item.name}</div><div class="item-price">$${item.price.toFixed(2)}</div></div><div class="item-description">${item.description}</div><div class="item-footer"><div class="item-tags">${item.tags.map(tag => `<span class="item-tag">${tag}</span>`).join('')}</div><button class="add-to-cart" data-id="${item.id}"><i class="fas fa-plus"></i></button></div></div>`;
+                let optionsIndicator = '';
+                if (item.options && item.options.length > 0) {
+                    optionsIndicator = `<div class="item-options-indicator"><i class="fas fa-sliders-h"></i> Customizable</div>`;
+                }
+                menuItemElement.innerHTML = `<div class="item-image" style="${imageStyle}"></div>
+                                            <div class="item-content">
+                                                <div class="item-header">
+                                                    <div class="item-name">${item.name}</div>
+                                                    <div class="item-price">$${item.price.toFixed(2)}</div>
+                                                </div>
+                                                <div class="item-description">${item.description}</div>
+                                                ${optionsIndicator}
+                                                <div class="item-footer">
+                                                    <div class="item-tags">${item.tags.map(tag => `<span class="item-tag">${tag}</span>`).join('')}</div>
+                                                    <button class="add-to-cart" data-id="${item.id}"><i class="fas fa-plus"></i></button>
+                                                </div>
+                                            </div>`;
                 menuGrid.appendChild(menuItemElement);
                 menuItemElement.querySelector('.add-to-cart').addEventListener('click', function() { 
                     addToCart(item.id); 
                 });
             });
         }
-        function addToCart(itemId) { 
-            if (state.isAdminMode) return; 
-            const menuItem = state.menuItems.find(item => item.id === itemId); 
-            if (!menuItem) return; 
-            const existingItem = state.cart.find(item => item.id === itemId); 
-            if (existingItem) existingItem.quantity += 1; 
-            else state.cart.push({ id: menuItem.id, name: menuItem.name, price: menuItem.price, quantity: 1 }); 
-            updateCart(); 
-            showNotification(`${menuItem.name} added to cart`); 
+
+        // ========== OPTIONS / SUBCATEGORY PRICE CALCULATION ==========
+        function calculateItemPrice(basePrice, selectedOptions) {
+            let total = basePrice;
+            if (selectedOptions && selectedOptions.length) {
+                selectedOptions.forEach(opt => {
+                    total += opt.price || 0;
+                });
+            }
+            return total;
         }
+
+        // ========== ADD TO CART (with options) ==========
+        function addToCartWithOptions(itemId, selectedOptions = []) {
+            if (state.isAdminMode) return;
+            const menuItem = state.menuItems.find(item => item.id === itemId);
+            if (!menuItem) return;
+            const itemPrice = calculateItemPrice(menuItem.price, selectedOptions);
+            const cartItem = {
+                id: menuItem.id,
+                name: menuItem.name,
+                basePrice: menuItem.price,
+                price: itemPrice,
+                quantity: 1,
+                selectedOptions: selectedOptions.map(opt => ({
+                    groupName: opt.groupName,
+                    choiceName: opt.choiceName,
+                    price: opt.price
+                }))
+            };
+            // Check if same item with identical options already exists
+            const existingIndex = state.cart.findIndex(item => 
+                item.id === cartItem.id && 
+                JSON.stringify(item.selectedOptions) === JSON.stringify(cartItem.selectedOptions)
+            );
+            if (existingIndex !== -1) {
+                state.cart[existingIndex].quantity += 1;
+            } else {
+                state.cart.push(cartItem);
+            }
+            updateCart();
+            showNotification(`${menuItem.name} added to cart`);
+        }
+
+        // Override original addToCart
+        function addToCart(itemId) {
+            const menuItem = state.menuItems.find(item => item.id === itemId);
+            if (!menuItem) return;
+            if (menuItem.options && menuItem.options.length > 0) {
+                openOptionsModal(menuItem);
+            } else {
+                addToCartWithOptions(itemId, []);
+            }
+        }
+
+        // ========== OPTIONS MODAL ==========
+        function openOptionsModal(item) {
+            let basePrice = item.price;
+            let selectedChoices = [];
+            let modalHtml = `<h3 class="options-modal-title">${item.name}</h3>
+                             <div class="options-modal-price">$${basePrice.toFixed(2)}</div>
+                             <div class="item-description" style="margin-bottom:20px;">${item.description}</div>`;
+            
+            item.options.forEach((group, gIndex) => {
+                modalHtml += `<div class="option-group" data-group-index="${gIndex}">
+                                <div class="option-group-title">
+                                    <i class="fas fa-tag"></i> ${group.name}
+                                    ${group.type === 'radio' ? '<span style="font-size:12px; color:var(--gray);">(choose one)</span>' : '<span style="font-size:12px; color:var(--gray);">(choose any)</span>'}
+                                </div>
+                                <div class="${group.type === 'radio' ? 'option-group-radio' : 'option-group-checkbox'}">`;
+                
+                group.choices.forEach((choice, cIndex) => {
+                    let priceText = '';
+                    let priceClass = '';
+                    if (choice.price > 0) { priceText = `+$${choice.price.toFixed(2)}`; priceClass = 'choice-price-positive'; }
+                    else if (choice.price < 0) { priceText = `-$${Math.abs(choice.price).toFixed(2)}`; priceClass = 'choice-price-negative'; }
+                    
+                    if (group.type === 'radio') {
+                        modalHtml += `<div class="choice-item">
+                                        <label class="choice-label">
+                                            <input type="radio" name="group_${group.id || gIndex}" value="${choice.name}" data-price="${choice.price}" data-group-name="${group.name}" data-choice-name="${choice.name}">
+                                            <span class="choice-name">${choice.name}</span>
+                                        </label>
+                                        <span class="choice-price ${priceClass}">${priceText}</span>
+                                      </div>`;
+                    } else {
+                        modalHtml += `<div class="choice-item">
+                                        <label class="choice-label">
+                                            <input type="checkbox" name="group_${group.id || gIndex}" value="${choice.name}" data-price="${choice.price}" data-group-name="${group.name}" data-choice-name="${choice.name}">
+                                            <span class="choice-name">${choice.name}</span>
+                                        </label>
+                                        <span class="choice-price ${priceClass}">${priceText}</span>
+                                      </div>`;
+                    }
+                });
+                modalHtml += `</div></div>`;
+            });
+
+            modalHtml += `<div class="options-total">
+                            <span>Total:</span>
+                            <span class="options-total-amount" id="optionsTotalAmount">$${basePrice.toFixed(2)}</span>
+                          </div>
+                          <div class="options-modal-actions">
+                            <button class="btn btn-secondary" id="cancelOptionsBtn"><i class="fas fa-times"></i> Cancel</button>
+                            <button class="btn btn-primary" id="confirmOptionsBtn"><i class="fas fa-check"></i> Add to Cart</button>
+                          </div>`;
+
+            optionsModalContent.innerHTML = modalHtml;
+            optionsModal.style.display = 'flex';
+
+            const inputs = optionsModal.querySelectorAll('input[type="radio"], input[type="checkbox"]');
+            const updateTotal = () => {
+                let extra = 0;
+                inputs.forEach(input => {
+                    if (input.type === 'radio' && input.checked) {
+                        extra += parseFloat(input.dataset.price || 0);
+                    } else if (input.type === 'checkbox' && input.checked) {
+                        extra += parseFloat(input.dataset.price || 0);
+                    }
+                });
+                document.getElementById('optionsTotalAmount').textContent = `$${(basePrice + extra).toFixed(2)}`;
+            };
+            inputs.forEach(input => input.addEventListener('change', updateTotal));
+
+            document.getElementById('cancelOptionsBtn').addEventListener('click', () => {
+                optionsModal.style.display = 'none';
+            });
+
+            document.getElementById('confirmOptionsBtn').addEventListener('click', () => {
+                let selected = [];
+                inputs.forEach(input => {
+                    if (input.checked) {
+                        selected.push({
+                            groupName: input.dataset.groupName,
+                            choiceName: input.dataset.choiceName,
+                            price: parseFloat(input.dataset.price || 0)
+                        });
+                    }
+                });
+                addToCartWithOptions(item.id, selected);
+                optionsModal.style.display = 'none';
+            });
+        }
+
+        // ========== UPDATE CART (with options display) ==========
         function updateCart() {
             if (state.isAdminMode) return;
             const totalItems = state.cart.reduce((sum, item) => sum + item.quantity, 0);
             cartCount.textContent = totalItems;
-            if (state.cart.length === 0) cartItems.innerHTML = '<div class="empty-cart" style="text-align: center; padding: 40px; color: var(--gray);"><i class="fas fa-shopping-cart" style="font-size: 50px; margin-bottom: 15px; opacity: 0.5;"></i><p>Your cart is empty</p></div>';
-            else {
+            if (state.cart.length === 0) {
+                cartItems.innerHTML = '<div class="empty-cart" style="text-align: center; padding: 40px; color: var(--gray);"><i class="fas fa-shopping-cart" style="font-size: 50px; margin-bottom: 15px; opacity: 0.5;"></i><p>Your cart is empty</p></div>';
+            } else {
                 cartItems.innerHTML = '';
                 state.cart.forEach(item => {
                     const cartItemElement = document.createElement('div');
                     cartItemElement.className = 'cart-item';
-                    cartItemElement.innerHTML = `<div class="cart-item-info"><div class="cart-item-name">${item.name}</div><div class="cart-item-price">$${item.price.toFixed(2)}</div></div><div class="cart-item-controls"><div class="quantity-control"><button class="quantity-btn decrease" data-id="${item.id}"><i class="fas fa-minus"></i></button><span class="quantity">${item.quantity}</span><button class="quantity-btn increase" data-id="${item.id}"><i class="fas fa-plus"></i></button></div><div class="remove-item" data-id="${item.id}"><i class="fas fa-trash"></i></div></div>`;
+                    
+                    let optionsHtml = '';
+                    if (item.selectedOptions && item.selectedOptions.length) {
+                        optionsHtml = '<div style="font-size:12px; color:var(--gray); margin-top:5px;">';
+                        item.selectedOptions.forEach(opt => {
+                            optionsHtml += `<div>• ${opt.groupName}: ${opt.choiceName} ${opt.price > 0 ? `+$${opt.price.toFixed(2)}` : opt.price < 0 ? `-$${Math.abs(opt.price).toFixed(2)}` : ''}</div>`;
+                        });
+                        optionsHtml += '</div>';
+                    }
+
+                    cartItemElement.innerHTML = `<div class="cart-item-info">
+                                                    <div class="cart-item-name">${item.name}</div>
+                                                    ${optionsHtml}
+                                                    <div class="cart-item-price">$${item.price.toFixed(2)}</div>
+                                                 </div>
+                                                 <div class="cart-item-controls">
+                                                    <div class="quantity-control">
+                                                        <button class="quantity-btn decrease" data-id="${item.id}" data-options='${JSON.stringify(item.selectedOptions)}'><i class="fas fa-minus"></i></button>
+                                                        <span class="quantity">${item.quantity}</span>
+                                                        <button class="quantity-btn increase" data-id="${item.id}" data-options='${JSON.stringify(item.selectedOptions)}'><i class="fas fa-plus"></i></button>
+                                                    </div>
+                                                    <div class="remove-item" data-id="${item.id}" data-options='${JSON.stringify(item.selectedOptions)}'><i class="fas fa-trash"></i></div>
+                                                 </div>`;
                     cartItems.appendChild(cartItemElement);
                 });
-                document.querySelectorAll('.decrease').forEach(btn => { btn.addEventListener('click', function() { const itemId = parseInt(this.getAttribute('data-id')); updateCartItemQuantity(itemId, -1); }); });
-                document.querySelectorAll('.increase').forEach(btn => { btn.addEventListener('click', function() { const itemId = parseInt(this.getAttribute('data-id')); updateCartItemQuantity(itemId, 1); }); });
-                document.querySelectorAll('.remove-item').forEach(btn => { btn.addEventListener('click', function() { const itemId = parseInt(this.getAttribute('data-id')); removeFromCart(itemId); }); });
+                document.querySelectorAll('.decrease').forEach(btn => { 
+                    btn.addEventListener('click', function() { 
+                        const itemId = parseInt(this.getAttribute('data-id')); 
+                        const options = JSON.parse(this.getAttribute('data-options') || '[]');
+                        updateCartItemQuantity(itemId, options, -1); 
+                    }); 
+                });
+                document.querySelectorAll('.increase').forEach(btn => { 
+                    btn.addEventListener('click', function() { 
+                        const itemId = parseInt(this.getAttribute('data-id')); 
+                        const options = JSON.parse(this.getAttribute('data-options') || '[]');
+                        updateCartItemQuantity(itemId, options, 1); 
+                    }); 
+                });
+                document.querySelectorAll('.remove-item').forEach(btn => { 
+                    btn.addEventListener('click', function() { 
+                        const itemId = parseInt(this.getAttribute('data-id')); 
+                        const options = JSON.parse(this.getAttribute('data-options') || '[]');
+                        removeFromCart(itemId, options); 
+                    }); 
+                });
             }
             updateCartSummary();
         }
-        function updateCartItemQuantity(itemId, change) { 
-            const item = state.cart.find(item => item.id === itemId); 
-            if (item) { 
-                item.quantity += change; 
-                if (item.quantity <= 0) state.cart = state.cart.filter(item => item.id !== itemId); 
-                updateCart(); 
-            } 
+
+        function updateCartItemQuantity(itemId, options, change) {
+            const index = state.cart.findIndex(item => 
+                item.id === itemId && 
+                JSON.stringify(item.selectedOptions) === JSON.stringify(options)
+            );
+            if (index !== -1) {
+                state.cart[index].quantity += change;
+                if (state.cart[index].quantity <= 0) {
+                    state.cart.splice(index, 1);
+                }
+                updateCart();
+            }
         }
-        function removeFromCart(itemId) { 
-            const item = state.cart.find(item => item.id === itemId); 
-            state.cart = state.cart.filter(item => item.id !== itemId); 
-            updateCart(); 
-            if (item) showNotification(`${item.name} removed from cart`); 
+
+        function removeFromCart(itemId, options) {
+            const index = state.cart.findIndex(item => 
+                item.id === itemId && 
+                JSON.stringify(item.selectedOptions) === JSON.stringify(options)
+            );
+            if (index !== -1) {
+                const item = state.cart[index];
+                state.cart.splice(index, 1);
+                updateCart();
+                showNotification(`${item.name} removed from cart`);
+            }
         }
-        function updateCartSummary() { 
-            const subtotal = calculateSubtotal(); 
-            const total = calculateTotal(); 
-            document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`; 
-            document.getElementById('total').textContent = `$${total.toFixed(2)}`; 
+
+        function updateCartSummary() {
+            const subtotal = calculateSubtotal();
+            const total = calculateTotal();
+            document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
+            document.getElementById('total').textContent = `$${total.toFixed(2)}`;
         }
-        function updatePaymentSummary() { 
-            const subtotal = calculateSubtotal(); 
-            const total = calculateTotal(); 
-            document.getElementById('paymentSubtotal').textContent = `$${subtotal.toFixed(2)}`; 
-            document.getElementById('paymentTotal').textContent = `$${total.toFixed(2)}`; 
+
+        function updatePaymentSummary() {
+            const subtotal = calculateSubtotal();
+            const total = calculateTotal();
+            document.getElementById('paymentSubtotal').textContent = `$${subtotal.toFixed(2)}`;
+            document.getElementById('paymentTotal').textContent = `$${total.toFixed(2)}`;
         }
-        function calculateSubtotal() { return state.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0); }
-        function calculateTotal() { return calculateSubtotal(); }
-        function generateOrderNumber() { const prefix = 'ORD'; const randomNum = Math.floor(1000 + Math.random() * 9000); return `${prefix}-${randomNum}`; }
+
+        function calculateSubtotal() {
+            return state.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        }
+
+        function calculateTotal() {
+            return calculateSubtotal();
+        }
+
+        function generateOrderNumber() {
+            const prefix = 'ORD';
+            const randomNum = Math.floor(1000 + Math.random() * 9000);
+            return `${prefix}-${randomNum}`;
+        }
 
         // ========== ORDER CONFIRMATION ==========
         function showOrderConfirmation(order) {
@@ -1140,7 +1387,22 @@
             confirmationItems.innerHTML = '';
             order.items.forEach(item => {
                 const itemTotal = item.price * item.quantity;
-                confirmationItems.innerHTML += `<div class="order-item"><div class="order-item-name"><div class="order-item-quantity">${item.quantity}</div><div>${item.name}</div></div><div class="order-item-price">$${itemTotal.toFixed(2)}</div></div>`;
+                let optionsText = '';
+                if (item.selectedOptions && item.selectedOptions.length) {
+                    optionsText = '<div style="font-size:12px; color:var(--gray);">' + 
+                        item.selectedOptions.map(opt => `${opt.groupName}: ${opt.choiceName}`).join(', ') + 
+                        '</div>';
+                }
+                confirmationItems.innerHTML += `<div class="order-item">
+                                                    <div class="order-item-name">
+                                                        <div class="order-item-quantity">${item.quantity}</div>
+                                                        <div>
+                                                            ${item.name}
+                                                            ${optionsText}
+                                                        </div>
+                                                    </div>
+                                                    <div class="order-item-price">$${itemTotal.toFixed(2)}</div>
+                                                </div>`;
             });
             confirmationTotal.textContent = `$${order.total.toFixed(2)}`;
             confirmationPaymentMethod.textContent = order.paymentMethod === 'card' ? 'Credit/Debit Card' : 'Cash';
@@ -1167,7 +1429,9 @@
             cartSubtitle.textContent = `Your order for ${tableName}`;
             localStorage.setItem('dineEasyTable', tableName);
             showNotification(`Table ${tableName} selected. Welcome!`);
-            resetCart(); updateCategoryTabs(); displayMenuItems('all');
+            resetCart();
+            updateCategoryTabs();
+            displayMenuItems('all');
             myOrdersButton.style.display = 'flex';
             showSection('menuSection');
         }
@@ -1195,8 +1459,9 @@
                 const date = new Date(order.timestamp); const formattedDate = date.toLocaleString();
                 let statusBadge = ''; switch(order.status) { case 'pending': statusBadge = '<span class="order-status-badge status-pending">Pending</span>'; break; case 'preparing': statusBadge = '<span class="order-status-badge status-preparing">Preparing</span>'; break; case 'ready': statusBadge = '<span class="order-status-badge status-ready">Ready</span>'; break; case 'served': statusBadge = '<span class="order-status-badge status-served">Served</span>'; break; case 'cancelled': statusBadge = '<span class="order-status-badge status-cancelled">Cancelled</span>'; break; }
                 let itemsSummary = '';
-                if (order.items.length <= 3) itemsSummary = order.items.map(item => `<div class="order-item-summary"><div class="order-item-summary-name"><div class="order-item-summary-quantity">${item.quantity}</div><div>${item.name}</div></div><div>$${(item.price * item.quantity).toFixed(2)}</div></div>`).join('');
-                else {
+                if (order.items.length <= 3) {
+                    itemsSummary = order.items.map(item => `<div class="order-item-summary"><div class="order-item-summary-name"><div class="order-item-summary-quantity">${item.quantity}</div><div>${item.name}</div></div><div>$${(item.price * item.quantity).toFixed(2)}</div></div>`).join('');
+                } else {
                     const firstItems = order.items.slice(0,3); const remainingCount = order.items.length - 3;
                     itemsSummary = firstItems.map(item => `<div class="order-item-summary"><div class="order-item-summary-name"><div class="order-item-summary-quantity">${item.quantity}</div><div>${item.name}</div></div><div>$${(item.price * item.quantity).toFixed(2)}</div></div>`).join('');
                     itemsSummary += `<div class="order-item-summary"><div class="order-item-summary-name" style="margin-left: 10px; font-style: italic;">+${remainingCount} more item${remainingCount > 1 ? 's' : ''}</div><div></div></div>`;
@@ -1250,7 +1515,7 @@
             loadOrdersForAdmin();
             loadSystemStats();
             loadCustomizationSettings();
-            // admin tabs
+
             document.querySelectorAll('#adminDashboardSection .admin-tab').forEach(tab => {
                 tab.addEventListener('click', function() {
                     const tabId = this.getAttribute('data-tab');
@@ -1282,6 +1547,7 @@
                 }
             });
         }
+
         function updateLogoPreview() {
             const logoPreview = document.getElementById('logoPreview'); const logoPreviewModal = document.getElementById('logoPreviewModal');
             if (state.restaurantInfo.logoImage) { logoPreview.innerHTML = `<img src="${state.restaurantInfo.logoImage}" alt="Restaurant Logo">`; if (logoPreviewModal) logoPreviewModal.innerHTML = `<img src="${state.restaurantInfo.logoImage}" alt="Restaurant Logo">`; }
@@ -1296,6 +1562,8 @@
             state.restaurantInfo.welcomeMessage = document.getElementById('adminWelcomeMessage').value;
             await saveToFirestore(); updateRestaurantUI(); showNotification("Restaurant settings saved.");
         }
+
+        // ========== ADMIN MENU ITEMS (with options UI) ==========
         function loadMenuItemsForAdmin() {
             const menuItemsList = document.getElementById('menuItemsList'); menuItemsList.innerHTML = '';
             if (state.menuItems.length === 0) { menuItemsList.innerHTML = '<p style="text-align: center; color: var(--gray);">No menu items found.</p>'; return; }
@@ -1304,65 +1572,246 @@
                 const hasImage = item.image && item.image.trim() !== '';
                 const imageContent = hasImage ? `<div style="height: 120px; background-image: url('${item.image}'); background-size: cover; background-position: center; border-radius: 8px; margin-bottom: 10px;"></div>` : `<div style="height: 120px; background-color: var(--light-gray); border-radius: 8px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; color: var(--gray);"><i class="fas fa-utensils"></i></div>`;
                 itemCard.innerHTML = `${imageContent}<div class="admin-card-header"><div class="admin-card-title">${item.name}</div><div class="admin-card-actions"><button class="admin-small-btn btn-primary edit-item" data-id="${item.id}"><i class="fas fa-edit"></i></button><button class="admin-small-btn btn-danger delete-item" data-id="${item.id}"><i class="fas fa-trash"></i></button></div></div><p style="margin-bottom: 10px; font-size: 14px;">${item.description}</p><div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-weight: 600; color: var(--primary);">$${item.price.toFixed(2)}</span><span style="font-size: 12px; color: var(--gray);">${getCategoryDisplayName(item.category)}</span></div><div class="tag-display">${item.tags.map(tag => `<span class="tag-item">${tag}</span>`).join('')}</div>`;
+                if (item.options && item.options.length) {
+                    itemCard.innerHTML += `<div style="margin-top:10px; font-size:12px; color:var(--secondary);"><i class="fas fa-tasks"></i> ${item.options.length} option group(s)</div>`;
+                }
                 menuItemsList.appendChild(itemCard);
             });
             document.querySelectorAll('.edit-item').forEach(btn => { btn.addEventListener('click', function() { const itemId = parseInt(this.getAttribute('data-id')); openEditMenuItemForm(itemId); }); });
             document.querySelectorAll('.delete-item').forEach(btn => { btn.addEventListener('click', function() { const itemId = parseInt(this.getAttribute('data-id')); showAdminChangePrompt(() => deleteMenuItem(itemId)); }); });
         }
+
         function openEditMenuItemForm(itemId) {
-            const editForm = document.getElementById('editMenuItemForm'); const menuItemsList = document.getElementById('menuItemsList');
-            const categorySelect = document.getElementById('editItemCategory'); categorySelect.innerHTML = '';
-            state.categories.forEach(category => { const option = document.createElement('option'); option.value = category.id; option.textContent = category.displayName; categorySelect.appendChild(option); });
-            if (itemId) { 
-                const item = state.menuItems.find(i => i.id === itemId); 
-                if (item) { 
-                    document.getElementById('editItemName').value = item.name; 
-                    document.getElementById('editItemDescription').value = item.description; 
-                    document.getElementById('editItemPrice').value = item.price; 
-                    document.getElementById('editItemCategory').value = item.category; 
-                    document.getElementById('editItemTags').value = item.tags.join(', '); 
-                    updateItemImagePreview(item.image); 
-                    editForm.setAttribute('data-item-id', itemId); 
-                } 
+            const editForm = document.getElementById('editMenuItemForm');
+            const menuItemsList = document.getElementById('menuItemsList');
+            const categorySelect = document.getElementById('editItemCategory');
+            categorySelect.innerHTML = '';
+            state.categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category.id;
+                option.textContent = category.displayName;
+                categorySelect.appendChild(option);
+            });
+
+            // Remove previous options UI if exists
+            const oldOptionsSection = document.getElementById('adminOptionsSection');
+            if (oldOptionsSection) oldOptionsSection.remove();
+
+            if (itemId) {
+                const item = state.menuItems.find(i => i.id === itemId);
+                if (item) {
+                    document.getElementById('editItemName').value = item.name;
+                    document.getElementById('editItemDescription').value = item.description;
+                    document.getElementById('editItemPrice').value = item.price;
+                    document.getElementById('editItemCategory').value = item.category;
+                    document.getElementById('editItemTags').value = item.tags.join(', ');
+                    updateItemImagePreview(item.image);
+                    editForm.setAttribute('data-item-id', itemId);
+                    buildOptionsAdminUI(item.options || []);
+                }
+            } else {
+                document.getElementById('editItemName').value = '';
+                document.getElementById('editItemDescription').value = '';
+                document.getElementById('editItemPrice').value = '';
+                document.getElementById('editItemCategory').value = state.categories.length > 0 ? state.categories[0].id : '';
+                document.getElementById('editItemTags').value = '';
+                updateItemImagePreview('');
+                editForm.setAttribute('data-item-id', '');
+                buildOptionsAdminUI([]);
             }
-            else { 
-                document.getElementById('editItemName').value = ''; 
-                document.getElementById('editItemDescription').value = ''; 
-                document.getElementById('editItemPrice').value = ''; 
-                document.getElementById('editItemCategory').value = state.categories.length > 0 ? state.categories[0].id : ''; 
-                document.getElementById('editItemTags').value = ''; 
-                updateItemImagePreview(''); 
-                editForm.setAttribute('data-item-id', ''); 
-            }
+
             document.getElementById('uploadItemImageBtn').addEventListener('click', () => document.getElementById('itemImageUpload').click());
             document.getElementById('itemImageUpload').addEventListener('change', handleItemImageUpload);
             document.getElementById('removeItemImageBtn').addEventListener('click', () => { updateItemImagePreview(''); state.currentImageUpload = null; });
-            menuItemsList.style.display = 'none'; editForm.style.display = 'block';
-            document.getElementById('cancelEditBtn').onclick = function() { editForm.style.display = 'none'; menuItemsList.style.display = 'block'; };
-            document.getElementById('saveMenuItemBtn').onclick = function() { showAdminChangePrompt(saveMenuItem); };
+
+            menuItemsList.style.display = 'none';
+            editForm.style.display = 'block';
+
+            document.getElementById('cancelEditBtn').onclick = function() {
+                editForm.style.display = 'none';
+                menuItemsList.style.display = 'block';
+            };
+
+            document.getElementById('saveMenuItemBtn').onclick = function() {
+                showAdminChangePrompt(saveMenuItem);
+            };
         }
+
+        function buildOptionsAdminUI(options) {
+            const editForm = document.getElementById('editMenuItemForm');
+            const optionsSection = document.createElement('div');
+            optionsSection.id = 'adminOptionsSection';
+            optionsSection.className = 'admin-options-section';
+            optionsSection.innerHTML = `<h4 style="margin-bottom:15px;"><i class="fas fa-tasks"></i> Options / Subcategories</h4>
+                                        <div id="optionsGroupsContainer"></div>
+                                        <button type="button" class="btn btn-secondary" id="addOptionGroupBtn"><i class="fas fa-plus"></i> Add Option Group</button>`;
+            // Insert after tags input
+            const tagsGroup = document.querySelector('.admin-form-group:has(#editItemTags)');
+            if (tagsGroup) {
+                tagsGroup.parentNode.insertBefore(optionsSection, tagsGroup.nextSibling);
+            } else {
+                editForm.appendChild(optionsSection);
+            }
+
+            const container = document.getElementById('optionsGroupsContainer');
+            function renderGroups() {
+                container.innerHTML = '';
+                options.forEach((group, gIndex) => {
+                    const groupDiv = document.createElement('div');
+                    groupDiv.className = 'admin-option-group';
+                    groupDiv.innerHTML = `<div class="admin-option-group-header">
+                                            <div class="admin-option-group-title">
+                                                <i class="fas fa-layer-group"></i> 
+                                                <input type="text" class="admin-input" style="width:150px;" placeholder="Group name" value="${group.name}" data-group-index="${gIndex}" id="group_name_${gIndex}">
+                                                <select class="admin-select" style="width:120px;" data-group-index="${gIndex}" id="group_type_${gIndex}">
+                                                    <option value="radio" ${group.type === 'radio' ? 'selected' : ''}>Single choice</option>
+                                                    <option value="checkbox" ${group.type === 'checkbox' ? 'selected' : ''}>Multiple choice</option>
+                                                </select>
+                                            </div>
+                                            <button class="admin-small-btn btn-danger remove-group" data-index="${gIndex}"><i class="fas fa-trash"></i></button>
+                                        </div>
+                                        <div id="choices_${gIndex}" class="choices-container"></div>
+                                        <button class="btn btn-secondary add-choice-btn" data-group-index="${gIndex}"><i class="fas fa-plus"></i> Add Choice</button>`;
+                    container.appendChild(groupDiv);
+
+                    const choicesContainer = document.getElementById(`choices_${gIndex}`);
+                    group.choices.forEach((choice, cIndex) => {
+                        addChoiceRow(choicesContainer, gIndex, cIndex, choice);
+                    });
+
+                    groupDiv.querySelector('.remove-group').addEventListener('click', function() {
+                        options.splice(gIndex, 1);
+                        renderGroups();
+                    });
+
+                    groupDiv.querySelector('.add-choice-btn').addEventListener('click', function() {
+                        group.choices.push({ name: '', price: 0 });
+                        renderGroups();
+                    });
+
+                    groupDiv.querySelector(`#group_name_${gIndex}`).addEventListener('input', function(e) {
+                        options[gIndex].name = e.target.value;
+                    });
+                    groupDiv.querySelector(`#group_type_${gIndex}`).addEventListener('change', function(e) {
+                        options[gIndex].type = e.target.value;
+                    });
+                });
+            }
+
+            function addChoiceRow(container, gIndex, cIndex, choice) {
+                const choiceRow = document.createElement('div');
+                choiceRow.className = 'admin-choice-item';
+                choiceRow.innerHTML = `<input type="text" class="admin-input admin-choice-input" placeholder="Choice name" value="${choice.name || ''}" data-group="${gIndex}" data-choice="${cIndex}" id="choice_name_${gIndex}_${cIndex}">
+                                        <input type="number" class="admin-input admin-choice-price" placeholder="Price adj." step="0.01" value="${choice.price || 0}" data-group="${gIndex}" data-choice="${cIndex}" id="choice_price_${gIndex}_${cIndex}">
+                                        <button class="admin-small-btn btn-danger remove-choice" data-group="${gIndex}" data-choice="${cIndex}"><i class="fas fa-times"></i></button>`;
+                container.appendChild(choiceRow);
+
+                choiceRow.querySelector(`#choice_name_${gIndex}_${cIndex}`).addEventListener('input', function(e) {
+                    if (!options[gIndex].choices[cIndex]) options[gIndex].choices[cIndex] = {};
+                    options[gIndex].choices[cIndex].name = e.target.value;
+                });
+                choiceRow.querySelector(`#choice_price_${gIndex}_${cIndex}`).addEventListener('input', function(e) {
+                    if (!options[gIndex].choices[cIndex]) options[gIndex].choices[cIndex] = {};
+                    options[gIndex].choices[cIndex].price = parseFloat(e.target.value) || 0;
+                });
+                choiceRow.querySelector('.remove-choice').addEventListener('click', function() {
+                    options[gIndex].choices.splice(cIndex, 1);
+                    renderGroups();
+                });
+            }
+
+            renderGroups();
+
+            document.getElementById('addOptionGroupBtn').addEventListener('click', function() {
+                options.push({ id: Date.now() + Math.random(), name: 'New Group', type: 'radio', choices: [] });
+                renderGroups();
+            });
+        }
+
         function updateItemImagePreview(imageData) {
             const itemImagePreview = document.getElementById('itemImagePreview');
             if (imageData && imageData.trim() !== '') { itemImagePreview.innerHTML = `<img src="${imageData}" alt="Menu Item Image">`; state.currentImageUpload = imageData; }
             else { itemImagePreview.innerHTML = '<div class="image-preview-placeholder"><i class="fas fa-utensils"></i><p>No image uploaded</p></div>'; state.currentImageUpload = null; }
         }
         function handleItemImageUpload(event) { const file = event.target.files[0]; if (!file) return; if (!file.type.match('image.*')) { showNotification("Please select an image file."); return; } const reader = new FileReader(); reader.onload = function(e) { updateItemImagePreview(e.target.result); showNotification("Image uploaded. Don't forget to save."); }; reader.readAsDataURL(file); }
+
         async function saveMenuItem() {
             const itemId = document.getElementById('editMenuItemForm').getAttribute('data-item-id');
-            const name = document.getElementById('editItemName').value; const description = document.getElementById('editItemDescription').value; const price = parseFloat(document.getElementById('editItemPrice').value); const category = document.getElementById('editItemCategory').value; const tags = document.getElementById('editItemTags').value.split(',').map(tag => tag.trim()).filter(tag => tag);
+            const name = document.getElementById('editItemName').value;
+            const description = document.getElementById('editItemDescription').value;
+            const price = parseFloat(document.getElementById('editItemPrice').value);
+            const category = document.getElementById('editItemCategory').value;
+            const tags = document.getElementById('editItemTags').value.split(',').map(tag => tag.trim()).filter(tag => tag);
             if (!name || !description || !price) { showNotification("Please fill in all required fields."); return; }
             if (!category) { showNotification("Please select a category."); return; }
-            if (itemId) { 
-                const index = state.menuItems.findIndex(item => item.id === parseInt(itemId)); 
-                if (index !== -1) state.menuItems[index] = { ...state.menuItems[index], name, description, price, category, image: state.currentImageUpload || state.menuItems[index].image, tags }; 
+
+            // Collect options from UI
+            let options = [];
+            const optionsSection = document.getElementById('adminOptionsSection');
+            if (optionsSection) {
+                const groupDivs = optionsSection.querySelectorAll('.admin-option-group');
+                groupDivs.forEach((groupDiv, gIndex) => {
+                    const groupNameInput = groupDiv.querySelector(`#group_name_${gIndex}`);
+                    const groupTypeSelect = groupDiv.querySelector(`#group_type_${gIndex}`);
+                    if (!groupNameInput) return;
+                    const groupName = groupNameInput.value;
+                    const groupType = groupTypeSelect ? groupTypeSelect.value : 'radio';
+                    const choices = [];
+                    const choiceRows = groupDiv.querySelectorAll('.admin-choice-item');
+                    choiceRows.forEach((row, cIndex) => {
+                        const nameInput = row.querySelector(`#choice_name_${gIndex}_${cIndex}`);
+                        const priceInput = row.querySelector(`#choice_price_${gIndex}_${cIndex}`);
+                        if (nameInput && nameInput.value.trim() !== '') {
+                            choices.push({
+                                name: nameInput.value.trim(),
+                                price: parseFloat(priceInput.value) || 0
+                            });
+                        }
+                    });
+                    if (groupName.trim() !== '' && choices.length > 0) {
+                        options.push({
+                            id: 'opt_' + Date.now() + '_' + gIndex,
+                            name: groupName.trim(),
+                            type: groupType,
+                            choices: choices
+                        });
+                    }
+                });
             }
-            else { 
-                const newId = state.menuItems.length > 0 ? Math.max(...state.menuItems.map(item => item.id)) + 1 : 1; 
-                state.menuItems.push({ id: newId, name, description, price, category, image: state.currentImageUpload || '', tags }); 
+
+            if (itemId) {
+                const index = state.menuItems.findIndex(item => item.id === parseInt(itemId));
+                if (index !== -1) {
+                    state.menuItems[index] = {
+                        ...state.menuItems[index],
+                        name, description, price, category,
+                        image: state.currentImageUpload || state.menuItems[index].image,
+                        tags,
+                        options: options
+                    };
+                }
+            } else {
+                const newId = state.menuItems.length > 0 ? Math.max(...state.menuItems.map(item => item.id)) + 1 : 1;
+                state.menuItems.push({
+                    id: newId, name, description, price, category,
+                    image: state.currentImageUpload || '',
+                    tags,
+                    options: options
+                });
             }
-            await saveToFirestore(); document.getElementById('editMenuItemForm').style.display = 'none'; document.getElementById('menuItemsList').style.display = 'block'; state.currentImageUpload = null; loadMenuItemsForAdmin(); displayMenuItems('all'); showNotification(itemId ? "Menu item updated." : "Menu item added.");
+
+            await saveToFirestore();
+            document.getElementById('editMenuItemForm').style.display = 'none';
+            document.getElementById('menuItemsList').style.display = 'block';
+            state.currentImageUpload = null;
+            loadMenuItemsForAdmin();
+            displayMenuItems('all');
+            showNotification(itemId ? "Menu item updated." : "Menu item added.");
         }
+
         async function deleteMenuItem(itemId) { if (confirm("Delete this menu item?")) { state.menuItems = state.menuItems.filter(item => item.id !== itemId); await saveToFirestore(); loadMenuItemsForAdmin(); displayMenuItems('all'); showNotification("Menu item deleted."); } }
+
+        // ========== CATEGORY MANAGEMENT ==========
         function loadCategoriesForAdmin() {
             const categoriesListContainer = document.getElementById('categoriesListContainer'); categoriesListContainer.innerHTML = '';
             if (state.categories.length === 0) categoriesListContainer.innerHTML = '<p style="text-align: center; color: var(--gray); padding: 20px;">No categories added yet.</p>';
@@ -1384,6 +1833,8 @@
             if (confirm(`Delete category "${category.displayName}"?`)) { state.categories = state.categories.filter(cat => cat.id !== categoryId); await saveToFirestore(); loadCategoriesForAdmin(); updateCategoryTabs(); showNotification(`Category "${category.displayName}" deleted.`); }
         }
         function getCategoryDisplayName(categoryId) { const category = state.categories.find(cat => cat.id === categoryId); return category ? category.displayName : categoryId; }
+
+        // ========== ORDER MANAGEMENT ==========
         function loadOrdersForAdmin() {
             const adminOrdersList = document.getElementById('adminOrdersList'); const statusFilter = document.getElementById('orderStatusFilter').value;
             let filteredOrders = [...state.orders]; if (statusFilter !== 'all') filteredOrders = filteredOrders.filter(order => order.status === statusFilter);
@@ -1423,6 +1874,8 @@
                 try { const importedData = JSON.parse(e.target.result); if (confirm("Importing data will replace ALL current data. Are you sure?")) { if (importedData.restaurantInfo) state.restaurantInfo = importedData.restaurantInfo; if (importedData.menuItems) state.menuItems = importedData.menuItems; if (importedData.orders) state.orders = importedData.orders; if (importedData.categories) state.categories = importedData.categories; if (importedData.customization) state.customization = importedData.customization; await saveToFirestore(); updateRestaurantUI(); displayMenuItems('all'); updateCategoryTabs(); applyCustomization(); loadMenuItemsForAdmin(); loadCategoriesForAdmin(); loadOrdersForAdmin(); loadSystemStats(); showNotification("Data imported successfully."); } } catch (error) { showNotification("Error importing data. Invalid file format."); }
             }; reader.readAsText(file); event.target.value = '';
         }
+
+        // ========== CUSTOMIZATION (themes, fonts) ==========
         function loadCustomizationSettings() {}
         function initializeCustomizationTab() {
             const themeGallery = document.getElementById('themeGallery'); themeGallery.innerHTML = '';
@@ -1526,6 +1979,7 @@
             updateCategoryTabs();
             displayMenuItems('all');
             setupAdminPanel();
+
             // Event listeners
             document.querySelectorAll('.table-btn').forEach(btn => btn.addEventListener('click', function() { selectTable(this.getAttribute('data-table')); }));
             cartFloating.addEventListener('click', function() { if (!state.isAdminMode) showSection('cartSection'); });
@@ -1539,9 +1993,31 @@
                 if (!state.selectedPaymentTime) { showNotification('Please select when you want to pay'); return; }
                 const orderNumber = generateOrderNumber(); state.currentOrderNumber = orderNumber;
                 const orderTotal = calculateTotal(); const orderSubtotal = calculateSubtotal();
-                const order = { orderNumber: orderNumber, table: state.currentTable, items: [...state.cart], paymentMethod: state.selectedPaymentMethod, paymentTime: state.selectedPaymentTime, subtotal: orderSubtotal, total: orderTotal, status: 'pending', timestamp: new Date().toISOString(), customerNotes: "" };
-                state.orders.push(order); await saveToFirestore();
-                showOrderConfirmation(order); showSection('confirmationSection'); showNotification(`Order #${orderNumber} confirmed!`); resetCart();
+                const order = {
+                    orderNumber: orderNumber,
+                    table: state.currentTable,
+                    items: state.cart.map(item => ({
+                        id: item.id,
+                        name: item.name,
+                        price: item.price,
+                        quantity: item.quantity,
+                        basePrice: item.basePrice,
+                        selectedOptions: item.selectedOptions
+                    })),
+                    paymentMethod: state.selectedPaymentMethod,
+                    paymentTime: state.selectedPaymentTime,
+                    subtotal: orderSubtotal,
+                    total: orderTotal,
+                    status: 'pending',
+                    timestamp: new Date().toISOString(),
+                    customerNotes: ""
+                };
+                state.orders.push(order);
+                await saveToFirestore();
+                showOrderConfirmation(order);
+                showSection('confirmationSection');
+                showNotification(`Order #${orderNumber} confirmed!`);
+                resetCart();
             });
             document.getElementById('newOrderBtn').addEventListener('click', function() { resetOrder(); showSection('scannerSection'); });
             document.getElementById('viewMyOrdersBtn').addEventListener('click', function() { loadMyOrders(); showSection('myOrdersSection'); });
