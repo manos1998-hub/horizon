@@ -845,8 +845,9 @@
             },
             currentTheme: "default",
             currentFont: "poppins",
-            // Permanent orders listener (for real‑time customer updates)
-            ordersListener: null
+            // Permanent listeners for real‑time updates
+            ordersListener: null,
+            menuItemsListener: null
         };
 
         // ========== DEFAULT DATA ==========
@@ -1555,39 +1556,10 @@
             cartFloating.style.display = 'none';
             showSection('adminDashboardSection');
             loadAdminDashboardData();
-
-            // ---- INSTANT ORDER UPDATES FOR ADMIN ----
-            if (!state.ordersListener) {
-                state.ordersListener = db.collection('orders').onSnapshot((snapshot) => {
-                    // Update state.orders with the latest data from Firestore
-                    state.orders = snapshot.docs.map(doc => ({
-                        ...doc.data(),
-                        orderNumber: doc.id
-                    }));
-                    // If admin dashboard is currently visible, refresh orders and stats
-                    if (state.isAdminMode && document.querySelector('#adminDashboardSection.active-section')) {
-                        loadOrdersForAdmin();
-                        loadSystemStats();
-                    }
-                    // Also refresh the "My Orders" view if the customer is looking at his orders
-                    if (document.querySelector('#myOrdersSection.active-section')) {
-                        loadMyOrders();
-                    }
-                }, (error) => {
-                    console.error("Orders snapshot error:", error);
-                });
-            }
-
             localStorage.setItem('dineEasyAdminMode', 'true');
             showNotification("Admin mode activated. Full administrative access granted.");
         }
         function exitAdminMode() {
-            // ---- REMOVE REAL‑TIME LISTENER ----
-            if (state.ordersListener) {
-                state.ordersListener();
-                state.ordersListener = null;
-            }
-
             state.isAdminMode = false; state.currentTable = null;
             document.body.classList.remove('admin-mode');
             document.querySelector('.header-center').innerHTML = '<button class="help-button" id="headerHelpButton"><i class="fas fa-headset"></i> Χρειάζεστε βοήθεια?</button>';
@@ -1664,10 +1636,6 @@
                 
                 // Save to Firestore
                 saveToFirestore().then(() => {
-                    // Refresh the menu display if visible
-                    if (document.querySelector('#menuSection.active-section')) {
-                        displayMenuItems('all');
-                    }
                     showNotification("Menu order updated");
                 });
             });
@@ -2297,8 +2265,49 @@
                     if (!state.isAdminMode && document.querySelector('#myOrdersSection.active-section')) {
                         loadMyOrders();
                     }
+                    // If admin dashboard is currently visible, refresh orders and stats
+                    if (state.isAdminMode && document.querySelector('#adminDashboardSection.active-section')) {
+                        loadOrdersForAdmin();
+                        loadSystemStats();
+                    }
                 }, (error) => {
                     console.error("Permanent orders snapshot error:", error);
+                });
+            }
+
+            // ---- PERMANENT MENU ITEMS LISTENER FOR REAL‑TIME CUSTOMER UPDATES ----
+            if (!state.menuItemsListener) {
+                state.menuItemsListener = db.collection('menuItems').onSnapshot((snapshot) => {
+                    const newMenuItems = snapshot.docs.map(doc => {
+                        const data = doc.data();
+                        return {
+                            id: Number(doc.id),
+                            ...data,
+                            options: data.options || []
+                        };
+                    });
+                    // Sort by displayOrder
+                    newMenuItems.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+                    state.menuItems = newMenuItems;
+                    
+                    // Refresh menu view if customer is on menu section
+                    if (!state.isAdminMode && document.querySelector('#menuSection.active-section')) {
+                        const activeCategory = document.querySelector('.category-tab.active')?.dataset?.category || 'all';
+                        displayMenuItems(activeCategory);
+                    }
+                    // Refresh admin menu management if admin is viewing it
+                    if (state.isAdminMode && document.querySelector('#adminDashboardSection.active-section')) {
+                        const activeTab = document.querySelector('#adminDashboardSection .admin-tab.active')?.dataset?.tab;
+                        if (activeTab === 'menu') {
+                            loadMenuItemsForAdmin();
+                        }
+                    }
+                    // Also refresh modal if open
+                    if (adminPanel.style.display === 'flex') {
+                        loadMenuItemsForAdminModal();
+                    }
+                }, (error) => {
+                    console.error("Permanent menu items snapshot error:", error);
                 });
             }
 
