@@ -913,23 +913,34 @@
                 if (restaurantDoc.exists) state.restaurantInfo = restaurantDoc.data();
                 else await db.collection('settings').doc('restaurantInfo').set(state.restaurantInfo);
 
-                // Menu Items
+                // Menu Items - FIX: ensure IDs are numbers for consistent handling
                 const menuSnapshot = await db.collection('menuItems').get();
                 if (!menuSnapshot.empty) {
-                    state.menuItems = menuSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    state.menuItems = menuSnapshot.docs.map(doc => ({
+                        id: Number(doc.id), // Convert Firestore document ID to number
+                        ...doc.data()
+                    }));
                 } else {
                     state.menuItems = [...defaultMenuItems];
-                    await Promise.all(state.menuItems.map(item => db.collection('menuItems').doc(item.id.toString()).set(item)));
+                    await Promise.all(state.menuItems.map(item => 
+                        db.collection('menuItems').doc(item.id.toString()).set(item)
+                    ));
                 }
 
                 // Orders
                 const ordersSnapshot = await db.collection('orders').get();
-                if (!ordersSnapshot.empty) state.orders = ordersSnapshot.docs.map(doc => ({ ...doc.data(), orderNumber: doc.id }));
+                if (!ordersSnapshot.empty) {
+                    state.orders = ordersSnapshot.docs.map(doc => ({
+                        ...doc.data(),
+                        orderNumber: doc.id
+                    }));
+                }
 
                 // Categories
                 const categoriesDoc = await db.collection('settings').doc('categories').get();
-                if (categoriesDoc.exists) state.categories = categoriesDoc.data().list || [];
-                else {
+                if (categoriesDoc.exists) {
+                    state.categories = categoriesDoc.data().list || [];
+                } else {
                     state.categories = [...defaultCategories];
                     await db.collection('settings').doc('categories').set({ list: state.categories });
                 }
@@ -951,16 +962,23 @@
         async function saveToFirestore() {
             try {
                 await db.collection('settings').doc('restaurantInfo').set(state.restaurantInfo);
+                
+                // Save menu items: use item.id.toString() as document ID
                 await Promise.all(state.menuItems.map(item => 
                     db.collection('menuItems').doc(item.id.toString()).set(item)
                 ));
+                
                 // Delete removed menu items
                 const existingIds = (await db.collection('menuItems').get()).docs.map(d => d.id);
                 const currentIds = state.menuItems.map(i => i.id.toString());
-                await Promise.all(existingIds.filter(id => !currentIds.includes(id)).map(id => db.collection('menuItems').doc(id).delete()));
+                await Promise.all(existingIds.filter(id => !currentIds.includes(id)).map(id => 
+                    db.collection('menuItems').doc(id).delete()
+                ));
 
                 await db.collection('settings').doc('categories').set({ list: state.categories });
                 await db.collection('settings').doc('customization').set(state.customization);
+                
+                // Save orders with orderNumber as document ID
                 await Promise.all(state.orders.map(order => 
                     db.collection('orders').doc(order.orderNumber).set(order)
                 ));
@@ -991,7 +1009,7 @@
             state.currentFont = "poppins";
         }
 
-        // ========== UI UPDATE FUNCTIONS (unchanged logic, but async saves) ==========
+        // ========== UI UPDATE FUNCTIONS ==========
         function applyCustomization() {
             const root = document.documentElement;
             Object.keys(state.customization).forEach(key => {
@@ -999,7 +1017,10 @@
                 else root.style.setProperty(`--${key}`, state.customization[key]);
             });
             const previewName = document.getElementById('previewRestaurantName');
-            if (previewName) { previewName.style.color = state.customization.primary; previewName.style.fontFamily = state.customization.fontSecondary; }
+            if (previewName) { 
+                previewName.style.color = state.customization.primary; 
+                previewName.style.fontFamily = state.customization.fontSecondary; 
+            }
         }
         function updateRestaurantUI() {
             restaurantName.textContent = state.restaurantInfo.name;
@@ -1009,7 +1030,10 @@
                 logoImage.src = state.restaurantInfo.logoImage;
                 logoImage.style.display = 'block';
                 logoIcon.style.display = 'none';
-            } else { logoImage.style.display = 'none'; logoIcon.style.display = 'block'; }
+            } else { 
+                logoImage.style.display = 'none'; 
+                logoIcon.style.display = 'block'; 
+            }
         }
         function updateCategoryTabs() {
             categoryTabs.innerHTML = '';
@@ -1017,31 +1041,53 @@
             allTab.className = 'category-tab active';
             allTab.setAttribute('data-category', 'all');
             allTab.textContent = 'All';
-            allTab.addEventListener('click', function() { document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active')); this.classList.add('active'); displayMenuItems('all'); });
+            allTab.addEventListener('click', function() { 
+                document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active')); 
+                this.classList.add('active'); 
+                displayMenuItems('all'); 
+            });
             categoryTabs.appendChild(allTab);
             state.categories.forEach(category => {
                 const tab = document.createElement('button');
                 tab.className = 'category-tab';
                 tab.setAttribute('data-category', category.id);
                 tab.textContent = category.displayName;
-                tab.addEventListener('click', function() { document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active')); this.classList.add('active'); displayMenuItems(category.id); });
+                tab.addEventListener('click', function() { 
+                    document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active')); 
+                    this.classList.add('active'); 
+                    displayMenuItems(category.id); 
+                });
                 categoryTabs.appendChild(tab);
             });
         }
         function displayMenuItems(category) {
             menuGrid.innerHTML = '';
             const filteredItems = category === 'all' ? state.menuItems : state.menuItems.filter(item => item.category === category);
-            if (filteredItems.length === 0) { menuGrid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--gray);"><i class="fas fa-utensils" style="font-size: 50px; margin-bottom: 15px; opacity: 0.5;"></i><p>No items in this category yet.</p></div>'; return; }
+            if (filteredItems.length === 0) { 
+                menuGrid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--gray);"><i class="fas fa-utensils" style="font-size: 50px; margin-bottom: 15px; opacity: 0.5;"></i><p>No items in this category yet.</p></div>'; 
+                return; 
+            }
             filteredItems.forEach(item => {
                 const menuItemElement = document.createElement('div');
                 menuItemElement.className = 'menu-item';
                 const imageStyle = item.image && item.image.trim() !== '' ? `background-image: url('${item.image}')` : 'background-color: var(--light-gray)';
                 menuItemElement.innerHTML = `<div class="item-image" style="${imageStyle}"></div><div class="item-content"><div class="item-header"><div class="item-name">${item.name}</div><div class="item-price">$${item.price.toFixed(2)}</div></div><div class="item-description">${item.description}</div><div class="item-footer"><div class="item-tags">${item.tags.map(tag => `<span class="item-tag">${tag}</span>`).join('')}</div><button class="add-to-cart" data-id="${item.id}"><i class="fas fa-plus"></i></button></div></div>`;
                 menuGrid.appendChild(menuItemElement);
-                menuItemElement.querySelector('.add-to-cart').addEventListener('click', function() { addToCart(item.id); });
+                menuItemElement.querySelector('.add-to-cart').addEventListener('click', function() { 
+                    addToCart(item.id); 
+                });
             });
         }
-        function addToCart(itemId) { if (state.isAdminMode) return; const menuItem = state.menuItems.find(item => item.id === itemId); if (!menuItem) return; const existingItem = state.cart.find(item => item.id === itemId); if (existingItem) existingItem.quantity += 1; else state.cart.push({ id: menuItem.id, name: menuItem.name, price: menuItem.price, quantity: 1 }); updateCart(); showNotification(`${menuItem.name} added to cart`); }
+        function addToCart(itemId) { 
+            if (state.isAdminMode) return; 
+            const menuItem = state.menuItems.find(item => item.id === itemId); 
+            if (!menuItem) return; 
+            const existingItem = state.cart.find(item => item.id === itemId); 
+            if (existingItem) existingItem.quantity += 1; 
+            else state.cart.push({ id: menuItem.id, name: menuItem.name, price: menuItem.price, quantity: 1 }); 
+            updateCart(); 
+            showNotification(`${menuItem.name} added to cart`); 
+        }
         function updateCart() {
             if (state.isAdminMode) return;
             const totalItems = state.cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -1061,10 +1107,32 @@
             }
             updateCartSummary();
         }
-        function updateCartItemQuantity(itemId, change) { const item = state.cart.find(item => item.id === itemId); if (item) { item.quantity += change; if (item.quantity <= 0) state.cart = state.cart.filter(item => item.id !== itemId); updateCart(); } }
-        function removeFromCart(itemId) { const item = state.cart.find(item => item.id === itemId); state.cart = state.cart.filter(item => item.id !== itemId); updateCart(); if (item) showNotification(`${item.name} removed from cart`); }
-        function updateCartSummary() { const subtotal = calculateSubtotal(); const total = calculateTotal(); document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`; document.getElementById('total').textContent = `$${total.toFixed(2)}`; }
-        function updatePaymentSummary() { const subtotal = calculateSubtotal(); const total = calculateTotal(); document.getElementById('paymentSubtotal').textContent = `$${subtotal.toFixed(2)}`; document.getElementById('paymentTotal').textContent = `$${total.toFixed(2)}`; }
+        function updateCartItemQuantity(itemId, change) { 
+            const item = state.cart.find(item => item.id === itemId); 
+            if (item) { 
+                item.quantity += change; 
+                if (item.quantity <= 0) state.cart = state.cart.filter(item => item.id !== itemId); 
+                updateCart(); 
+            } 
+        }
+        function removeFromCart(itemId) { 
+            const item = state.cart.find(item => item.id === itemId); 
+            state.cart = state.cart.filter(item => item.id !== itemId); 
+            updateCart(); 
+            if (item) showNotification(`${item.name} removed from cart`); 
+        }
+        function updateCartSummary() { 
+            const subtotal = calculateSubtotal(); 
+            const total = calculateTotal(); 
+            document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`; 
+            document.getElementById('total').textContent = `$${total.toFixed(2)}`; 
+        }
+        function updatePaymentSummary() { 
+            const subtotal = calculateSubtotal(); 
+            const total = calculateTotal(); 
+            document.getElementById('paymentSubtotal').textContent = `$${subtotal.toFixed(2)}`; 
+            document.getElementById('paymentTotal').textContent = `$${total.toFixed(2)}`; 
+        }
         function calculateSubtotal() { return state.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0); }
         function calculateTotal() { return calculateSubtotal(); }
         function generateOrderNumber() { const prefix = 'ORD'; const randomNum = Math.floor(1000 + Math.random() * 9000); return `${prefix}-${randomNum}`; }
@@ -1249,8 +1317,27 @@
             const editForm = document.getElementById('editMenuItemForm'); const menuItemsList = document.getElementById('menuItemsList');
             const categorySelect = document.getElementById('editItemCategory'); categorySelect.innerHTML = '';
             state.categories.forEach(category => { const option = document.createElement('option'); option.value = category.id; option.textContent = category.displayName; categorySelect.appendChild(option); });
-            if (itemId) { const item = state.menuItems.find(i => i.id === itemId); if (item) { document.getElementById('editItemName').value = item.name; document.getElementById('editItemDescription').value = item.description; document.getElementById('editItemPrice').value = item.price; document.getElementById('editItemCategory').value = item.category; document.getElementById('editItemTags').value = item.tags.join(', '); updateItemImagePreview(item.image); editForm.setAttribute('data-item-id', itemId); } }
-            else { document.getElementById('editItemName').value = ''; document.getElementById('editItemDescription').value = ''; document.getElementById('editItemPrice').value = ''; document.getElementById('editItemCategory').value = state.categories.length > 0 ? state.categories[0].id : ''; document.getElementById('editItemTags').value = ''; updateItemImagePreview(''); editForm.setAttribute('data-item-id', ''); }
+            if (itemId) { 
+                const item = state.menuItems.find(i => i.id === itemId); 
+                if (item) { 
+                    document.getElementById('editItemName').value = item.name; 
+                    document.getElementById('editItemDescription').value = item.description; 
+                    document.getElementById('editItemPrice').value = item.price; 
+                    document.getElementById('editItemCategory').value = item.category; 
+                    document.getElementById('editItemTags').value = item.tags.join(', '); 
+                    updateItemImagePreview(item.image); 
+                    editForm.setAttribute('data-item-id', itemId); 
+                } 
+            }
+            else { 
+                document.getElementById('editItemName').value = ''; 
+                document.getElementById('editItemDescription').value = ''; 
+                document.getElementById('editItemPrice').value = ''; 
+                document.getElementById('editItemCategory').value = state.categories.length > 0 ? state.categories[0].id : ''; 
+                document.getElementById('editItemTags').value = ''; 
+                updateItemImagePreview(''); 
+                editForm.setAttribute('data-item-id', ''); 
+            }
             document.getElementById('uploadItemImageBtn').addEventListener('click', () => document.getElementById('itemImageUpload').click());
             document.getElementById('itemImageUpload').addEventListener('change', handleItemImageUpload);
             document.getElementById('removeItemImageBtn').addEventListener('click', () => { updateItemImagePreview(''); state.currentImageUpload = null; });
@@ -1269,8 +1356,14 @@
             const name = document.getElementById('editItemName').value; const description = document.getElementById('editItemDescription').value; const price = parseFloat(document.getElementById('editItemPrice').value); const category = document.getElementById('editItemCategory').value; const tags = document.getElementById('editItemTags').value.split(',').map(tag => tag.trim()).filter(tag => tag);
             if (!name || !description || !price) { showNotification("Please fill in all required fields."); return; }
             if (!category) { showNotification("Please select a category."); return; }
-            if (itemId) { const index = state.menuItems.findIndex(item => item.id === parseInt(itemId)); if (index !== -1) state.menuItems[index] = { ...state.menuItems[index], name, description, price, category, image: state.currentImageUpload || state.menuItems[index].image, tags }; }
-            else { const newId = state.menuItems.length > 0 ? Math.max(...state.menuItems.map(item => item.id)) + 1 : 1; state.menuItems.push({ id: newId, name, description, price, category, image: state.currentImageUpload || '', tags }); }
+            if (itemId) { 
+                const index = state.menuItems.findIndex(item => item.id === parseInt(itemId)); 
+                if (index !== -1) state.menuItems[index] = { ...state.menuItems[index], name, description, price, category, image: state.currentImageUpload || state.menuItems[index].image, tags }; 
+            }
+            else { 
+                const newId = state.menuItems.length > 0 ? Math.max(...state.menuItems.map(item => item.id)) + 1 : 1; 
+                state.menuItems.push({ id: newId, name, description, price, category, image: state.currentImageUpload || '', tags }); 
+            }
             await saveToFirestore(); document.getElementById('editMenuItemForm').style.display = 'none'; document.getElementById('menuItemsList').style.display = 'block'; state.currentImageUpload = null; loadMenuItemsForAdmin(); displayMenuItems('all'); showNotification(itemId ? "Menu item updated." : "Menu item added.");
         }
         async function deleteMenuItem(itemId) { if (confirm("Delete this menu item?")) { state.menuItems = state.menuItems.filter(item => item.id !== itemId); await saveToFirestore(); loadMenuItemsForAdmin(); displayMenuItems('all'); showNotification("Menu item deleted."); } }
