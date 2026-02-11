@@ -212,10 +212,12 @@
         .categories-list { flex: 1; min-width: 300px; }
         .add-category-form { flex: 1; min-width: 300px; }
         .categories-list-container { background-color: var(--light); border-radius: 10px; padding: 20px; max-height: 300px; overflow-y: auto; }
-        .category-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background-color: var(--card-bg); border-radius: 8px; margin-bottom: 10px; border: 1px solid var(--light-gray); }
+        .category-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background-color: var(--card-bg); border-radius: 8px; margin-bottom: 10px; border: 1px solid var(--light-gray); cursor: grab; transition: all 0.2s; }
         .category-item:last-child { margin-bottom: 0; }
-        .category-item-name { font-weight: 500; color: var(--text); }
+        .category-item.dragging { opacity: 0.5; cursor: grabbing; }
+        .category-item-name { font-weight: 500; color: var(--text); display: flex; align-items: center; gap: 8px; }
         .category-item-count { background-color: var(--light-gray); color: var(--text); padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-left: 10px; }
+        .drag-handle-category { cursor: grab; color: var(--gray); margin-right: 8px; }
         .theme-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; margin-bottom: 30px; max-height: 500px; overflow-y: auto; padding: 10px; }
         .theme-card { border: 2px solid var(--light-gray); border-radius: 12px; overflow: hidden; cursor: pointer; transition: all 0.3s; background-color: var(--card-bg); }
         .theme-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); }
@@ -311,6 +313,7 @@
         .admin-card[draggable="true"] { cursor: grab; }
         .admin-card[draggable="true"]:active { cursor: grabbing; }
         .drag-handle { cursor: grab; padding: 5px; margin-right: 8px; color: var(--gray); }
+        .drag-handle-category { cursor: grab; color: var(--gray); margin-right: 8px; }
 
         @media (max-width: 992px) { .theme-gallery { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); } .font-options { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); } }
         @media (max-width: 768px) { 
@@ -815,7 +818,7 @@
             orders: [],
             adminAccessCode: "3232",
             adminChangeCode: "6262",
-            categories: [],
+            categories: [],  // Each category now has "displayOrder"
             isAdminMode: false,
             pendingAdminAction: null,
             currentImageUpload: null,
@@ -847,18 +850,19 @@
             currentFont: "poppins",
             // Permanent listeners for real‑time updates
             ordersListener: null,
-            menuItemsListener: null
+            menuItemsListener: null,
+            categoriesListener: null
         };
 
         // ========== DEFAULT DATA ==========
         const defaultMenuItems = []; // NO DEFAULT PRODUCTS – completely empty
         const defaultCategories = [
-            { id: "pizza", name: "pizza", displayName: "Pizza", isDefault: true },
-            { id: "salads", name: "salads", displayName: "Salads", isDefault: true },
-            { id: "pasta", name: "pasta", displayName: "Pasta", isDefault: true },
-            { id: "main", name: "main", displayName: "Main Courses", isDefault: true },
-            { id: "desserts", name: "desserts", displayName: "Desserts", isDefault: true },
-            { id: "beverages", name: "beverages", displayName: "Beverages", isDefault: true }
+            { id: "pizza", name: "pizza", displayName: "Pizza", isDefault: true, displayOrder: 0 },
+            { id: "salads", name: "salads", displayName: "Salads", isDefault: true, displayOrder: 1 },
+            { id: "pasta", name: "pasta", displayName: "Pasta", isDefault: true, displayOrder: 2 },
+            { id: "main", name: "main", displayName: "Main Courses", isDefault: true, displayOrder: 3 },
+            { id: "desserts", name: "desserts", displayName: "Desserts", isDefault: true, displayOrder: 4 },
+            { id: "beverages", name: "beverages", displayName: "Beverages", isDefault: true, displayOrder: 5 }
         ];
 
         // ========== 20 THEMES (unchanged) ==========
@@ -987,7 +991,16 @@
 
                 const categoriesDoc = await db.collection('settings').doc('categories').get();
                 if (categoriesDoc.exists) {
-                    state.categories = categoriesDoc.data().list || [];
+                    const catData = categoriesDoc.data();
+                    state.categories = catData.list || [];
+                    // Ensure each category has displayOrder, if not assign based on index
+                    state.categories.forEach((cat, idx) => {
+                        if (cat.displayOrder === undefined) {
+                            cat.displayOrder = idx;
+                        }
+                    });
+                    // Sort by displayOrder
+                    state.categories.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
                 } else {
                     state.categories = [...defaultCategories];
                     await db.collection('settings').doc('categories').set({ list: state.categories });
@@ -1015,6 +1028,8 @@
                 await Promise.all(existingIds.filter(id => !currentIds.includes(id)).map(id => 
                     db.collection('menuItems').doc(id).delete()
                 ));
+                // Sort categories by displayOrder before saving
+                state.categories.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
                 await db.collection('settings').doc('categories').set({ list: state.categories });
                 await db.collection('settings').doc('customization').set(state.customization);
                 await Promise.all(state.orders.map(order => 
@@ -1081,6 +1096,8 @@
         }
         function updateCategoryTabs() {
             categoryTabs.innerHTML = '';
+            // Sort categories by displayOrder
+            const sortedCategories = [...state.categories].sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
             const allTab = document.createElement('button');
             allTab.className = 'category-tab active';
             allTab.setAttribute('data-category', 'all');
@@ -1091,7 +1108,7 @@
                 displayMenuItems('all'); 
             });
             categoryTabs.appendChild(allTab);
-            state.categories.forEach(category => {
+            sortedCategories.forEach(category => {
                 const tab = document.createElement('button');
                 tab.className = 'category-tab';
                 tab.setAttribute('data-category', category.id);
@@ -1579,7 +1596,6 @@
             
             let draggedItem = null;
             
-            // Attach dragstart to each card
             grid.addEventListener('dragstart', (e) => {
                 if (e.target.classList.contains('admin-card') || e.target.closest('.admin-card')) {
                     const card = e.target.classList.contains('admin-card') ? e.target : e.target.closest('.admin-card');
@@ -1609,7 +1625,6 @@
                 const targetCard = e.target.classList.contains('admin-card') ? e.target : e.target.closest('.admin-card');
                 if (!targetCard || targetCard === draggedItem) return;
                 
-                // Get positions
                 const parent = grid;
                 const items = Array.from(parent.children).filter(el => el.classList.contains('admin-card'));
                 const draggedIndex = items.indexOf(draggedItem);
@@ -1617,14 +1632,12 @@
                 
                 if (draggedIndex === -1 || targetIndex === -1) return;
                 
-                // Reorder DOM
                 if (draggedIndex < targetIndex) {
                     parent.insertBefore(draggedItem, targetCard.nextSibling);
                 } else {
                     parent.insertBefore(draggedItem, targetCard);
                 }
                 
-                // Update displayOrder in state and Firestore
                 const updatedItems = Array.from(parent.children).filter(el => el.classList.contains('admin-card'));
                 updatedItems.forEach((card, idx) => {
                     const itemId = parseInt(card.dataset.itemId);
@@ -1634,9 +1647,92 @@
                     }
                 });
                 
-                // Save to Firestore
                 saveToFirestore().then(() => {
                     showNotification("Menu order updated");
+                });
+            });
+        }
+
+        // ========== CATEGORY DRAG AND DROP ==========
+        function makeCategoriesDraggable(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            
+            let draggedItem = null;
+            
+            container.addEventListener('dragstart', (e) => {
+                const categoryItem = e.target.classList.contains('category-item') ? e.target : e.target.closest('.category-item');
+                if (categoryItem) {
+                    draggedItem = categoryItem;
+                    categoryItem.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/plain', categoryItem.dataset.categoryId || '');
+                }
+            });
+            
+            container.addEventListener('dragend', (e) => {
+                if (draggedItem) {
+                    draggedItem.classList.remove('dragging');
+                    draggedItem = null;
+                }
+            });
+            
+            container.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+            });
+            
+            container.addEventListener('drop', (e) => {
+                e.preventDefault();
+                if (!draggedItem) return;
+                
+                const targetItem = e.target.classList.contains('category-item') ? e.target : e.target.closest('.category-item');
+                if (!targetItem || targetItem === draggedItem) return;
+                
+                const parent = container;
+                const items = Array.from(parent.children).filter(el => el.classList.contains('category-item'));
+                const draggedIndex = items.indexOf(draggedItem);
+                const targetIndex = items.indexOf(targetItem);
+                
+                if (draggedIndex === -1 || targetIndex === -1) return;
+                
+                if (draggedIndex < targetIndex) {
+                    parent.insertBefore(draggedItem, targetItem.nextSibling);
+                } else {
+                    parent.insertBefore(draggedItem, targetItem);
+                }
+                
+                const updatedItems = Array.from(parent.children).filter(el => el.classList.contains('category-item'));
+                updatedItems.forEach((catEl, idx) => {
+                    const catId = catEl.dataset.categoryId;
+                    const category = state.categories.find(c => c.id === catId);
+                    if (category) {
+                        category.displayOrder = idx;
+                    }
+                });
+                
+                // Sort state.categories by new displayOrder
+                state.categories.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+                
+                saveToFirestore().then(() => {
+                    updateCategoryTabs();
+                    // Update category selects in edit forms
+                    const categorySelects = ['editItemCategory', 'editItemCategoryModal'];
+                    categorySelects.forEach(selectId => {
+                        const select = document.getElementById(selectId);
+                        if (select) {
+                            const currentValue = select.value;
+                            select.innerHTML = '';
+                            state.categories.forEach(cat => {
+                                const option = document.createElement('option');
+                                option.value = cat.id;
+                                option.textContent = cat.displayName;
+                                select.appendChild(option);
+                            });
+                            if (currentValue) select.value = currentValue;
+                        }
+                    });
+                    showNotification("Category order updated");
                 });
             });
         }
@@ -1662,6 +1758,7 @@
                     document.querySelectorAll('#adminDashboardSection .admin-content').forEach(content => content.classList.remove('active'));
                     document.getElementById(tabId + 'Tab').classList.add('active');
                     if (tabId === 'customization') setTimeout(() => initializeCustomizationTab(), 100);
+                    if (tabId === 'categories') setTimeout(() => makeCategoriesDraggable('categoriesListContainer'), 200);
                 });
             });
             document.getElementById('uploadLogoBtn').addEventListener('click', () => document.getElementById('logoUpload').click());
@@ -1682,15 +1779,14 @@
                     const orderId = updateBtn.getAttribute('data-order-id');
                     const select = document.querySelector(`select[data-order-id="${orderId}"]`);
                     if (select && orderId) {
-                        // DIRECT UPDATE – NO CODE PROMPT
                         updateOrderStatus(orderId, select.value);
                     }
                 }
             });
             
-            // Initialize drag and drop for admin grid after loading
             setTimeout(() => {
                 makeAdminGridDraggable('menuItemsList');
+                makeCategoriesDraggable('categoriesListContainer');
             }, 500);
         }
 
@@ -1713,7 +1809,6 @@
         function loadMenuItemsForAdmin() {
             const menuItemsList = document.getElementById('menuItemsList'); menuItemsList.innerHTML = '';
             if (state.menuItems.length === 0) { menuItemsList.innerHTML = '<p style="text-align: center; color: var(--gray);">No menu items found.</p>'; return; }
-            // Sort by displayOrder
             const sortedItems = [...state.menuItems].sort((a,b) => (a.displayOrder || 0) - (b.displayOrder || 0));
             sortedItems.forEach(item => {
                 const itemCard = document.createElement('div'); itemCard.className = 'admin-card';
@@ -1731,11 +1826,9 @@
             document.querySelectorAll('.duplicate-item').forEach(btn => { btn.addEventListener('click', function() { const itemId = parseInt(this.getAttribute('data-id')); duplicateMenuItem(itemId); }); });
             document.querySelectorAll('.delete-item').forEach(btn => { btn.addEventListener('click', function() { const itemId = parseInt(this.getAttribute('data-id')); showAdminChangePrompt(() => deleteMenuItem(itemId)); }); });
             
-            // Re-attach drag and drop
             makeAdminGridDraggable('menuItemsList');
         }
 
-        // NEW: Duplicate a menu item
         async function duplicateMenuItem(itemId) {
             const original = state.menuItems.find(item => item.id === itemId);
             if (!original) return;
@@ -1759,14 +1852,15 @@
             const menuItemsList = document.getElementById('menuItemsList');
             const categorySelect = document.getElementById('editItemCategory');
             categorySelect.innerHTML = '';
-            state.categories.forEach(category => {
+            // Sort categories by displayOrder
+            const sortedCategories = [...state.categories].sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+            sortedCategories.forEach(category => {
                 const option = document.createElement('option');
                 option.value = category.id;
                 option.textContent = category.displayName;
                 categorySelect.appendChild(option);
             });
 
-            // Remove previous options UI if exists
             const oldOptionsSection = document.getElementById('adminOptionsSection');
             if (oldOptionsSection) oldOptionsSection.remove();
 
@@ -1786,7 +1880,7 @@
                 document.getElementById('editItemName').value = '';
                 document.getElementById('editItemDescription').value = '';
                 document.getElementById('editItemPrice').value = '';
-                document.getElementById('editItemCategory').value = state.categories.length > 0 ? state.categories[0].id : '';
+                document.getElementById('editItemCategory').value = sortedCategories.length > 0 ? sortedCategories[0].id : '';
                 document.getElementById('editItemTags').value = '';
                 updateItemImagePreview('');
                 editForm.setAttribute('data-item-id', '');
@@ -1818,7 +1912,6 @@
             optionsSection.innerHTML = `<h4 style="margin-bottom:15px;"><i class="fas fa-tasks"></i> Options / Subcategories</h4>
                                         <div id="optionsGroupsContainer"></div>
                                         <button type="button" class="btn btn-secondary" id="addOptionGroupBtn"><i class="fas fa-plus"></i> Add Option Group</button>`;
-            // Insert after tags input
             const tagsGroup = document.querySelector('.admin-form-group:has(#editItemTags)');
             if (tagsGroup) {
                 tagsGroup.parentNode.insertBefore(optionsSection, tagsGroup.nextSibling);
@@ -1870,7 +1963,6 @@
                     });
                     groupDiv.querySelector(`#group_type_${gIndex}`).addEventListener('change', function(e) {
                         options[gIndex].type = e.target.value;
-                        // If switching to/from text, reset choices
                         if (options[gIndex].type === 'text') {
                             options[gIndex].choices = [];
                         } else if (!options[gIndex].choices) {
@@ -1928,7 +2020,6 @@
             if (!name || !description || !price) { showNotification("Please fill in all required fields."); return; }
             if (!category) { showNotification("Please select a category."); return; }
 
-            // Collect options from UI
             let options = [];
             const optionsSection = document.getElementById('adminOptionsSection');
             if (optionsSection) {
@@ -2000,26 +2091,119 @@
 
         // ========== CATEGORY MANAGEMENT ==========
         function loadCategoriesForAdmin() {
-            const categoriesListContainer = document.getElementById('categoriesListContainer'); categoriesListContainer.innerHTML = '';
-            if (state.categories.length === 0) categoriesListContainer.innerHTML = '<p style="text-align: center; color: var(--gray); padding: 20px;">No categories added yet.</p>';
-            else state.categories.forEach(category => { const itemCount = state.menuItems.filter(item => item.category === category.id).length; const categoryItem = document.createElement('div'); categoryItem.className = 'category-item'; categoryItem.innerHTML = `<div><span class="category-item-name">${category.displayName}</span><span class="category-item-count">${itemCount} item${itemCount !== 1 ? 's' : ''}</span></div><div class="admin-card-actions"><button class="admin-small-btn btn-danger delete-category" data-id="${category.id}"><i class="fas fa-trash"></i></button></div>`; categoriesListContainer.appendChild(categoryItem); });
-            document.querySelectorAll('.delete-category').forEach(btn => { btn.addEventListener('click', function() { const categoryId = this.getAttribute('data-id'); showAdminChangePrompt(() => deleteCategory(categoryId)); }); });
+            const categoriesListContainer = document.getElementById('categoriesListContainer'); 
+            categoriesListContainer.innerHTML = '';
+            if (state.categories.length === 0) {
+                categoriesListContainer.innerHTML = '<p style="text-align: center; color: var(--gray); padding: 20px;">No categories added yet.</p>';
+                return;
+            }
+            // Sort by displayOrder
+            const sortedCategories = [...state.categories].sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+            sortedCategories.forEach(category => {
+                const itemCount = state.menuItems.filter(item => item.category === category.id).length;
+                const categoryItem = document.createElement('div');
+                categoryItem.className = 'category-item';
+                categoryItem.setAttribute('draggable', 'true');
+                categoryItem.setAttribute('data-category-id', category.id);
+                categoryItem.innerHTML = `<div style="display:flex; align-items:center;">
+                                            <i class="fas fa-grip-vertical drag-handle-category"></i>
+                                            <span class="category-item-name">${category.displayName}</span>
+                                            <span class="category-item-count">${itemCount} item${itemCount !== 1 ? 's' : ''}</span>
+                                          </div>
+                                          <div class="admin-card-actions">
+                                            <button class="admin-small-btn btn-danger delete-category" data-id="${category.id}"><i class="fas fa-trash"></i></button>
+                                          </div>`;
+                categoriesListContainer.appendChild(categoryItem);
+            });
+            document.querySelectorAll('.delete-category').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const categoryId = this.getAttribute('data-id');
+                    showAdminChangePrompt(() => deleteCategory(categoryId));
+                });
+            });
+            
+            // Enable drag and drop
+            makeCategoriesDraggable('categoriesListContainer');
         }
+
         async function addNewCategory() {
-            const categoryNameInput = document.getElementById('newCategoryName'); const displayNameInput = document.getElementById('newCategoryDisplayName');
-            const categoryName = categoryNameInput.value.trim().toLowerCase().replace(/\s+/g, '-'); const displayName = displayNameInput.value.trim() || categoryNameInput.value.trim();
+            const categoryNameInput = document.getElementById('newCategoryName');
+            const displayNameInput = document.getElementById('newCategoryDisplayName');
+            const categoryName = categoryNameInput.value.trim().toLowerCase().replace(/\s+/g, '-');
+            const displayName = displayNameInput.value.trim() || categoryNameInput.value.trim();
             if (!categoryName) { showNotification("Please enter a category name."); return; }
             if (state.categories.some(cat => cat.id === categoryName || cat.name === categoryName)) { showNotification("A category with this name already exists."); return; }
-            state.categories.push({ id: categoryName, name: categoryName, displayName: displayName, isDefault: false });
-            await saveToFirestore(); categoryNameInput.value = ''; displayNameInput.value = ''; loadCategoriesForAdmin(); updateCategoryTabs(); showNotification(`Category "${displayName}" added.`);
+            const maxOrder = state.categories.reduce((max, cat) => Math.max(max, cat.displayOrder || 0), 0);
+            state.categories.push({
+                id: categoryName,
+                name: categoryName,
+                displayName: displayName,
+                isDefault: false,
+                displayOrder: maxOrder + 1
+            });
+            await saveToFirestore();
+            categoryNameInput.value = '';
+            displayNameInput.value = '';
+            loadCategoriesForAdmin();
+            updateCategoryTabs();
+            // Update category selects in edit forms
+            const categorySelects = ['editItemCategory', 'editItemCategoryModal'];
+            categorySelects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                if (select) {
+                    select.innerHTML = '';
+                    const sorted = [...state.categories].sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+                    sorted.forEach(cat => {
+                        const option = document.createElement('option');
+                        option.value = cat.id;
+                        option.textContent = cat.displayName;
+                        select.appendChild(option);
+                    });
+                }
+            });
+            showNotification(`Category "${displayName}" added.`);
         }
+
         async function deleteCategory(categoryId) {
-            const category = state.categories.find(cat => cat.id === categoryId); if (!category) return;
+            const category = state.categories.find(cat => cat.id === categoryId);
+            if (!category) return;
             const itemsInCategory = state.menuItems.filter(item => item.category === categoryId);
-            if (itemsInCategory.length > 0) { showNotification(`Cannot delete "${category.displayName}" because it has ${itemsInCategory.length} menu item(s).`); return; }
-            if (confirm(`Delete category "${category.displayName}"?`)) { state.categories = state.categories.filter(cat => cat.id !== categoryId); await saveToFirestore(); loadCategoriesForAdmin(); updateCategoryTabs(); showNotification(`Category "${category.displayName}" deleted.`); }
+            if (itemsInCategory.length > 0) {
+                showNotification(`Cannot delete "${category.displayName}" because it has ${itemsInCategory.length} menu item(s).`);
+                return;
+            }
+            if (confirm(`Delete category "${category.displayName}"?`)) {
+                state.categories = state.categories.filter(cat => cat.id !== categoryId);
+                await saveToFirestore();
+                loadCategoriesForAdmin();
+                updateCategoryTabs();
+                // Update category selects
+                const categorySelects = ['editItemCategory', 'editItemCategoryModal'];
+                categorySelects.forEach(selectId => {
+                    const select = document.getElementById(selectId);
+                    if (select) {
+                        const currentValue = select.value;
+                        select.innerHTML = '';
+                        const sorted = [...state.categories].sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+                        sorted.forEach(cat => {
+                            const option = document.createElement('option');
+                            option.value = cat.id;
+                            option.textContent = cat.displayName;
+                            select.appendChild(option);
+                        });
+                        if (currentValue && state.categories.some(c => c.id === currentValue)) {
+                            select.value = currentValue;
+                        }
+                    }
+                });
+                showNotification(`Category "${category.displayName}" deleted.`);
+            }
         }
-        function getCategoryDisplayName(categoryId) { const category = state.categories.find(cat => cat.id === categoryId); return category ? category.displayName : categoryId; }
+
+        function getCategoryDisplayName(categoryId) {
+            const category = state.categories.find(cat => cat.id === categoryId);
+            return category ? category.displayName : categoryId;
+        }
 
         // ========== ORDER MANAGEMENT – MODIFIED TO SHOW OPTIONS AND DIRECT UPDATE ==========
         function loadOrdersForAdmin() {
@@ -2033,7 +2217,6 @@
                 const date = new Date(order.timestamp); const formattedDate = date.toLocaleString();
                 let statusBadge = ''; switch(order.status) { case 'pending': statusBadge = '<span class="order-status-badge status-pending">Pending</span>'; break; case 'preparing': statusBadge = '<span class="order-status-badge status-preparing">Preparing</span>'; break; case 'ready': statusBadge = '<span class="order-status-badge status-ready">Ready</span>'; break; case 'served': statusBadge = '<span class="order-status-badge status-served">Served</span>'; break; case 'cancelled': statusBadge = '<span class="order-status-badge status-cancelled">Cancelled</span>'; break; }
                 
-                // Build detailed items HTML with options
                 let itemsHtml = '';
                 order.items.forEach(item => {
                     itemsHtml += `<div style="margin-bottom: 8px;">
@@ -2163,7 +2346,7 @@
         function darkenColor(color, percent) { const num = parseInt(color.replace("#", ""), 16); const amt = Math.round(2.55 * percent); const R = (num >> 16) - amt; const G = (num >> 8 & 0x00FF) - amt; const B = (num & 0x0000FF) - amt; return "#" + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 + (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 + (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1); }
         function getContrastColor(hexcolor) { const r = parseInt(hexcolor.substr(1, 2), 16); const g = parseInt(hexcolor.substr(3, 2), 16); const b = parseInt(hexcolor.substr(5, 2), 16); const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000; return (yiq >= 128) ? '#000000' : '#ffffff'; }
 
-        // ========== MODAL ADMIN (simplified) – also need drag drop here, but we'll do separately if needed ==========
+        // ========== MODAL ADMIN ==========
         function setupAdminPanel() {
             adminClose.addEventListener('click', () => adminPanel.style.display = 'none');
             document.querySelectorAll('#adminPanel .admin-tab').forEach(tab => {
@@ -2174,10 +2357,8 @@
                     document.querySelectorAll('#adminPanel .admin-content').forEach(content => content.classList.remove('active'));
                     document.getElementById(tabId + 'TabModal').classList.add('active');
                     if (tabId === 'customization') setTimeout(() => initializeModalCustomizationTab(), 100);
-                    if (tabId === 'menu') setTimeout(() => {
-                        // Also make modal menu items draggable
-                        makeAdminGridDraggable('menuItemsListModal');
-                    }, 500);
+                    if (tabId === 'menu') setTimeout(() => { makeAdminGridDraggable('menuItemsListModal'); }, 500);
+                    if (tabId === 'categories') setTimeout(() => { makeCategoriesDraggable('categoriesListContainerModal'); }, 200);
                 });
             });
             document.getElementById('adminRestaurantNameModal').value = state.restaurantInfo.name;
@@ -2186,8 +2367,8 @@
             document.getElementById('adminWelcomeMessageModal').value = state.restaurantInfo.welcomeMessage || '';
             updateLogoPreview();
             
-            // Load menu items for modal with drag drop
             loadMenuItemsForAdminModal();
+            loadCategoriesForAdminModal();
         }
 
         function loadMenuItemsForAdminModal() {
@@ -2213,6 +2394,40 @@
             document.querySelectorAll('.delete-item-modal').forEach(btn => { btn.addEventListener('click', function() { const itemId = parseInt(this.getAttribute('data-id')); showAdminChangePrompt(() => deleteMenuItem(itemId)); }); });
             
             makeAdminGridDraggable('menuItemsListModal');
+        }
+
+        function loadCategoriesForAdminModal() {
+            const container = document.getElementById('categoriesListContainerModal');
+            if (!container) return;
+            container.innerHTML = '';
+            if (state.categories.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: var(--gray); padding: 20px;">No categories added yet.</p>';
+                return;
+            }
+            const sorted = [...state.categories].sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+            sorted.forEach(category => {
+                const itemCount = state.menuItems.filter(item => item.category === category.id).length;
+                const catItem = document.createElement('div');
+                catItem.className = 'category-item';
+                catItem.setAttribute('draggable', 'true');
+                catItem.setAttribute('data-category-id', category.id);
+                catItem.innerHTML = `<div style="display:flex; align-items:center;">
+                                        <i class="fas fa-grip-vertical drag-handle-category"></i>
+                                        <span class="category-item-name">${category.displayName}</span>
+                                        <span class="category-item-count">${itemCount} item${itemCount !== 1 ? 's' : ''}</span>
+                                      </div>
+                                      <div class="admin-card-actions">
+                                        <button class="admin-small-btn btn-danger delete-category-modal" data-id="${category.id}"><i class="fas fa-trash"></i></button>
+                                      </div>`;
+                container.appendChild(catItem);
+            });
+            document.querySelectorAll('.delete-category-modal').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const catId = this.getAttribute('data-id');
+                    showAdminChangePrompt(() => deleteCategory(catId));
+                });
+            });
+            makeCategoriesDraggable('categoriesListContainerModal');
         }
 
         function initializeModalCustomizationTab() {
@@ -2254,28 +2469,26 @@
             displayMenuItems('all');
             setupAdminPanel();
 
-            // ---- PERMANENT ORDERS LISTENER FOR REAL‑TIME CUSTOMER UPDATES ----
+            // ---- PERMANENT ORDERS LISTENER ----
             if (!state.ordersListener) {
                 state.ordersListener = db.collection('orders').onSnapshot((snapshot) => {
                     state.orders = snapshot.docs.map(doc => ({
                         ...doc.data(),
                         orderNumber: doc.id
                     }));
-                    // Refresh "My Orders" if the customer is viewing it and not in admin mode
                     if (!state.isAdminMode && document.querySelector('#myOrdersSection.active-section')) {
                         loadMyOrders();
                     }
-                    // If admin dashboard is currently visible, refresh orders and stats
                     if (state.isAdminMode && document.querySelector('#adminDashboardSection.active-section')) {
                         loadOrdersForAdmin();
                         loadSystemStats();
                     }
                 }, (error) => {
-                    console.error("Permanent orders snapshot error:", error);
+                    console.error("Orders snapshot error:", error);
                 });
             }
 
-            // ---- PERMANENT MENU ITEMS LISTENER FOR REAL‑TIME CUSTOMER UPDATES ----
+            // ---- PERMANENT MENU ITEMS LISTENER ----
             if (!state.menuItemsListener) {
                 state.menuItemsListener = db.collection('menuItems').onSnapshot((snapshot) => {
                     const newMenuItems = snapshot.docs.map(doc => {
@@ -2286,28 +2499,68 @@
                             options: data.options || []
                         };
                     });
-                    // Sort by displayOrder
                     newMenuItems.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
                     state.menuItems = newMenuItems;
                     
-                    // Refresh menu view if customer is on menu section
                     if (!state.isAdminMode && document.querySelector('#menuSection.active-section')) {
                         const activeCategory = document.querySelector('.category-tab.active')?.dataset?.category || 'all';
                         displayMenuItems(activeCategory);
                     }
-                    // Refresh admin menu management if admin is viewing it
                     if (state.isAdminMode && document.querySelector('#adminDashboardSection.active-section')) {
                         const activeTab = document.querySelector('#adminDashboardSection .admin-tab.active')?.dataset?.tab;
                         if (activeTab === 'menu') {
                             loadMenuItemsForAdmin();
                         }
                     }
-                    // Also refresh modal if open
                     if (adminPanel.style.display === 'flex') {
                         loadMenuItemsForAdminModal();
                     }
                 }, (error) => {
-                    console.error("Permanent menu items snapshot error:", error);
+                    console.error("Menu items snapshot error:", error);
+                });
+            }
+
+            // ---- PERMANENT CATEGORIES LISTENER ----
+            if (!state.categoriesListener) {
+                state.categoriesListener = db.collection('settings').doc('categories').onSnapshot((doc) => {
+                    if (doc.exists) {
+                        const catData = doc.data();
+                        state.categories = catData.list || [];
+                        state.categories.forEach((cat, idx) => {
+                            if (cat.displayOrder === undefined) cat.displayOrder = idx;
+                        });
+                        state.categories.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+                    }
+                    updateCategoryTabs();
+                    // Update selects
+                    const categorySelects = ['editItemCategory', 'editItemCategoryModal'];
+                    categorySelects.forEach(selectId => {
+                        const select = document.getElementById(selectId);
+                        if (select) {
+                            const currentVal = select.value;
+                            select.innerHTML = '';
+                            state.categories.forEach(cat => {
+                                const opt = document.createElement('option');
+                                opt.value = cat.id;
+                                opt.textContent = cat.displayName;
+                                select.appendChild(opt);
+                            });
+                            if (currentVal && state.categories.some(c => c.id === currentVal)) {
+                                select.value = currentVal;
+                            }
+                        }
+                    });
+                    if (state.isAdminMode && document.querySelector('#adminDashboardSection.active-section')) {
+                        const activeTab = document.querySelector('#adminDashboardSection .admin-tab.active')?.dataset?.tab;
+                        if (activeTab === 'categories') {
+                            loadCategoriesForAdmin();
+                        }
+                    }
+                    if (adminPanel.style.display === 'flex') {
+                        loadCategoriesForAdminModal();
+                    }
+                }, (error) => {
+                    console.error("Categories snapshot error:", error);
                 });
             }
 
