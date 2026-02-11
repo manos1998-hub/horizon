@@ -302,6 +302,9 @@
         .admin-choice-input { flex: 1; }
         .admin-choice-price { width: 100px; }
         .add-choice-btn { margin-top: 10px; }
+        /* ===== NEW STYLE FOR COMMENT FIELDS ===== */
+        .comment-field { margin: 10px 0; }
+        .comment-field textarea { width: 100%; padding: 10px; border: 1px solid var(--light-gray); border-radius: 8px; font-family: var(--font-primary); resize: vertical; }
 
         @media (max-width: 992px) { .theme-gallery { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); } .font-options { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); } }
         @media (max-width: 768px) { 
@@ -1148,16 +1151,25 @@
                 selectedOptions: selectedOptions.map(opt => ({
                     groupName: opt.groupName,
                     choiceName: opt.choiceName,
-                    price: opt.price
+                    price: opt.price,
+                    isComment: opt.isComment || false
                 }))
             };
-            // Check if same item with identical options already exists
+            // Check if same item with identical options already exists (ignore comment fields for grouping)
             const existingIndex = state.cart.findIndex(item => 
                 item.id === cartItem.id && 
-                JSON.stringify(item.selectedOptions) === JSON.stringify(cartItem.selectedOptions)
+                JSON.stringify(item.selectedOptions.filter(o => !o.isComment)) === JSON.stringify(cartItem.selectedOptions.filter(o => !o.isComment))
             );
             if (existingIndex !== -1) {
-                state.cart[existingIndex].quantity += 1;
+                // If identical non‑comment options, merge quantities but keep comments? Better to keep separate if comments differ.
+                // To keep it simple: if comments differ, we treat as different items.
+                const existingItem = state.cart[existingIndex];
+                const sameComments = JSON.stringify(existingItem.selectedOptions.filter(o => o.isComment)) === JSON.stringify(cartItem.selectedOptions.filter(o => o.isComment));
+                if (sameComments) {
+                    existingItem.quantity += 1;
+                } else {
+                    state.cart.push(cartItem);
+                }
             } else {
                 state.cart.push(cartItem);
             }
@@ -1176,47 +1188,59 @@
             }
         }
 
-        // ========== OPTIONS MODAL ==========
+        // ========== OPTIONS MODAL (with comment field support) ==========
         function openOptionsModal(item) {
             let basePrice = item.price;
-            let selectedChoices = [];
             let modalHtml = `<h3 class="options-modal-title">${item.name}</h3>
                              <div class="options-modal-price">$${basePrice.toFixed(2)}</div>
                              <div class="item-description" style="margin-bottom:20px;">${item.description}</div>`;
             
             item.options.forEach((group, gIndex) => {
-                modalHtml += `<div class="option-group" data-group-index="${gIndex}">
-                                <div class="option-group-title">
-                                    <i class="fas fa-tag"></i> ${group.name}
-                                    ${group.type === 'radio' ? '<span style="font-size:12px; color:var(--gray);">(choose one)</span>' : '<span style="font-size:12px; color:var(--gray);">(choose any)</span>'}
-                                </div>
-                                <div class="${group.type === 'radio' ? 'option-group-radio' : 'option-group-checkbox'}">`;
-                
-                group.choices.forEach((choice, cIndex) => {
-                    let priceText = '';
-                    let priceClass = '';
-                    if (choice.price > 0) { priceText = `+$${choice.price.toFixed(2)}`; priceClass = 'choice-price-positive'; }
-                    else if (choice.price < 0) { priceText = `-$${Math.abs(choice.price).toFixed(2)}`; priceClass = 'choice-price-negative'; }
+                if (group.type === 'text') {
+                    // Render a comment field
+                    modalHtml += `<div class="option-group" data-group-index="${gIndex}">
+                                    <div class="option-group-title">
+                                        <i class="fas fa-comment"></i> ${group.name}
+                                    </div>
+                                    <div class="comment-field">
+                                        <textarea class="admin-textarea" placeholder="Enter your comment here..." id="comment_${group.id || gIndex}" data-group-name="${group.name}"></textarea>
+                                    </div>
+                                </div>`;
+                } else {
+                    // Radio / Checkbox
+                    modalHtml += `<div class="option-group" data-group-index="${gIndex}">
+                                    <div class="option-group-title">
+                                        <i class="fas fa-tag"></i> ${group.name}
+                                        ${group.type === 'radio' ? '<span style="font-size:12px; color:var(--gray);">(choose one)</span>' : '<span style="font-size:12px; color:var(--gray);">(choose any)</span>'}
+                                    </div>
+                                    <div class="${group.type === 'radio' ? 'option-group-radio' : 'option-group-checkbox'}">`;
                     
-                    if (group.type === 'radio') {
-                        modalHtml += `<div class="choice-item">
-                                        <label class="choice-label">
-                                            <input type="radio" name="group_${group.id || gIndex}" value="${choice.name}" data-price="${choice.price}" data-group-name="${group.name}" data-choice-name="${choice.name}">
-                                            <span class="choice-name">${choice.name}</span>
-                                        </label>
-                                        <span class="choice-price ${priceClass}">${priceText}</span>
-                                      </div>`;
-                    } else {
-                        modalHtml += `<div class="choice-item">
-                                        <label class="choice-label">
-                                            <input type="checkbox" name="group_${group.id || gIndex}" value="${choice.name}" data-price="${choice.price}" data-group-name="${group.name}" data-choice-name="${choice.name}">
-                                            <span class="choice-name">${choice.name}</span>
-                                        </label>
-                                        <span class="choice-price ${priceClass}">${priceText}</span>
-                                      </div>`;
-                    }
-                });
-                modalHtml += `</div></div>`;
+                    group.choices.forEach((choice, cIndex) => {
+                        let priceText = '';
+                        let priceClass = '';
+                        if (choice.price > 0) { priceText = `+$${choice.price.toFixed(2)}`; priceClass = 'choice-price-positive'; }
+                        else if (choice.price < 0) { priceText = `-$${Math.abs(choice.price).toFixed(2)}`; priceClass = 'choice-price-negative'; }
+                        
+                        if (group.type === 'radio') {
+                            modalHtml += `<div class="choice-item">
+                                            <label class="choice-label">
+                                                <input type="radio" name="group_${group.id || gIndex}" value="${choice.name}" data-price="${choice.price}" data-group-name="${group.name}" data-choice-name="${choice.name}">
+                                                <span class="choice-name">${choice.name}</span>
+                                            </label>
+                                            <span class="choice-price ${priceClass}">${priceText}</span>
+                                          </div>`;
+                        } else {
+                            modalHtml += `<div class="choice-item">
+                                            <label class="choice-label">
+                                                <input type="checkbox" name="group_${group.id || gIndex}" value="${choice.name}" data-price="${choice.price}" data-group-name="${group.name}" data-choice-name="${choice.name}">
+                                                <span class="choice-name">${choice.name}</span>
+                                            </label>
+                                            <span class="choice-price ${priceClass}">${priceText}</span>
+                                          </div>`;
+                        }
+                    });
+                    modalHtml += `</div></div>`;
+                }
             });
 
             modalHtml += `<div class="options-total">
@@ -1231,6 +1255,7 @@
             optionsModalContent.innerHTML = modalHtml;
             optionsModal.style.display = 'flex';
 
+            // Update total for radio/checkbox groups
             const inputs = optionsModal.querySelectorAll('input[type="radio"], input[type="checkbox"]');
             const updateTotal = () => {
                 let extra = 0;
@@ -1251,13 +1276,29 @@
 
             document.getElementById('confirmOptionsBtn').addEventListener('click', () => {
                 let selected = [];
+                // Collect radio/checkbox choices
                 inputs.forEach(input => {
                     if (input.checked) {
                         selected.push({
                             groupName: input.dataset.groupName,
                             choiceName: input.dataset.choiceName,
-                            price: parseFloat(input.dataset.price || 0)
+                            price: parseFloat(input.dataset.price || 0),
+                            isComment: false
                         });
+                    }
+                });
+                // Collect comment fields
+                item.options.forEach((group, gIndex) => {
+                    if (group.type === 'text') {
+                        const commentField = document.getElementById(`comment_${group.id || gIndex}`);
+                        if (commentField && commentField.value.trim() !== '') {
+                            selected.push({
+                                groupName: group.name,
+                                choiceName: commentField.value.trim(),
+                                price: 0,
+                                isComment: true
+                            });
+                        }
                     }
                 });
                 addToCartWithOptions(item.id, selected);
@@ -1282,7 +1323,11 @@
                     if (item.selectedOptions && item.selectedOptions.length) {
                         optionsHtml = '<div style="font-size:12px; color:var(--gray); margin-top:5px;">';
                         item.selectedOptions.forEach(opt => {
-                            optionsHtml += `<div>• ${opt.groupName}: ${opt.choiceName} ${opt.price > 0 ? `+$${opt.price.toFixed(2)}` : opt.price < 0 ? `-$${Math.abs(opt.price).toFixed(2)}` : ''}</div>`;
+                            if (opt.isComment) {
+                                optionsHtml += `<div><i class="fas fa-comment"></i> ${opt.groupName}: "${opt.choiceName}"</div>`;
+                            } else {
+                                optionsHtml += `<div>• ${opt.groupName}: ${opt.choiceName} ${opt.price > 0 ? `+$${opt.price.toFixed(2)}` : opt.price < 0 ? `-$${Math.abs(opt.price).toFixed(2)}` : ''}</div>`;
+                            }
                         });
                         optionsHtml += '</div>';
                     }
@@ -1328,6 +1373,7 @@
         }
 
         function updateCartItemQuantity(itemId, options, change) {
+            // For comment fields, we compare full options including comments
             const index = state.cart.findIndex(item => 
                 item.id === itemId && 
                 JSON.stringify(item.selectedOptions) === JSON.stringify(options)
@@ -1392,7 +1438,13 @@
                 let optionsText = '';
                 if (item.selectedOptions && item.selectedOptions.length) {
                     optionsText = '<div style="font-size:12px; color:var(--gray);">' + 
-                        item.selectedOptions.map(opt => `${opt.groupName}: ${opt.choiceName}`).join(', ') + 
+                        item.selectedOptions.map(opt => {
+                            if (opt.isComment) {
+                                return `${opt.groupName}: "${opt.choiceName}"`;
+                            } else {
+                                return `${opt.groupName}: ${opt.choiceName}`;
+                            }
+                        }).join(', ') + 
                         '</div>';
                 }
                 confirmationItems.innerHTML += `<div class="order-item">
@@ -1597,7 +1649,7 @@
             await saveToFirestore(); updateRestaurantUI(); showNotification("Restaurant settings saved.");
         }
 
-        // ========== ADMIN MENU ITEMS (with options UI + DUPLICATE BUTTON) ==========
+        // ========== ADMIN MENU ITEMS (with options UI + DUPLICATE BUTTON + COMMENT FIELD) ==========
         function loadMenuItemsForAdmin() {
             const menuItemsList = document.getElementById('menuItemsList'); menuItemsList.innerHTML = '';
             if (state.menuItems.length === 0) { menuItemsList.innerHTML = '<p style="text-align: center; color: var(--gray);">No menu items found.</p>'; return; }
@@ -1715,29 +1767,32 @@
                                             <div class="admin-option-group-title">
                                                 <i class="fas fa-layer-group"></i> 
                                                 <input type="text" class="admin-input" style="width:150px;" placeholder="Group name" value="${group.name}" data-group-index="${gIndex}" id="group_name_${gIndex}">
-                                                <select class="admin-select" style="width:120px;" data-group-index="${gIndex}" id="group_type_${gIndex}">
+                                                <select class="admin-select" style="width:140px;" data-group-index="${gIndex}" id="group_type_${gIndex}">
                                                     <option value="radio" ${group.type === 'radio' ? 'selected' : ''}>Single choice</option>
                                                     <option value="checkbox" ${group.type === 'checkbox' ? 'selected' : ''}>Multiple choice</option>
+                                                    <option value="text" ${group.type === 'text' ? 'selected' : ''}>Comment field</option>
                                                 </select>
                                             </div>
                                             <button class="admin-small-btn btn-danger remove-group" data-index="${gIndex}"><i class="fas fa-trash"></i></button>
                                         </div>
                                         <div id="choices_${gIndex}" class="choices-container"></div>
-                                        <button class="btn btn-secondary add-choice-btn" data-group-index="${gIndex}"><i class="fas fa-plus"></i> Add Choice</button>`;
+                                        ${group.type !== 'text' ? `<button class="btn btn-secondary add-choice-btn" data-group-index="${gIndex}"><i class="fas fa-plus"></i> Add Choice</button>` : ''}`;
                     container.appendChild(groupDiv);
 
-                    const choicesContainer = document.getElementById(`choices_${gIndex}`);
-                    group.choices.forEach((choice, cIndex) => {
-                        addChoiceRow(choicesContainer, gIndex, cIndex, choice);
-                    });
+                    if (group.type !== 'text') {
+                        const choicesContainer = document.getElementById(`choices_${gIndex}`);
+                        group.choices.forEach((choice, cIndex) => {
+                            addChoiceRow(choicesContainer, gIndex, cIndex, choice);
+                        });
+
+                        groupDiv.querySelector('.add-choice-btn').addEventListener('click', function() {
+                            group.choices.push({ name: '', price: 0 });
+                            renderGroups();
+                        });
+                    }
 
                     groupDiv.querySelector('.remove-group').addEventListener('click', function() {
                         options.splice(gIndex, 1);
-                        renderGroups();
-                    });
-
-                    groupDiv.querySelector('.add-choice-btn').addEventListener('click', function() {
-                        group.choices.push({ name: '', price: 0 });
                         renderGroups();
                     });
 
@@ -1746,6 +1801,13 @@
                     });
                     groupDiv.querySelector(`#group_type_${gIndex}`).addEventListener('change', function(e) {
                         options[gIndex].type = e.target.value;
+                        // If switching to/from text, reset choices
+                        if (options[gIndex].type === 'text') {
+                            options[gIndex].choices = [];
+                        } else if (!options[gIndex].choices) {
+                            options[gIndex].choices = [];
+                        }
+                        renderGroups();
                     });
                 });
             }
@@ -1809,18 +1871,20 @@
                     const groupName = groupNameInput.value;
                     const groupType = groupTypeSelect ? groupTypeSelect.value : 'radio';
                     const choices = [];
-                    const choiceRows = groupDiv.querySelectorAll('.admin-choice-item');
-                    choiceRows.forEach((row, cIndex) => {
-                        const nameInput = row.querySelector(`#choice_name_${gIndex}_${cIndex}`);
-                        const priceInput = row.querySelector(`#choice_price_${gIndex}_${cIndex}`);
-                        if (nameInput && nameInput.value.trim() !== '') {
-                            choices.push({
-                                name: nameInput.value.trim(),
-                                price: parseFloat(priceInput.value) || 0
-                            });
-                        }
-                    });
-                    if (groupName.trim() !== '' && choices.length > 0) {
+                    if (groupType !== 'text') {
+                        const choiceRows = groupDiv.querySelectorAll('.admin-choice-item');
+                        choiceRows.forEach((row, cIndex) => {
+                            const nameInput = row.querySelector(`#choice_name_${gIndex}_${cIndex}`);
+                            const priceInput = row.querySelector(`#choice_price_${gIndex}_${cIndex}`);
+                            if (nameInput && nameInput.value.trim() !== '') {
+                                choices.push({
+                                    name: nameInput.value.trim(),
+                                    price: parseFloat(priceInput.value) || 0
+                                });
+                            }
+                        });
+                    }
+                    if (groupName.trim() !== '' && (groupType === 'text' || choices.length > 0)) {
                         options.push({
                             id: 'opt_' + Date.now() + '_' + gIndex,
                             name: groupName.trim(),
@@ -1909,7 +1973,11 @@
                     if (item.selectedOptions && item.selectedOptions.length) {
                         itemsHtml += '<div style="margin-left: 20px; font-size: 12px; color: var(--gray);">';
                         item.selectedOptions.forEach(opt => {
-                            itemsHtml += `<div>• ${opt.groupName}: ${opt.choiceName} ${opt.price > 0 ? `(+$${opt.price.toFixed(2)})` : opt.price < 0 ? `(-$${Math.abs(opt.price).toFixed(2)})` : ''}</div>`;
+                            if (opt.isComment) {
+                                itemsHtml += `<div><i class="fas fa-comment"></i> ${opt.groupName}: "${opt.choiceName}"</div>`;
+                            } else {
+                                itemsHtml += `<div>• ${opt.groupName}: ${opt.choiceName} ${opt.price > 0 ? `(+$${opt.price.toFixed(2)})` : opt.price < 0 ? `(-$${Math.abs(opt.price).toFixed(2)})` : ''}</div>`;
+                            }
                         });
                         itemsHtml += '</div>';
                     }
