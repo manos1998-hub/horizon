@@ -168,6 +168,27 @@
             color: var(--secondary);
         }
 
+        /* Drag & drop visual feedback */
+            .admin-card.dragging,
+            .category-item.dragging {
+                opacity: 0.5;
+                cursor: grabbing;
+            }
+
+            .admin-card.drag-over,
+            .category-item.drag-over {
+                border: 2px dashed var(--primary);
+                background-color: rgba(230, 57, 70, 0.05);
+            }
+
+            .drag-handle {
+                cursor: grab;
+            }
+
+            .drag-handle:active {
+                cursor: grabbing;
+            }
+
         /* Main App Sections */
         .app-section {
             display: none;
@@ -3345,49 +3366,7 @@
             showNotification(`"${copy.name}" duplicated`);
         }
 
-        // ----- 3. MOVE MENU ITEM (UP / DOWN) -----
-        function moveMenuItem(itemId, direction) {
-            const index = state.menuItems.findIndex(i => i.id === itemId);
-            if (index === -1) return;
-            const swapIndex = direction === 'up' ? index - 1 : index + 1;
-            if (swapIndex < 0 || swapIndex >= state.menuItems.length) return;
-            const a = state.menuItems[index];
-            const b = state.menuItems[swapIndex];
-            [a.sortOrder, b.sortOrder] = [b.sortOrder, a.sortOrder];
-            state.menuItems.sort((x,y) => (x.sortOrder || 0) - (y.sortOrder || 0));
-            saveToLocalStorage();
-            const batch = db.batch();
-            batch.update(db.collection("menu").doc(a.id.toString()), { sortOrder: a.sortOrder });
-            batch.update(db.collection("menu").doc(b.id.toString()), { sortOrder: b.sortOrder });
-            batch.commit().catch(console.error);
-            if (state.isAdminMode) {
-                loadMenuItemsForAdmin();
-                loadMenuItemsForAdminModal();
-            }
-            displayMenuItems('all');
-        }
-
-        // ----- 4. MOVE CATEGORY (UP / DOWN) -----
-        function moveCategory(categoryId, direction) {
-            const index = state.categories.findIndex(c => c.id === categoryId);
-            if (index === -1) return;
-            const swapIndex = direction === 'up' ? index - 1 : index + 1;
-            if (swapIndex < 0 || swapIndex >= state.categories.length) return;
-            const a = state.categories[index];
-            const b = state.categories[swapIndex];
-            [a.sortOrder, b.sortOrder] = [b.sortOrder, a.sortOrder];
-            state.categories.sort((x,y) => (x.sortOrder || 0) - (y.sortOrder || 0));
-            saveToLocalStorage();
-            const batch = db.batch();
-            batch.update(db.collection("categories").doc(a.id), { sortOrder: a.sortOrder });
-            batch.update(db.collection("categories").doc(b.id), { sortOrder: b.sortOrder });
-            batch.commit().catch(console.error);
-            if (state.isAdminMode) {
-                loadCategoriesForAdmin();
-                loadCategoriesForAdminModal();
-            }
-            updateCategoryTabs();
-        }  
+    
         // Application State
         const state = {
             currentTable: null,
@@ -5656,151 +5635,165 @@
 
         // Function to load menu items for admin
         function loadMenuItemsForAdmin() {
-    const container = document.getElementById('menuItemsList');
-    if (!container) return;
-    container.innerHTML = '';
-    const sorted = [...state.menuItems].sort((a,b) => (a.sortOrder || 0) - (b.sortOrder || 0));
-    if (sorted.length === 0) {
-        container.innerHTML = '<p style="text-align:center;color:var(--gray);">No menu items.</p>';
-        return;
-    }
-    sorted.forEach(item => {
-        const card = document.createElement('div');
-        card.className = 'admin-card';
-        card.innerHTML = `
-            ${item.image ? `<div style="height:120px;background-image:url('${item.image}');background-size:cover;border-radius:8px;margin-bottom:10px;"></div>` 
-                         : `<div style="height:120px;background:var(--light-gray);display:flex;align-items:center;justify-content:center;color:var(--gray);"><i class="fas fa-utensils"></i></div>`}
-            <div class="admin-card-header">
-                <div class="admin-card-title">${item.name} ${item.subcategories?.length ? '<span style="background:var(--success);color:white;padding:2px 8px;border-radius:10px;font-size:11px;margin-left:5px;">Customizable</span>' : ''}</div>
-                <div style="display:flex;gap:5px;">
-                    <div class="reorder-arrows">
-                        <button class="reorder-btn move-up" data-id="${item.id}"><i class="fas fa-chevron-up"></i></button>
-                        <button class="reorder-btn move-down" data-id="${item.id}"><i class="fas fa-chevron-down"></i></button>
-                    </div>
-                    <button class="admin-small-btn btn-primary duplicate-item" data-id="${item.id}"><i class="fas fa-copy"></i></button>
-                    <button class="admin-small-btn btn-primary edit-item" data-id="${item.id}"><i class="fas fa-edit"></i></button>
-                    <button class="admin-small-btn btn-danger delete-item" data-id="${item.id}"><i class="fas fa-trash"></i></button>
-                </div>
-            </div>
-            <p style="font-size:14px;margin-bottom:10px;">${item.description}</p>
-            <div style="display:flex;justify-content:space-between;">
-                <span style="font-weight:600;color:var(--primary);">$${item.price.toFixed(2)}</span>
-                <span style="font-size:12px;color:var(--gray);">${getCategoryDisplayName(item.category)}</span>
-            </div>
-            <div class="tag-display">${item.tags.map(t => `<span class="tag-item">${t}</span>`).join('')}</div>
-        `;
-        container.appendChild(card);
-    });
-    // attach events
-   // ===== ATTACH EVENT LISTENERS (FIXED) =====
-        container.querySelectorAll('.edit-item').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const id = +this.dataset.id;
-                openEditMenuItemForm(id);
-            });
-        });
+                const container = document.getElementById('menuItemsList');
+                if (!container) return;
+                container.innerHTML = '';
+                const sorted = [...state.menuItems].sort((a,b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+                if (sorted.length === 0) {
+                    container.innerHTML = '<p style="text-align:center;color:var(--gray);">No menu items.</p>';
+                    return;
+                }
+                sorted.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'admin-card';
+                    card.setAttribute('draggable', 'true');                     // NEW: make draggable
+                    card.setAttribute('data-item-id', item.id);               // store ID for drag events
+                    card.innerHTML = `
+                        ${item.image ? `<div style="height:120px;background-image:url('${item.image}');background-size:cover;border-radius:8px;margin-bottom:10px;"></div>` 
+                                    : `<div style="height:120px;background:var(--light-gray);display:flex;align-items:center;justify-content:center;color:var(--gray);"><i class="fas fa-utensils"></i></div>`}
+                        <div class="admin-card-header">
+                            <div class="admin-card-title">${item.name} ${item.subcategories?.length ? '<span style="background:var(--success);color:white;padding:2px 8px;border-radius:10px;font-size:11px;margin-left:5px;">Customizable</span>' : ''}</div>
+                            <div style="display:flex;gap:5px;">
+                                <!-- NEW DRAG HANDLE -->
+                                <span class="drag-handle" style="cursor:grab; padding:4px; color:var(--gray);"><i class="fas fa-grip-vertical"></i></span>
+                                <button class="admin-small-btn btn-primary duplicate-item" data-id="${item.id}"><i class="fas fa-copy"></i></button>
+                                <button class="admin-small-btn btn-primary edit-item" data-id="${item.id}"><i class="fas fa-edit"></i></button>
+                                <button class="admin-small-btn btn-danger delete-item" data-id="${item.id}"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
+                        <p style="font-size:14px;margin-bottom:10px;">${item.description}</p>
+                        <div style="display:flex;justify-content:space-between;">
+                            <span style="font-weight:600;color:var(--primary);">$${item.price.toFixed(2)}</span>
+                            <span style="font-size:12px;color:var(--gray);">${getCategoryDisplayName(item.category)}</span>
+                        </div>
+                        <div class="tag-display">${item.tags.map(t => `<span class="tag-item">${t}</span>`).join('')}</div>
+                    `;
+                    container.appendChild(card);
+                });
 
-        container.querySelectorAll('.delete-item').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const id = +this.dataset.id;
-                showAdminChangePrompt(() => deleteMenuItem(id));
-            });
-        });
+                // ----- ATTACH DRAG EVENT LISTENERS TO EACH CARD -----
+                container.querySelectorAll('.admin-card').forEach(card => {
+                    card.addEventListener('dragstart', handleMenuItemDragStart);
+                    card.addEventListener('dragover', handleMenuItemDragOver);
+                    card.addEventListener('drop', handleMenuItemDrop);
+                    card.addEventListener('dragend', handleMenuItemDragEnd);
+                });
 
-        container.querySelectorAll('.duplicate-item').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const id = +this.dataset.id;
-                showAdminChangePrompt(() => duplicateMenuItem(id));
-            });
-        });
+                // ----- REMOVE OLD ARROW BUTTON LISTENERS -----
+                // (the code that used to listen to .move-up/.move-down is now deleted)
+            }  
+            // ----- DRAG & DROP FOR MENU ITEMS -----
+                let draggedMenuItemId = null;
 
-        container.querySelectorAll('.move-up').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const id = +this.dataset.id;
-                showAdminChangePrompt(() => moveMenuItem(id, 'up'));
-            });
-        });
+                function handleMenuItemDragStart(e) {
+                    e.dataTransfer.effectAllowed = 'move';
+                    const card = e.target.closest('.admin-card');
+                    if (!card) return;
+                    draggedMenuItemId = parseInt(card.dataset.itemId);
+                    e.dataTransfer.setData('text/plain', draggedMenuItemId);
+                    card.classList.add('dragging');
+                }
 
-        container.querySelectorAll('.move-down').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const id = +this.dataset.id;
-                showAdminChangePrompt(() => moveMenuItem(id, 'down'));
-            });
-        });
-        }    
-    function loadMenuItemsForAdminModal() {
-    const container = document.getElementById('menuItemsListModal');
-    if (!container) return;
-    container.innerHTML = '';
-    const sorted = [...state.menuItems].sort((a,b) => (a.sortOrder || 0) - (b.sortOrder || 0));
-    if (sorted.length === 0) {
-        container.innerHTML = '<p style="text-align:center;color:var(--gray);">No menu items.</p>';
-        return;
-    }
-    sorted.forEach(item => {
-        const card = document.createElement('div');
-        card.className = 'admin-card';
-        card.innerHTML = `
-            ${item.image ? `<div style="height:120px;background-image:url('${item.image}');background-size:cover;border-radius:8px;margin-bottom:10px;"></div>` 
-                         : `<div style="height:120px;background:var(--light-gray);display:flex;align-items:center;justify-content:center;color:var(--gray);"><i class="fas fa-utensils"></i></div>`}
-            <div class="admin-card-header">
-                <div class="admin-card-title">${item.name}</div>
-                <div style="display:flex;gap:5px;">
-                    <div class="reorder-arrows">
-                        <button class="reorder-btn move-up" data-id="${item.id}"><i class="fas fa-chevron-up"></i></button>
-                        <button class="reorder-btn move-down" data-id="${item.id}"><i class="fas fa-chevron-down"></i></button>
-                    </div>
-                    <button class="admin-small-btn btn-primary duplicate-item" data-id="${item.id}"><i class="fas fa-copy"></i></button>
-                    <button class="admin-small-btn btn-primary edit-item" data-id="${item.id}"><i class="fas fa-edit"></i></button>
-                    <button class="admin-small-btn btn-danger delete-item" data-id="${item.id}"><i class="fas fa-trash"></i></button>
-                </div>
-            </div>
-            <p style="font-size:14px;margin-bottom:10px;">${item.description}</p>
-            <div style="display:flex;justify-content:space-between;">
-                <span style="font-weight:600;color:var(--primary);">$${item.price.toFixed(2)}</span>
-                <span style="font-size:12px;color:var(--gray);">${getCategoryDisplayName(item.category)}</span>
-            </div>
-            <div class="tag-display">${item.tags.map(t => `<span class="tag-item">${t}</span>`).join('')}</div>
-        `;
-        container.appendChild(card);
-    });
-    // ===== FIXED EVENT LISTENERS for loadMenuItemsForAdminModal =====
-        container.querySelectorAll('.edit-item').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const id = +this.dataset.id;      // ✅ capture ID immediately
-                openEditMenuItemForm(id);
-            });
-        });
+                function handleMenuItemDragOver(e) {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    const targetCard = e.target.closest('.admin-card');
+                    if (targetCard) {
+                        document.querySelectorAll('.admin-card').forEach(c => c.classList.remove('drag-over'));
+                        targetCard.classList.add('drag-over');
+                    }
+                }
 
-        container.querySelectorAll('.delete-item').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const id = +this.dataset.id;
-                showAdminChangePrompt(() => deleteMenuItem(id));  // ✅ pass a function that uses 'id'
-            });
-        });
+                function handleMenuItemDrop(e) {
+                    e.preventDefault();
+                    document.querySelectorAll('.admin-card').forEach(c => c.classList.remove('drag-over'));
+                    const targetCard = e.target.closest('.admin-card');
+                    if (!targetCard) return;
+                    const targetId = parseInt(targetCard.dataset.itemId);
+                    if (draggedMenuItemId === null || draggedMenuItemId === targetId) return;
 
-        container.querySelectorAll('.duplicate-item').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const id = +this.dataset.id;
-                showAdminChangePrompt(() => duplicateMenuItem(id));
-            });
-        });
+                    const sourceIndex = state.menuItems.findIndex(i => i.id === draggedMenuItemId);
+                    const targetIndex = state.menuItems.findIndex(i => i.id === targetId);
+                    if (sourceIndex === -1 || targetIndex === -1) return;
 
-        container.querySelectorAll('.move-up').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const id = +this.dataset.id;
-                showAdminChangePrompt(() => moveMenuItem(id, 'up'));
-            });
-        });
+                    const [movedItem] = state.menuItems.splice(sourceIndex, 1);
+                    state.menuItems.splice(targetIndex, 0, movedItem);
 
-        container.querySelectorAll('.move-down').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const id = +this.dataset.id;
-                showAdminChangePrompt(() => moveMenuItem(id, 'down'));
-            });
-        });
+                    state.menuItems.forEach((item, idx) => {
+                        item.sortOrder = idx;
+                    });
 
-    }
+                    saveToLocalStorage();
+
+                    const batch = db.batch();
+                    state.menuItems.forEach(item => {
+                        batch.update(db.collection("menu").doc(item.id.toString()), { sortOrder: item.sortOrder });
+                    });
+                    batch.commit().catch(console.error);
+
+                    loadMenuItemsForAdmin();
+                    if (state.isAdminMode) {
+                        loadMenuItemsForAdminModal();
+                    }
+                    displayMenuItems('all');
+                }
+
+                function handleMenuItemDragEnd(e) {
+                    const card = e.target.closest('.admin-card');
+                    if (card) card.classList.remove('dragging');
+                    document.querySelectorAll('.admin-card').forEach(c => c.classList.remove('drag-over'));
+                    draggedMenuItemId = null;
+                } 
+
+
+                function loadMenuItemsForAdminModal() {
+                    const container = document.getElementById('menuItemsListModal');
+                    if (!container) return;
+                    container.innerHTML = '';
+                    const sorted = [...state.menuItems].sort((a,b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+                    if (sorted.length === 0) {
+                        container.innerHTML = '<p style="text-align:center;color:var(--gray);">No menu items.</p>';
+                        return;
+                    }
+                    sorted.forEach(item => {
+                        const card = document.createElement('div');
+                        card.className = 'admin-card';
+                        card.setAttribute('draggable', 'true');
+                        card.setAttribute('data-item-id', item.id);
+                        card.innerHTML = `
+                            ${item.image ? `<div style="height:120px;background-image:url('${item.image}');background-size:cover;border-radius:8px;margin-bottom:10px;"></div>` 
+                                        : `<div style="height:120px;background:var(--light-gray);display:flex;align-items:center;justify-content:center;color:var(--gray);"><i class="fas fa-utensils"></i></div>`}
+                            <div class="admin-card-header">
+                                <div class="admin-card-title">${item.name} ${item.subcategories?.length ? '<span style="background:var(--success);color:white;padding:2px 8px;border-radius:10px;font-size:11px;margin-left:5px;">Customizable</span>' : ''}</div>
+                                <div style="display:flex;gap:5px;">
+                                    <!-- DRAG HANDLE -->
+                                    <span class="drag-handle" style="cursor:grab; padding:4px; color:var(--gray);"><i class="fas fa-grip-vertical"></i></span>
+                                    <button class="admin-small-btn btn-primary duplicate-item" data-id="${item.id}"><i class="fas fa-copy"></i></button>
+                                    <button class="admin-small-btn btn-primary edit-item" data-id="${item.id}"><i class="fas fa-edit"></i></button>
+                                    <button class="admin-small-btn btn-danger delete-item" data-id="${item.id}"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </div>
+                            <p style="font-size:14px;margin-bottom:10px;">${item.description}</p>
+                            <div style="display:flex;justify-content:space-between;">
+                                <span style="font-weight:600;color:var(--primary);">$${item.price.toFixed(2)}</span>
+                                <span style="font-size:12px;color:var(--gray);">${getCategoryDisplayName(item.category)}</span>
+                            </div>
+                            <div class="tag-display">${item.tags.map(t => `<span class="tag-item">${t}</span>`).join('')}</div>
+                        `;
+                        container.appendChild(card);
+                    });
+
+                    // ----- ATTACH THE SAME DRAG EVENT LISTENERS (already defined in Step 2) -----
+                    container.querySelectorAll('.admin-card').forEach(card => {
+                        card.addEventListener('dragstart', handleMenuItemDragStart);
+                        card.addEventListener('dragover', handleMenuItemDragOver);
+                        card.addEventListener('drop', handleMenuItemDrop);
+                        card.addEventListener('dragend', handleMenuItemDragEnd);
+                    });
+
+                    // ----- REMOVE OLD ARROW BUTTON LISTENERS (no longer needed) -----
+                    // (The previous code that added click listeners to .move-up/.move-down is gone)
+                }
         // Function to open edit menu item form
         function openEditMenuItemForm(itemId) {
             const editForm = document.getElementById('editMenuItemForm');
