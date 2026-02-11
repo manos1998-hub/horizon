@@ -1783,6 +1783,178 @@
             justify-content: center;
             padding: 20px;
         }
+        /* NEW: Subcategory Option Modal Styles */
+        .subcategory-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1001;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .subcategory-modal-container {
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 30px;
+            position: relative;
+        }
+
+        .subcategory-modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: var(--gray);
+            cursor: pointer;
+        }
+
+        .subcategory-option-group {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .subcategory-option-group:last-child {
+            border-bottom: none;
+        }
+
+        .subcategory-option-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--text);
+        }
+
+        .subcategory-option-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .subcategory-option-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            background-color: var(--light-gray);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .subcategory-option-item:hover {
+            background-color: rgba(69, 123, 157, 0.1);
+        }
+
+        .subcategory-option-item.selected {
+            border-color: var(--primary);
+            background-color: rgba(230, 57, 70, 0.1);
+        }
+
+        .subcategory-option-name {
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .subcategory-option-price {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .subcategory-summary {
+            background-color: var(--light-gray);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 25px;
+            margin-bottom: 25px;
+        }
+
+        .subcategory-summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            color: var(--text);
+        }
+
+        .subcategory-summary-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .subcategory-summary-total {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 18px;
+            border-top: 1px solid var(--gray);
+            padding-top: 10px;
+            margin-top: 10px;
+        }
+
+        /* NEW: Subcategory display in cart */
+        .cart-subcategory-options {
+            margin-top: 5px;
+            font-size: 13px;
+            color: var(--gray);
+        }
+
+        .cart-subcategory-option {
+            display: block;
+            margin-left: 10px;
+        }
+
+        /* NEW: Subcategory management styles in admin */
+        .subcategory-management {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid var(--light-gray);
+        }
+
+        .subcategory-item {
+            background-color: var(--light-gray);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .subcategory-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .subcategory-item-title {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .subcategory-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            padding: 8px 10px;
+            background-color: var(--card-bg);
+            border-radius: 6px;
+        }
+
+        .subcategory-option:last-child {
+            margin-bottom: 0;
+        }
+
+
 
         /* Responsive */
         @media (max-width: 992px) {
@@ -1903,6 +2075,11 @@
                 left: 20px;
                 right: 20px;
                 max-width: none;
+            }
+
+            .subcategory-modal-container {
+                padding: 20px 15px;
+                max-height: 90vh;
             }
         }
 
@@ -2454,6 +2631,26 @@
                                 placeholder="Vegetarian, Popular, Spicy">
                         </div>
 
+                        <!-- NEW: Subcategory Management Section -->
+                        <div class="subcategory-management">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <div class="section-title-small" style="margin-bottom: 0;">
+                                    <i class="fas fa-list-alt"></i>
+                                    Subcategories & Options
+                                </div>
+                                <button type="button" class="btn btn-secondary" id="addSubcategoryBtn">
+                                    <i class="fas fa-plus"></i> Add Subcategory
+                                </button>
+                            </div>
+                            <p style="margin-bottom: 20px; color: var(--gray); font-size: 14px;">
+                                Add subcategories like "Sugar Level", "Ice Level", etc. with options like "No Sugar", "Less Sugar", etc.
+                                You can add prices to each option for additional charges.
+                            </p>
+                            <div id="subcategoriesContainer">
+                                <!-- Subcategories will be dynamically added here -->
+                            </div>
+                        </div>
+
                         <div class="payment-actions">
                             <button class="btn btn-secondary" id="cancelEditBtn">
                                 <i class="fas fa-times"></i> Cancel
@@ -2744,6 +2941,46 @@
             </div>
         </div>
     </section>
+
+    <!-- NEW: Subcategory Options Modal -->
+    <div class="subcategory-modal" id="subcategoryModal">
+        <div class="subcategory-modal-container">
+            <button class="subcategory-modal-close" id="subcategoryModalClose">
+                <i class="fas fa-times"></i>
+            </button>
+            
+            <h3 id="subcategoryModalTitle">Customize Your Item</h3>
+            <p id="subcategoryModalDescription" style="color: var(--gray); margin-bottom: 20px;"></p>
+            
+            <div id="subcategoryOptionsContainer">
+                <!-- Subcategory options will be dynamically added here -->
+            </div>
+            
+            <div class="subcategory-summary" id="subcategorySummary">
+                <div class="subcategory-summary-item">
+                    <span>Base Price:</span>
+                    <span id="subcategoryBasePrice">$0.00</span>
+                </div>
+                <div class="subcategory-summary-item">
+                    <span>Additional Options:</span>
+                    <span id="subcategoryAdditionalPrice">$0.00</span>
+                </div>
+                <div class="subcategory-summary-item subcategory-summary-total">
+                    <span>Total Price:</span>
+                    <span id="subcategoryTotalPrice">$0.00</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-secondary" id="cancelSubcategoryBtn" style="flex: 1;">
+                    Cancel
+                </button>
+                <button class="btn btn-primary" id="addToCartWithOptionsBtn" style="flex: 1;">
+                    Add to Cart
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Admin Panel (Modal for customer mode) -->
     <div class="admin-panel" id="adminPanel">
@@ -3210,7 +3447,10 @@
             },
             currentTheme: "default",
             currentFont: "poppins",
-            lastOrderUpdate: 0
+            lastOrderUpdate: 0,
+            // NEW: Temporary storage for subcategory selections
+            currentSubcategorySelections: null,
+            currentMenuItemForSubcategories: null
         };
 
         // Default Menu Data with Tax Included in Prices
@@ -3513,6 +3753,18 @@
         const submitChangeCodeBtn = document.getElementById('submitChangeCodeBtn');
         const cancelChangeBtn = document.getElementById('cancelChangeBtn');
 
+        // NEW: Subcategory modal elements
+        const subcategoryModal = document.getElementById('subcategoryModal');
+        const subcategoryModalClose = document.getElementById('subcategoryModalClose');
+        const subcategoryModalTitle = document.getElementById('subcategoryModalTitle');
+        const subcategoryModalDescription = document.getElementById('subcategoryModalDescription');
+        const subcategoryOptionsContainer = document.getElementById('subcategoryOptionsContainer');
+        const subcategoryBasePrice = document.getElementById('subcategoryBasePrice');
+        const subcategoryAdditionalPrice = document.getElementById('subcategoryAdditionalPrice');
+        const subcategoryTotalPrice = document.getElementById('subcategoryTotalPrice');
+        const cancelSubcategoryBtn = document.getElementById('cancelSubcategoryBtn');
+        const addToCartWithOptionsBtn = document.getElementById('addToCartWithOptionsBtn');
+
         // NEW: Refresh buttons for admin order management
         const refreshAdminOrdersBtn = document.getElementById('refreshAdminOrdersBtn');
         const refreshAdminOrdersBtnModal = document.getElementById('refreshAdminOrdersBtnModal');
@@ -3780,6 +4032,23 @@
                 state.pendingAdminAction = null;
                 showNotification("Changes cancelled.");
             });
+            // NEW: Subcategory modal setup
+            subcategoryModalClose.addEventListener('click', function () {
+                subcategoryModal.style.display = 'none';
+                state.currentSubcategorySelections = null;
+                state.currentMenuItemForSubcategories = null;
+            });
+
+            cancelSubcategoryBtn.addEventListener('click', function () {
+                subcategoryModal.style.display = 'none';
+                state.currentSubcategorySelections = null;
+                state.currentMenuItemForSubcategories = null;
+            });
+
+            addToCartWithOptionsBtn.addEventListener('click', function () {
+                addItemWithSubcategoryOptions();
+            });   
+
 
             // Check if we should be in admin mode from previous session
             if (localStorage.getItem('dineEasyAdminMode') === 'true') {
@@ -3790,6 +4059,8 @@
             // NEW: Set up real-time order checking
             setupRealTimeOrderUpdates();
         });
+
+        
 
         // NEW FUNCTION: Setup real-time order updates
         function setupRealTimeOrderUpdates() {
@@ -3803,6 +4074,241 @@
                     checkForNewOrders();
                 }
             });
+        }
+        // NEW: Subcategory modal setup
+            subcategoryModalClose.addEventListener('click', function () {
+                subcategoryModal.style.display = 'none';
+                state.currentSubcategorySelections = null;
+                state.currentMenuItemForSubcategories = null;
+            });
+
+            cancelSubcategoryBtn.addEventListener('click', function () {
+                subcategoryModal.style.display = 'none';
+                state.currentSubcategorySelections = null;
+                state.currentMenuItemForSubcategories = null;
+            });
+
+            addToCartWithOptionsBtn.addEventListener('click', function () {
+                addItemWithSubcategoryOptions();
+            });
+
+            // Check if we should be in admin mode from previous session
+            if (localStorage.getItem('dineEasyAdminMode') === 'true') {
+                // Still require code verification on reload
+                showAdminCodePrompt();
+            }
+
+            // NEW: Set up real-time order checking
+            setupRealTimeOrderUpdates();
+        
+    
+        // NEW FUNCTION: Add item with subcategory options to cart
+        function addItemWithSubcategoryOptions() {
+            if (!state.currentMenuItemForSubcategories || !state.currentSubcategorySelections) return;
+
+            const menuItem = state.currentMenuItemForSubcategories;
+            const selections = state.currentSubcategorySelections;
+
+            // Calculate additional price from selected options
+            let additionalPrice = 0;
+            Object.keys(selections).forEach(subcategoryId => {
+                const optionId = selections[subcategoryId];
+                const subcategory = menuItem.subcategories.find(sc => sc.id === subcategoryId);
+                if (subcategory) {
+                    const option = subcategory.options.find(opt => opt.id === optionId);
+                    if (option && option.additionalPrice) {
+                        additionalPrice += option.additionalPrice;
+                    }
+                }
+            });
+
+            // Get selected option names for display
+            const selectedOptions = [];
+            Object.keys(selections).forEach(subcategoryId => {
+                const optionId = selections[subcategoryId];
+                const subcategory = menuItem.subcategories.find(sc => sc.id === subcategoryId);
+                if (subcategory) {
+                    const option = subcategory.options.find(opt => opt.id === optionId);
+                    if (option) {
+                        selectedOptions.push({
+                            subcategoryName: subcategory.name,
+                            optionName: option.name,
+                            additionalPrice: option.additionalPrice || 0
+                        });
+                    }
+                }
+            });
+
+            // Check if item already exists in cart
+            const existingItem = state.cart.find(item => 
+                item.id === menuItem.id && 
+                JSON.stringify(item.selectedOptions) === JSON.stringify(selectedOptions)
+            );
+
+            if (existingItem) {
+                existingItem.quantity += 1;
+                existingItem.totalPrice = (menuItem.price + additionalPrice) * existingItem.quantity;
+            } else {
+                state.cart.push({
+                    id: menuItem.id,
+                    name: menuItem.name,
+                    price: menuItem.price,
+                    quantity: 1,
+                    selectedOptions: selectedOptions,
+                    additionalPrice: additionalPrice,
+                    totalPrice: menuItem.price + additionalPrice
+                });
+            }
+
+            updateCart();
+            
+            const totalPrice = menuItem.price + additionalPrice;
+            showNotification(`${menuItem.name} with options added to cart for $${totalPrice.toFixed(2)}`);
+
+            // Play add to cart sound
+            playAddToCartSound();
+
+            // Close modal and reset state
+            subcategoryModal.style.display = 'none';
+            state.currentSubcategorySelections = null;
+            state.currentMenuItemForSubcategories = null;
+        }
+
+        // NEW FUNCTION: Show subcategory options modal
+        function showSubcategoryOptions(itemId) {
+            const menuItem = state.menuItems.find(item => item.id === itemId);
+            if (!menuItem) return;
+
+            // Store the current menu item
+            state.currentMenuItemForSubcategories = menuItem;
+            state.currentSubcategorySelections = {};
+
+            // Reset selections
+            if (menuItem.subcategories && menuItem.subcategories.length > 0) {
+                menuItem.subcategories.forEach(subcategory => {
+                    // Select the first option by default
+                    if (subcategory.options && subcategory.options.length > 0) {
+                        state.currentSubcategorySelections[subcategory.id] = subcategory.options[0].id;
+                    }
+                });
+            }
+
+            // Update modal title and description
+            subcategoryModalTitle.textContent = menuItem.name;
+            subcategoryModalDescription.textContent = menuItem.description;
+
+            // Update base price
+            subcategoryBasePrice.textContent = `$${menuItem.price.toFixed(2)}`;
+
+            // Clear options container
+            subcategoryOptionsContainer.innerHTML = '';
+
+            // Check if item has subcategories
+            if (!menuItem.subcategories || menuItem.subcategories.length === 0) {
+                subcategoryOptionsContainer.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: var(--gray);">
+                        <i class="fas fa-info-circle" style="font-size: 40px; margin-bottom: 15px;"></i>
+                        <p>This item has no customization options.</p>
+                    </div>
+                `;
+                // Update price summary
+                updateSubcategoryPriceSummary();
+                return;
+            }
+
+            // Add subcategory options
+            menuItem.subcategories.forEach(subcategory => {
+                const optionGroup = document.createElement('div');
+                optionGroup.className = 'subcategory-option-group';
+
+                const optionTitle = document.createElement('div');
+                optionTitle.className = 'subcategory-option-title';
+                optionTitle.textContent = subcategory.name;
+                optionGroup.appendChild(optionTitle);
+
+                const optionList = document.createElement('div');
+                optionList.className = 'subcategory-option-list';
+
+                subcategory.options.forEach(option => {
+                    const optionItem = document.createElement('div');
+                    optionItem.className = `subcategory-option-item ${state.currentSubcategorySelections[subcategory.id] === option.id ? 'selected' : ''}`;
+                    optionItem.setAttribute('data-subcategory-id', subcategory.id);
+                    optionItem.setAttribute('data-option-id', option.id);
+
+                    const optionName = document.createElement('div');
+                    optionName.className = 'subcategory-option-name';
+                    optionName.textContent = option.name;
+
+                    const optionPrice = document.createElement('div');
+                    optionPrice.className = 'subcategory-option-price';
+                    if (option.additionalPrice && option.additionalPrice > 0) {
+                        optionPrice.textContent = `+$${option.additionalPrice.toFixed(2)}`;
+                    } else if (option.additionalPrice && option.additionalPrice < 0) {
+                        optionPrice.textContent = `-$${Math.abs(option.additionalPrice).toFixed(2)}`;
+                        optionPrice.style.color = 'var(--success)';
+                    } else {
+                        optionPrice.textContent = 'No charge';
+                        optionPrice.style.color = 'var(--gray)';
+                    }
+
+                    optionItem.appendChild(optionName);
+                    optionItem.appendChild(optionPrice);
+
+                    optionItem.addEventListener('click', function () {
+                        const subcategoryId = this.getAttribute('data-subcategory-id');
+                        const optionId = this.getAttribute('data-option-id');
+
+                        // Update selection
+                        state.currentSubcategorySelections[subcategoryId] = optionId;
+
+                        // Update UI
+                        document.querySelectorAll(`[data-subcategory-id="${subcategoryId}"]`).forEach(item => {
+                            item.classList.remove('selected');
+                        });
+                        this.classList.add('selected');
+
+                        // Update price summary
+                        updateSubcategoryPriceSummary();
+                    });
+
+                    optionList.appendChild(optionItem);
+                });
+
+                optionGroup.appendChild(optionList);
+                subcategoryOptionsContainer.appendChild(optionGroup);
+            });
+
+            // Update price summary
+            updateSubcategoryPriceSummary();
+
+            // Show modal
+            subcategoryModal.style.display = 'flex';
+        }
+
+        // NEW FUNCTION: Update subcategory price summary
+        function updateSubcategoryPriceSummary() {
+            if (!state.currentMenuItemForSubcategories || !state.currentSubcategorySelections) return;
+
+            const menuItem = state.currentMenuItemForSubcategories;
+            let additionalPrice = 0;
+
+            // Calculate total additional price
+            Object.keys(state.currentSubcategorySelections).forEach(subcategoryId => {
+                const optionId = state.currentSubcategorySelections[subcategoryId];
+                const subcategory = menuItem.subcategories.find(sc => sc.id === subcategoryId);
+                if (subcategory) {
+                    const option = subcategory.options.find(opt => opt.id === optionId);
+                    if (option && option.additionalPrice) {
+                        additionalPrice += option.additionalPrice;
+                    }
+                }
+            });
+
+            // Update UI
+            subcategoryAdditionalPrice.textContent = additionalPrice > 0 ? `+$${additionalPrice.toFixed(2)}` : '$0.00';
+            
+            const totalPrice = menuItem.price + additionalPrice;
+            subcategoryTotalPrice.textContent = `$${totalPrice.toFixed(2)}`;
         }
 
         // NEW FUNCTION: Check for new orders
@@ -4022,8 +4528,22 @@
 
             if (savedMenuItems) {
                 state.menuItems = JSON.parse(savedMenuItems);
-            } else {
-                state.menuItems = [...defaultMenuItems];
+                // Ensure all menu items have subcategories array if not present
+                state.menuItems.forEach(item => {
+                    if (!item.subcategories) {
+                        item.subcategories = [];
+                    }
+                    // Ensure all subcategories have proper structure
+                    if (item.subcategories) {
+                        item.subcategories.forEach(subcategory => {
+                            if (!subcategory.id) subcategory.id = `subcategory-${Date.now()}`;
+                            if (!subcategory.options) subcategory.options = [];
+                            subcategory.options.forEach(option => {
+                                if (!option.id) option.id = `option-${Date.now()}`;
+                            });
+                        });
+                    }
+                });
             }
 
             if (savedOrders) {
@@ -4908,6 +5428,56 @@
             setupSystemTools();
         }
 
+        // NEW FUNCTION: Create subcategory HTML in edit form
+        function createSubcategoryHTML(subcategory, index) {
+            const subcategoryId = subcategory.id || `subcategory-${Date.now()}-${index}`;
+            
+            return `
+                <div class="subcategory-item" data-id="${subcategoryId}">
+                    <div class="subcategory-item-header">
+                        <div class="subcategory-item-title">${subcategory.name || 'New Subcategory'}</div>
+                        <div class="admin-card-actions">
+                            <button type="button" class="admin-small-btn btn-danger remove-subcategory">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="admin-form-group">
+                        <label class="admin-label">Subcategory Name</label>
+                        <input type="text" class="admin-input subcategory-name" value="${subcategory.name || ''}" placeholder="e.g., Sugar Level, Ice Level, Size">
+                    </div>
+                    <div class="admin-form-group">
+                        <label class="admin-label">Options</label>
+                        <div class="subcategory-options-container" data-subcategory-id="${subcategoryId}">
+                            ${subcategory.options ? subcategory.options.map((option, optIndex) => createSubcategoryOptionHTML(option, optIndex)).join('') : ''}
+                        </div>
+                        <button type="button" class="btn btn-secondary add-subcategory-option" style="margin-top: 10px;">
+                            <i class="fas fa-plus"></i> Add Option
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // NEW FUNCTION: Create subcategory option HTML
+        function createSubcategoryOptionHTML(option, index) {
+            const optionId = option.id || `option-${Date.now()}-${index}`;
+            
+            return `
+                <div class="subcategory-option" data-id="${optionId}">
+                    <input type="text" class="admin-input" style="flex: 2;" value="${option.name || ''}" placeholder="Option name (e.g., No Sugar, Less Sugar)">
+                    <input type="number" class="admin-input" style="flex: 1;" value="${option.additionalPrice || 0}" step="0.01" placeholder="Additional price">
+                    <select class="admin-select" style="flex: 1;">
+                        <option value="add" ${option.additionalPrice >= 0 ? 'selected' : ''}>Add to price</option>
+                        <option value="subtract" ${option.additionalPrice < 0 ? 'selected' : ''}>Subtract from price</option>
+                    </select>
+                    <button type="button" class="admin-small-btn btn-danger remove-subcategory-option">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+        }
+
         // Function to load my orders for the current table
         function loadMyOrders() {
             if (!state.currentTable || state.isAdminMode) {
@@ -4972,28 +5542,48 @@
                 // Items summary (show first 3 items, then "+X more")
                 let itemsSummary = '';
                 if (order.items.length <= 3) {
-                    itemsSummary = order.items.map(item => `
-                        <div class="order-item-summary">
-                            <div class="order-item-summary-name">
-                                <div class="order-item-summary-quantity">${item.quantity}</div>
-                                <div>${item.name}</div>
+                    itemsSummary = order.items.map(item => {
+                        let itemPrice = item.totalPrice || (item.price * item.quantity);
+                        let optionsText = '';
+                        
+                        // NEW: Add subcategory options to display
+                        if (item.selectedOptions && item.selectedOptions.length > 0) {
+                            optionsText = '<div style="font-size: 12px; color: var(--gray); margin-left: 34px;">';
+                            item.selectedOptions.forEach(opt => {
+                                const priceText = opt.additionalPrice > 0 ? ` (+$${opt.additionalPrice.toFixed(2)})` : 
+                                                opt.additionalPrice < 0 ? ` (-$${Math.abs(opt.additionalPrice).toFixed(2)})` : '';
+                                optionsText += `${opt.subcategoryName}: ${opt.optionName}${priceText}<br>`;
+                            });
+                            optionsText += '</div>';
+                        }
+                        
+                        return `
+                            <div class="order-item-summary">
+                                <div class="order-item-summary-name">
+                                    <div class="order-item-summary-quantity">${item.quantity}</div>
+                                    <div>${item.name}</div>
+                                </div>
+                                <div>$${itemPrice.toFixed(2)}</div>
                             </div>
-                            <div>$${(item.price * item.quantity).toFixed(2)}</div>
-                        </div>
-                    `).join('');
+                            ${optionsText}
+                        `;
+                    }).join('');
                 } else {
                     const firstItems = order.items.slice(0, 3);
                     const remainingCount = order.items.length - 3;
 
-                    itemsSummary = firstItems.map(item => `
-                        <div class="order-item-summary">
-                            <div class="order-item-summary-name">
-                                <div class="order-item-summary-quantity">${item.quantity}</div>
-                                <div>${item.name}</div>
+                    itemsSummary = firstItems.map(item => {
+                        let itemPrice = item.totalPrice || (item.price * item.quantity);
+                        return `
+                            <div class="order-item-summary">
+                                <div class="order-item-summary-name">
+                                    <div class="order-item-summary-quantity">${item.quantity}</div>
+                                    <div>${item.name}</div>
+                                </div>
+                                <div>$${itemPrice.toFixed(2)}</div>
                             </div>
-                            <div>$${(item.price * item.quantity).toFixed(2)}</div>
-                        </div>
-                    `).join('');
+                        `;
+                    }).join('');
 
                     itemsSummary += `
                         <div class="order-item-summary">
@@ -5243,6 +5833,9 @@
 
                     // Set current item ID in a data attribute
                     editForm.setAttribute('data-item-id', itemId);
+
+                    // NEW: Load subcategories
+                    loadSubcategoriesForEdit(item.subcategories || []);
                 }
             } else {
                 // Add new item
@@ -5257,6 +5850,8 @@
 
                 // Clear item ID
                 editForm.setAttribute('data-item-id', '');
+                // NEW: Initialize empty subcategories
+                loadSubcategoriesForEdit([]);
             }
 
             // Set up image upload for menu item
@@ -5272,6 +5867,8 @@
                 updateItemImagePreview('');
                 state.currentImageUpload = null;
             });
+            // NEW: Set up subcategory functionality
+            setupSubcategoryManagement();
 
             // Show form and hide list
             menuItemsList.style.display = 'none';
@@ -5286,6 +5883,120 @@
             document.getElementById('saveMenuItemBtn').onclick = function () {
                 showAdminChangePrompt(saveMenuItem);
             };
+        }
+
+        // NEW FUNCTION: Load subcategories for edit form
+        function loadSubcategoriesForEdit(subcategories) {
+            const subcategoriesContainer = document.getElementById('subcategoriesContainer');
+            subcategoriesContainer.innerHTML = '';
+
+            if (subcategories.length === 0) {
+                subcategoriesContainer.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: var(--gray); background-color: var(--light-gray); border-radius: 8px;">
+                        <i class="fas fa-list-alt" style="font-size: 24px; margin-bottom: 10px; display: block;"></i>
+                        <p>No subcategories added yet. Add subcategories to allow customers to customize this item.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            subcategories.forEach((subcategory, index) => {
+                const subcategoryHTML = createSubcategoryHTML(subcategory, index);
+                subcategoriesContainer.innerHTML += subcategoryHTML;
+            });
+        }
+
+        // NEW FUNCTION: Setup subcategory management
+        function setupSubcategoryManagement() {
+            const subcategoriesContainer = document.getElementById('subcategoriesContainer');
+            const addSubcategoryBtn = document.getElementById('addSubcategoryBtn');
+
+            // Add subcategory button
+            addSubcategoryBtn.addEventListener('click', function () {
+                const newSubcategory = {
+                    id: `subcategory-${Date.now()}`,
+                    name: '',
+                    options: []
+                };
+
+                const subcategoryHTML = createSubcategoryHTML(newSubcategory, Date.now());
+                
+                // Remove placeholder if present
+                const placeholder = subcategoriesContainer.querySelector('div[style*="text-align: center"]');
+                if (placeholder) {
+                    subcategoriesContainer.innerHTML = '';
+                }
+                
+                subcategoriesContainer.innerHTML += subcategoryHTML;
+                
+                // Setup event listeners for the new subcategory
+                setupSubcategoryEventListeners();
+            });
+
+            // Setup initial event listeners
+            setupSubcategoryEventListeners();
+        }
+
+        // NEW FUNCTION: Setup subcategory event listeners
+        function setupSubcategoryEventListeners() {
+            // Remove subcategory buttons
+            document.querySelectorAll('.remove-subcategory').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const subcategoryItem = this.closest('.subcategory-item');
+                    if (subcategoryItem) {
+                        subcategoryItem.remove();
+                        
+                        // Show placeholder if no subcategories left
+                        const subcategoriesContainer = document.getElementById('subcategoriesContainer');
+                        if (subcategoriesContainer.children.length === 0) {
+                            subcategoriesContainer.innerHTML = `
+                                <div style="text-align: center; padding: 20px; color: var(--gray); background-color: var(--light-gray); border-radius: 8px;">
+                                    <i class="fas fa-list-alt" style="font-size: 24px; margin-bottom: 10px; display: block;"></i>
+                                    <p>No subcategories added yet. Add subcategories to allow customers to customize this item.</p>
+                                </div>
+                            `;
+                        }
+                    }
+                });
+            });
+
+            // Add option buttons
+            document.querySelectorAll('.add-subcategory-option').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const subcategoryItem = this.closest('.subcategory-item');
+                    const optionsContainer = subcategoryItem.querySelector('.subcategory-options-container');
+                    
+                    const newOption = {
+                        id: `option-${Date.now()}`,
+                        name: '',
+                        additionalPrice: 0
+                    };
+                    
+                    const optionHTML = createSubcategoryOptionHTML(newOption, Date.now());
+                    optionsContainer.innerHTML += optionHTML;
+                    
+                    // Setup event listener for the new option's remove button
+                    const newRemoveBtn = optionsContainer.lastElementChild.querySelector('.remove-subcategory-option');
+                    if (newRemoveBtn) {
+                        newRemoveBtn.addEventListener('click', function() {
+                            const optionElement = this.closest('.subcategory-option');
+                            if (optionElement) {
+                                optionElement.remove();
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Remove option buttons
+            document.querySelectorAll('.remove-subcategory-option').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const optionElement = this.closest('.subcategory-option');
+                    if (optionElement) {
+                        optionElement.remove();
+                    }
+                });
+            });
         }
 
         // Function to update item image preview
@@ -5323,6 +6034,132 @@
             };
             reader.readAsDataURL(file);
         }
+
+        // UPDATED Function to save menu item with subcategories to Firebase
+        function saveMenuItem() {
+            const itemId = document.getElementById('editMenuItemForm').getAttribute('data-item-id');
+            const name = document.getElementById('editItemName').value;
+            const description = document.getElementById('editItemDescription').value;
+            const price = parseFloat(document.getElementById('editItemPrice').value);
+            const category = document.getElementById('editItemCategory').value;
+            const tags = document.getElementById('editItemTags').value.split(',').map(tag => tag.trim()).filter(tag => tag);
+
+            if (!name || !description || !price) {
+                showNotification("Please fill in all required fields.");
+                return;
+            }
+
+            if (!category) {
+                showNotification("Please select a category.");
+                return;
+            }
+
+            // NEW: Collect subcategories
+            const subcategories = [];
+            const subcategoryItems = document.querySelectorAll('.subcategory-item');
+            
+            subcategoryItems.forEach(subcategoryItem => {
+                const subcategoryName = subcategoryItem.querySelector('.subcategory-name').value;
+                
+                if (subcategoryName.trim() === '') {
+                    showNotification("Please provide a name for all subcategories.");
+                    return;
+                }
+                
+                const options = [];
+                const optionElements = subcategoryItem.querySelectorAll('.subcategory-option');
+                
+                optionElements.forEach(optionElement => {
+                    const optionName = optionElement.querySelector('input[type="text"]').value;
+                    const optionPrice = parseFloat(optionElement.querySelector('input[type="number"]').value) || 0;
+                    const priceType = optionElement.querySelector('select').value;
+                    
+                    if (optionName.trim() === '') {
+                        showNotification("Please provide a name for all options.");
+                        return;
+                    }
+                    
+                    options.push({
+                        id: optionElement.getAttribute('data-id') || `option-${Date.now()}`,
+                        name: optionName,
+                        additionalPrice: priceType === 'subtract' ? -Math.abs(optionPrice) : Math.abs(optionPrice)
+                    });
+                });
+                
+                if (options.length === 0) {
+                    showNotification(`Please add at least one option to the "${subcategoryName}" subcategory.`);
+                    return;
+                }
+                
+                subcategories.push({
+                    id: subcategoryItem.getAttribute('data-id') || `subcategory-${Date.now()}`,
+                    name: subcategoryName,
+                    options: options
+                });
+            });
+
+            let updatedItem;
+
+            if (itemId) {
+                // Update existing item
+                const index = state.menuItems.findIndex(item => item.id === parseInt(itemId));
+                if (index !== -1) {
+                    updatedItem = {
+                        ...state.menuItems[index],
+                        name,
+                        description,
+                        price,
+                        category,
+                        image: state.currentImageUpload || state.menuItems[index].image,
+                        tags,
+                        subcategories: subcategories
+                    };
+                    state.menuItems[index] = updatedItem;
+                }
+            } else {
+                // Add new item
+                const newId = state.menuItems.length > 0 ? Math.max(...state.menuItems.map(item => item.id)) + 1 : 1;
+                updatedItem = {
+                    id: newId,
+                    name,
+                    description,
+                    price,
+                    category,
+                    image: state.currentImageUpload || '',
+                    tags,
+                    subcategories: subcategories
+                };
+                state.menuItems.push(updatedItem);
+            }
+
+            // Save to Firebase Firestore with subcategories
+            db.collection("menu").doc(updatedItem.id.toString()).set(updatedItem)
+                .then(() => {
+                    console.log("Menu item saved to Firestore with subcategories:", updatedItem.subcategories);
+                    
+                    // Save to localStorage
+                    saveToLocalStorage();
+
+                    // Hide form and show list
+                    document.getElementById('editMenuItemForm').style.display = 'none';
+                    document.getElementById('menuItemsList').style.display = 'block';
+
+                    // Reset current image upload
+                    state.currentImageUpload = null;
+
+                    // Reload menu items
+                    loadMenuItemsForAdmin();
+                    displayMenuItems('all');
+
+                    showNotification(itemId ? "Menu item updated successfully." : "Menu item added successfully.");
+                })
+                .catch((error) => {
+                    console.error("Error saving menu item to Firestore: ", error);
+                    showNotification("Error saving menu item to cloud. Please check console.");
+                });
+        }
+
+
 
         // Function to save menu item
         function saveMenuItem() {
@@ -5635,7 +6472,16 @@
                 }
 
                 // Items summary
-                const itemsSummary = order.items.map(item => `${item.quantity}x ${item.name}`).join(', ');
+                const itemsSummary = order.items.map(item => {
+                    let itemText = `${item.quantity}x ${item.name}`;
+                    // NEW: Add subcategory options to display
+                    if (item.selectedOptions && item.selectedOptions.length > 0) {
+                        itemText += ' (Customized)';
+                    }
+                    return itemText;
+                }).join(', ');
+
+
 
                 orderCard.innerHTML = `
                     <div class="admin-card-header">
@@ -6128,9 +6974,13 @@ function selectTable(tableName) {
             return `${prefix}-${randomNum}`;
         }
 
-        // Function to calculate subtotal
+
+       // UPDATED Function to calculate subtotal (now includes subcategory options)
         function calculateSubtotal() {
-            return state.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            return state.cart.reduce((sum, item) => {
+                const itemPrice = item.totalPrice || (item.price * item.quantity);
+                return sum + itemPrice;
+            }, 0);
         }
 
         // Function to calculate total (same as subtotal since tax is already included)
@@ -6138,22 +6988,35 @@ function selectTable(tableName) {
             return calculateSubtotal();
         }
 
-        // Function to show order confirmation
+        // UPDATED Function to show order confirmation (now includes subcategory options)
         function showOrderConfirmation(order) {
             orderNumberDisplay.textContent = order.orderNumber;
             confirmationTable.textContent = `Table: ${order.table}`;
 
             confirmationItems.innerHTML = '';
             order.items.forEach(item => {
-                const itemTotal = item.price * item.quantity;
+                const itemTotal = item.totalPrice || (item.price * item.quantity);
                 const orderItemElement = document.createElement('div');
                 orderItemElement.className = 'order-item';
+                
+                let optionsHTML = '';
+                if (item.selectedOptions && item.selectedOptions.length > 0) {
+                    optionsHTML = '<div style="font-size: 13px; color: var(--gray); margin-left: 38px;">';
+                    item.selectedOptions.forEach(opt => {
+                        const priceText = opt.additionalPrice > 0 ? ` (+$${opt.additionalPrice.toFixed(2)})` : 
+                                        opt.additionalPrice < 0 ? ` (-$${Math.abs(opt.additionalPrice).toFixed(2)})` : '';
+                        optionsHTML += `${opt.subcategoryName}: ${opt.optionName}${priceText}<br>`;
+                    });
+                    optionsHTML += '</div>';
+                }
+                
                 orderItemElement.innerHTML = `
                     <div class="order-item-name">
                         <div class="order-item-quantity">${item.quantity}</div>
                         <div>${item.name}</div>
                     </div>
                     <div class="order-item-price">$${itemTotal.toFixed(2)}</div>
+                    ${optionsHTML}
                 `;
                 confirmationItems.appendChild(orderItemElement);
             });
@@ -6284,15 +7147,14 @@ function selectTable(tableName) {
             }
         }
 
-        // Function to display menu items
-                function displayMenuItems(category) {
+        // UPDATED Function to display menu items (now shows customizable badge)
+        function displayMenuItems(category) {
             menuGrid.innerHTML = '';
-            let filteredItems = category === 'all'
-            ? state.menuItems
-            : state.menuItems.filter(item => item.category === category);
-            // 👇 NEW LINE – paste it right here
-            filteredItems = [...filteredItems].sort((a,b) => (a.sortOrder || 0) - (b.sortOrder || 0));
-            
+
+            const filteredItems = category === 'all'
+                ? state.menuItems
+                : state.menuItems.filter(item => item.category === category);
+
             if (filteredItems.length === 0) {
                 menuGrid.innerHTML = `
                     <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--gray);">
@@ -6311,22 +7173,19 @@ function selectTable(tableName) {
                     ? `background-image: url('${item.image}')`
                     : 'background-color: var(--light-gray)';
 
+                // Check if item has subcategories
+                const hasSubcategories = item.subcategories && item.subcategories.length > 0;
+                const customizableBadge = hasSubcategories ? 
+                    '<span style="font-size: 11px; background-color: var(--success); color: white; padding: 2px 8px; border-radius: 10px; margin-left: 5px;">Customizable</span>' : '';
+
                 menuItemElement.innerHTML = `
                     <div class="item-image" style="${imageStyle}"></div>
                     <div class="item-content">
                         <div class="item-header">
-                            <div class="item-name">${item.name}</div>
+                            <div class="item-name">${item.name} ${customizableBadge}</div>
                             <div class="item-price">$${item.price.toFixed(2)}</div>
                         </div>
                         <div class="item-description">${item.description}</div>
-                        
-                        ${item.subcategories && item.subcategories.length ? 
-                            `<div class="item-subcategories">
-                                <i class="fas fa-tag" style="margin-right: 5px;"></i>
-                                ${item.subcategories.join(' · ')}
-                            </div>` 
-                            : ''}
-                        
                         <div class="item-footer">
                             <div class="item-tags">
                                 ${item.tags.map(tag => `<span class="item-tag">${tag}</span>`).join('')}
@@ -6341,28 +7200,40 @@ function selectTable(tableName) {
                 menuGrid.appendChild(menuItemElement);
 
                 menuItemElement.querySelector('.add-to-cart').addEventListener('click', function () {
-                    addToCart(item.id);
+                    // NEW: Check if item has subcategories
+                    if (hasSubcategories) {
+                        showSubcategoryOptions(item.id);
+                    } else {
+                        addToCart(item.id);
+                    }
                 });
             });
         }
 
-        // Function to add an item to the cart
+        // UPDATED Function to add an item to the cart (now handles items without subcategories)
         function addToCart(itemId) {
             if (state.isAdminMode) return;
 
             const menuItem = state.menuItems.find(item => item.id === itemId);
             if (!menuItem) return;
 
-            const existingItem = state.cart.find(item => item.id === itemId);
+            const existingItem = state.cart.find(item => 
+                item.id === itemId && 
+                (!item.selectedOptions || item.selectedOptions.length === 0)
+            );
 
             if (existingItem) {
                 existingItem.quantity += 1;
+                existingItem.totalPrice = existingItem.price * existingItem.quantity;
             } else {
                 state.cart.push({
                     id: menuItem.id,
                     name: menuItem.name,
                     price: menuItem.price,
-                    quantity: 1
+                    quantity: 1,
+                    selectedOptions: [],
+                    additionalPrice: 0,
+                    totalPrice: menuItem.price
                 });
             }
 
@@ -6373,7 +7244,7 @@ function selectTable(tableName) {
             playAddToCartSound();
         }
 
-        // Function to update the cart display
+        // UPDATED Function to update the cart display (now shows subcategory options)
         function updateCart() {
             if (state.isAdminMode) return;
 
@@ -6392,22 +7263,39 @@ function selectTable(tableName) {
                 state.cart.forEach(item => {
                     const cartItemElement = document.createElement('div');
                     cartItemElement.className = 'cart-item';
+                    
+                    // Calculate item total
+                    const itemTotal = item.totalPrice || (item.price * item.quantity);
+                    
+                    // NEW: Add subcategory options display
+                    let optionsHTML = '';
+                    if (item.selectedOptions && item.selectedOptions.length > 0) {
+                        optionsHTML = '<div class="cart-subcategory-options">';
+                        item.selectedOptions.forEach(opt => {
+                            const priceText = opt.additionalPrice > 0 ? ` (+$${opt.additionalPrice.toFixed(2)})` : 
+                                            opt.additionalPrice < 0 ? ` (-$${Math.abs(opt.additionalPrice).toFixed(2)})` : '';
+                            optionsHTML += `<span class="cart-subcategory-option">${opt.subcategoryName}: ${opt.optionName}${priceText}</span>`;
+                        });
+                        optionsHTML += '</div>';
+                    }
+                    
                     cartItemElement.innerHTML = `
                         <div class="cart-item-info">
                             <div class="cart-item-name">${item.name}</div>
-                            <div class="cart-item-price">$${item.price.toFixed(2)}</div>
+                            <div class="cart-item-price">$${itemTotal.toFixed(2)}</div>
+                            ${optionsHTML}
                         </div>
                         <div class="cart-item-controls">
                             <div class="quantity-control">
-                                <button class="quantity-btn decrease" data-id="${item.id}">
+                                <button class="quantity-btn decrease" data-id="${item.id}" data-has-options="${item.selectedOptions && item.selectedOptions.length > 0 ? 'true' : 'false'}">
                                     <i class="fas fa-minus"></i>
                                 </button>
                                 <span class="quantity">${item.quantity}</span>
-                                <button class="quantity-btn increase" data-id="${item.id}">
+                                <button class="quantity-btn increase" data-id="${item.id}" data-has-options="${item.selectedOptions && item.selectedOptions.length > 0 ? 'true' : 'false'}">
                                     <i class="fas fa-plus"></i>
                                 </button>
                             </div>
-                            <div class="remove-item" data-id="${item.id}">
+                            <div class="remove-item" data-id="${item.id}" data-has-options="${item.selectedOptions && item.selectedOptions.length > 0 ? 'true' : 'false'}">
                                 <i class="fas fa-trash"></i>
                             </div>
                         </div>
@@ -6418,21 +7306,24 @@ function selectTable(tableName) {
                 document.querySelectorAll('.decrease').forEach(btn => {
                     btn.addEventListener('click', function () {
                         const itemId = parseInt(this.getAttribute('data-id'));
-                        updateCartItemQuantity(itemId, -1);
+                        const hasOptions = this.getAttribute('data-has-options') === 'true';
+                        updateCartItemQuantity(itemId, -1, hasOptions);
                     });
                 });
 
                 document.querySelectorAll('.increase').forEach(btn => {
                     btn.addEventListener('click', function () {
                         const itemId = parseInt(this.getAttribute('data-id'));
-                        updateCartItemQuantity(itemId, 1);
+                        const hasOptions = this.getAttribute('data-has-options') === 'true';
+                        updateCartItemQuantity(itemId, 1, hasOptions);
                     });
                 });
 
                 document.querySelectorAll('.remove-item').forEach(btn => {
                     btn.addEventListener('click', function () {
                         const itemId = parseInt(this.getAttribute('data-id'));
-                        removeFromCart(itemId);
+                        const hasOptions = this.getAttribute('data-has-options') === 'true';
+                        removeFromCart(itemId, hasOptions);
                     });
                 });
             }
@@ -6440,28 +7331,68 @@ function selectTable(tableName) {
             updateCartSummary();
         }
 
-        // Function to update cart item quantity
-        function updateCartItemQuantity(itemId, change) {
-            const item = state.cart.find(item => item.id === itemId);
+        // UPDATED Function to update cart item quantity (now handles items with options)
+        function updateCartItemQuantity(itemId, change, hasOptions = false) {
+            let item;
+            
+            if (hasOptions) {
+                // For items with options, we need to find the exact match
+                // This is handled by the click event which passes the specific item
+                // For now, we'll find the first matching item
+                item = state.cart.find(item => item.id === itemId);
+            } else {
+                item = state.cart.find(item => item.id === itemId && (!item.selectedOptions || item.selectedOptions.length === 0));
+            }
 
             if (item) {
                 item.quantity += change;
 
                 if (item.quantity <= 0) {
-                    state.cart = state.cart.filter(item => item.id !== itemId);
+                    if (hasOptions) {
+                        state.cart = state.cart.filter(cartItem => 
+                            !(cartItem.id === itemId && 
+                              JSON.stringify(cartItem.selectedOptions) === JSON.stringify(item.selectedOptions))
+                        );
+                    } else {
+                        state.cart = state.cart.filter(cartItem => 
+                            !(cartItem.id === itemId && 
+                              (!cartItem.selectedOptions || cartItem.selectedOptions.length === 0))
+                        );
+                    }
+                } else {
+                    // Update total price
+                    item.totalPrice = (item.price + item.additionalPrice) * item.quantity;
                 }
 
                 updateCart();
             }
         }
 
-        // Function to remove an item from cart
-        function removeFromCart(itemId) {
-            const item = state.cart.find(item => item.id === itemId);
-            state.cart = state.cart.filter(item => item.id !== itemId);
-            updateCart();
-
+        // UPDATED Function to remove an item from cart (now handles items with options)
+        function removeFromCart(itemId, hasOptions = false) {
+            let item;
+            
+            if (hasOptions) {
+                // For items with options, we need to find the exact match
+                item = state.cart.find(item => item.id === itemId);
+            } else {
+                item = state.cart.find(item => item.id === itemId && (!item.selectedOptions || item.selectedOptions.length === 0));
+            }
+            
             if (item) {
+                if (hasOptions) {
+                    state.cart = state.cart.filter(cartItem => 
+                        !(cartItem.id === itemId && 
+                          JSON.stringify(cartItem.selectedOptions) === JSON.stringify(item.selectedOptions))
+                    );
+                } else {
+                    state.cart = state.cart.filter(cartItem => 
+                        !(cartItem.id === itemId && 
+                          (!cartItem.selectedOptions || cartItem.selectedOptions.length === 0))
+                    );
+                }
+                
+                updateCart();
                 showNotification(`${item.name} removed from cart`);
             }
         }
@@ -6628,7 +7559,6 @@ function selectTable(tableName) {
                     const cloudCategories = [];
                     snapshot.forEach(doc => cloudCategories.push(doc.data()));
                     state.categories = cloudCategories;
-                    ensureSortOrders();
                     updateCategoryTabs();
                 } else if (state.categories.length > 0) {
                     // Migration: Upload local categories
@@ -6639,24 +7569,49 @@ function selectTable(tableName) {
                 }
             });
 
-            // 4. Menu Items
+            // 4. Menu Items with Subcategories
             db.collection("menu").onSnapshot((snapshot) => {
                 if (!snapshot.empty) {
                     const cloudItems = [];
-                    snapshot.forEach(doc => cloudItems.push(doc.data()));
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        cloudItems.push(data);
+                    });
+                    
+                    // IMPORTANT: Replace local menu items with cloud data
                     state.menuItems = cloudItems;
-                    ensureSortOrders();
+
+                    // Ensure all menu items have subcategories array if not present
+                    state.menuItems.forEach(item => {
+                        if (!item.subcategories) {
+                            item.subcategories = [];
+                        }
+                        // Ensure all subcategories have proper structure
+                        if (item.subcategories) {
+                            item.subcategories.forEach(subcategory => {
+                                if (!subcategory.id) subcategory.id = `subcategory-${Date.now()}`;
+                                if (!subcategory.options) subcategory.options = [];
+                                subcategory.options.forEach(option => {
+                                    if (!option.id) option.id = `option-${Date.now()}`;
+                                });
+                            });
+                        }
+                    });
 
                     // Refresh displays
-                    displayMenuItems(state.currentCategory);
+                    displayMenuItems('all');
 
                     // If Admin, refresh admin list
                     if (state.isAdminMode) {
                         loadMenuItemsForAdmin();
                     }
+                    
+                    // Save to localStorage as backup
+                    saveToLocalStorage();
+                    
                 } else if (state.menuItems.length > 0) {
-                    // Migration: Upload local menu items
-                    console.log("Uploading local menu items to cloud...");
+                    // Migration: Upload local menu items (including subcategories) to cloud
+                    console.log("Uploading local menu items with subcategories to cloud...");
                     state.menuItems.forEach(item => {
                         // Ensure ID is string for doc name, or use numeric ID
                         db.collection("menu").doc(item.id.toString()).set(item);
