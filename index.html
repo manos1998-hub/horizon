@@ -896,56 +896,60 @@
         const submitChangeCodeBtn = document.getElementById('submitChangeCodeBtn');
         const cancelChangeBtn = document.getElementById('cancelChangeBtn');
 
-        // ========== FIRESTORE LOAD & SAVE ==========
-        async function loadFromFirestore() {
-            try {
-                // Restaurant Info
-                const restaurantDoc = await db.collection('settings').doc('restaurantInfo').get();
-                if (restaurantDoc.exists) state.restaurantInfo = restaurantDoc.data();
-                else await db.collection('settings').doc('restaurantInfo').set(state.restaurantInfo);
+        // ========== OPTIMIZED FIRESTORE LOAD (parallel) ==========
+    async function loadFromFirestore() {
+    try {
+        // Firestore reads in parallel for max speed
+        const [restaurantDoc, menuSnapshot, ordersSnapshot, categoriesDoc, customDoc] = await Promise.all([
+            db.collection('settings').doc('restaurantInfo').get(),
+            db.collection('menuItems').get(),
+            db.collection('orders').get(),
+            db.collection('settings').doc('categories').get(),
+            db.collection('settings').doc('customization').get()
+        ]);
 
-                // Menu Items – NO DEFAULT PRODUCTS! If Firestore empty, start with empty array.
-                const menuSnapshot = await db.collection('menuItems').get();
-                if (!menuSnapshot.empty) {
-                    state.menuItems = menuSnapshot.docs.map(doc => ({
-                        id: Number(doc.id),
-                        ...doc.data()
-                    }));
-                } else {
-                    state.menuItems = []; // 🔥 No default products – completely empty
-                }
+        // Restaurant Info
+        if (restaurantDoc.exists) state.restaurantInfo = restaurantDoc.data();
+        else await db.collection('settings').doc('restaurantInfo').set(state.restaurantInfo);
 
-                // Orders
-                const ordersSnapshot = await db.collection('orders').get();
-                if (!ordersSnapshot.empty) {
-                    state.orders = ordersSnapshot.docs.map(doc => ({
-                        ...doc.data(),
-                        orderNumber: doc.id
-                    }));
-                }
-
-                // Categories – keep default categories for usability
-                const categoriesDoc = await db.collection('settings').doc('categories').get();
-                if (categoriesDoc.exists) {
-                    state.categories = categoriesDoc.data().list || [];
-                } else {
-                    state.categories = [...defaultCategories];
-                    await db.collection('settings').doc('categories').set({ list: state.categories });
-                }
-
-                // Customization
-                const customDoc = await db.collection('settings').doc('customization').get();
-                if (customDoc.exists) state.customization = customDoc.data();
-                else await db.collection('settings').doc('customization').set(state.customization);
-
-                // Determine theme & font
-                determineCurrentTheme();
-                determineCurrentFont();
-
-            } catch (error) {
-                console.error("Firestore load error:", error);
-            }
+        // Menu Items – NO DEFAULT PRODUCTS
+        if (!menuSnapshot.empty) {
+            state.menuItems = menuSnapshot.docs.map(doc => ({
+                id: Number(doc.id),
+                ...doc.data()
+            }));
+        } else {
+            state.menuItems = []; // keep empty
         }
+
+        // Orders
+        if (!ordersSnapshot.empty) {
+            state.orders = ordersSnapshot.docs.map(doc => ({
+                ...doc.data(),
+                orderNumber: doc.id
+            }));
+        }
+
+        // Categories
+        if (categoriesDoc.exists) {
+            state.categories = categoriesDoc.data().list || [];
+        } else {
+            state.categories = [...defaultCategories];
+            await db.collection('settings').doc('categories').set({ list: state.categories });
+        }
+
+        // Customization
+        if (customDoc.exists) state.customization = customDoc.data();
+        else await db.collection('settings').doc('customization').set(state.customization);
+
+        determineCurrentTheme();
+        determineCurrentFont();
+
+    } catch (error) {
+        console.error("Firestore load error:", error);
+    }
+    }
+         
 
         async function saveToFirestore() {
             try {
@@ -1510,14 +1514,26 @@
             });
         }
 
-        // ========== INITIALIZATION ==========
-        async function initApp() {
-            await loadFromFirestore();
-            applyCustomization();
-            updateRestaurantUI();
-            updateCategoryTabs();
-            displayMenuItems('all');
-            setupAdminPanel();
+        // ========== INITIALIZATION WITH LOADING OVERLAY ==========
+    async function initApp() {
+    // Show loading overlay
+    const overlay = document.getElementById('loadingOverlay');
+    overlay.style.display = 'flex';
+
+    await loadFromFirestore(); // parallel load – much faster
+
+    // Apply all UI updates
+    applyCustomization();
+    updateRestaurantUI();
+    updateCategoryTabs();
+    displayMenuItems('all');
+    setupAdminPanel();
+
+    // Hide loading overlay with fade
+    overlay.style.opacity = '0';
+    setTimeout(() => {
+        overlay.style.display = 'none';
+    }, 300);
             // Event listeners
             document.querySelectorAll('.table-btn').forEach(btn => btn.addEventListener('click', function() { selectTable(this.getAttribute('data-table')); }));
             cartFloating.addEventListener('click', function() { if (!state.isAdminMode) showSection('cartSection'); });
@@ -1551,5 +1567,15 @@
         }
         initApp();
     </script>
+    <!-- Loading Overlay (visible until Firestore loads) -->
+    <div id="loadingOverlay" style="position: fixed; top:0; left:0; width:100%; height:100%; background: white; display: flex; align-items: center; justify-content: center; z-index: 9999; transition: opacity 0.3s;">
+    <div style="text-align: center; color: var(--primary);">
+        <i class="fas fa-circle-notch" style="font-size: 50px; margin-bottom: 15px; animation: spin 1s infinite linear;"></i>
+        <p style="font-size: 18px; font-weight: 500;">Loading menu...</p>
+    </div>
+    </div>
+    <style>
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
 </body>
 </html>
