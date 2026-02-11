@@ -4072,10 +4072,7 @@
             });
 
             // Check if we should be in admin mode from previous session
-            if (localStorage.getItem('dineEasyAdminMode') === 'true') {
-                // Still require code verification on reload
-                showAdminCodePrompt();
-            }
+            
 
             // NEW: Set up real-time order checking
             setupRealTimeOrderUpdates();
@@ -5663,12 +5660,32 @@
                         </div>
                         <p style="font-size:14px;margin-bottom:10px;">${item.description}</p>
                         <div style="display:flex;justify-content:space-between;">
-                            <span style="font-weight:600;color:var(--primary);">$${item.price.toFixed(2)}</span>
+                            <span style="font-weight:600;color:var(--primary);">$${(item.price ?? 0).toFixed(2)}</span
                             <span style="font-size:12px;color:var(--gray);">${getCategoryDisplayName(item.category)}</span>
                         </div>
                         <div class="tag-display">${item.tags.map(t => `<span class="tag-item">${t}</span>`).join('')}</div>
                     `;
                     container.appendChild(card);
+                    // --- Add listeners for duplicate, edit, delete buttons ---
+                    // Duplicate button
+                    card.querySelector('.duplicate-item').addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        duplicateMenuItem(parseInt(this.dataset.id));
+                    });
+
+                    // Edit button
+                    card.querySelector('.edit-item').addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        openEditMenuItemForm(parseInt(this.dataset.id));
+                    });
+
+                    // Delete button
+                    card.querySelector('.delete-item').addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        if (confirm("Delete this menu item?")) {
+                            deleteMenuItem(parseInt(this.dataset.id));
+                        }
+                    });
                 });
 
                 // ----- ATTACH DRAG EVENT LISTENERS TO EACH CARD -----
@@ -5727,7 +5744,8 @@
 
                     const batch = db.batch();
                     state.menuItems.forEach(item => {
-                        batch.update(db.collection("menu").doc(item.id.toString()), { sortOrder: item.sortOrder });
+                        const ref = db.collection("menu").doc(item.id.toString());
+                        batch.set(ref, { sortOrder: item.sortOrder }, { merge: true });
                     });
                     batch.commit().catch(console.error);
 
@@ -5736,6 +5754,8 @@
                         loadMenuItemsForAdminModal();
                     }
                     displayMenuItems('all');
+
+                    batch.set(ref, { sortOrder: item.sortOrder }, { merge: true });
                 }
 
                 function handleMenuItemDragEnd(e) {
@@ -5775,12 +5795,29 @@
                             </div>
                             <p style="font-size:14px;margin-bottom:10px;">${item.description}</p>
                             <div style="display:flex;justify-content:space-between;">
-                                <span style="font-weight:600;color:var(--primary);">$${item.price.toFixed(2)}</span>
+                                <span style="font-weight:600;color:var(--primary);">$${(item.price ?? 0).toFixed(2)}</span
                                 <span style="font-size:12px;color:var(--gray);">${getCategoryDisplayName(item.category)}</span>
                             </div>
                             <div class="tag-display">${item.tags.map(t => `<span class="tag-item">${t}</span>`).join('')}</div>
                         `;
                         container.appendChild(card);
+                        // --- Add listeners for duplicate, edit, delete buttons ---
+                        card.querySelector('.duplicate-item').addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            duplicateMenuItem(parseInt(this.dataset.id));
+                        });
+
+                        card.querySelector('.edit-item').addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            openEditMenuItemForm(parseInt(this.dataset.id));
+                        });
+
+                        card.querySelector('.delete-item').addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            if (confirm("Delete this menu item?")) {
+                                deleteMenuItem(parseInt(this.dataset.id));
+                            }
+                        });
                     });
 
                     // ----- ATTACH THE SAME DRAG EVENT LISTENERS (already defined in Step 2) -----
@@ -6037,10 +6074,14 @@
             const category = document.getElementById('editItemCategory').value;
             const tags = document.getElementById('editItemTags').value.split(',').map(tag => tag.trim()).filter(tag => tag);
 
-            if (!name || !description || !price) {
-                showNotification("Please fill in all required fields.");
-                return;
+            if (!name || !description) {
+             showNotification("Please fill in all required fields.");
+            return;
             }
+             if (typeof price !== 'number' || isNaN(price) || price < 0) {
+            showNotification("Price must be a valid number greater than or equal to 0.");
+            return;
+             }
 
             if (!category) {
                 showNotification("Please select a category.");
@@ -6152,78 +6193,6 @@
                 });
         }
 
-
-
-        // Function to save menu item
-        function saveMenuItem() {
-            const itemId = document.getElementById('editMenuItemForm').getAttribute('data-item-id');
-            const name = document.getElementById('editItemName').value;
-            const description = document.getElementById('editItemDescription').value;
-            const price = parseFloat(document.getElementById('editItemPrice').value);
-            const category = document.getElementById('editItemCategory').value;
-            const tags = document.getElementById('editItemTags').value.split(',').map(tag => tag.trim()).filter(tag => tag);
-
-            if (!name || !description || !price) {
-                showNotification("Please fill in all required fields.");
-                return;
-            }
-
-            if (!category) {
-                showNotification("Please select a category.");
-                return;
-            }
-
-            if (itemId) {
-                // Update existing item
-                const index = state.menuItems.findIndex(item => item.id === parseInt(itemId));
-                if (index !== -1) {
-                    state.menuItems[index] = {
-                        ...state.menuItems[index],
-                        name,
-                        description,
-                        price,
-                        category,
-                        image: state.currentImageUpload || state.menuItems[index].image,
-                        tags
-                    };
-                }
-            } else {
-                // Add new item
-                const newId = state.menuItems.length > 0 ? Math.max(...state.menuItems.map(item => item.id)) + 1 : 1;
-                const updatedItem = {   // ✅ use 'const' or 'let' only once
-                    id: newId,
-                    name,
-                    description,
-                    price,
-                    category,
-                    image: state.currentImageUpload || '',
-                    tags,
-                    subcategories: subcategories,
-                    sortOrder: Math.max(...state.menuItems.map(i => i.sortOrder || 0), 0) + 1   // ✅ this line is inside
-                };
-                state.menuItems.push(updatedItem);
-            }
-
-            // Save to Firestore (Menu)
-            // Use the item we just modified/added
-            const savedItem = itemId ? state.menuItems[index] : state.menuItems[state.menuItems.length - 1];
-            db.collection("menu").doc(savedItem.id.toString()).set(savedItem);
-
-            saveToLocalStorage();
-
-            // Hide form and show list
-            document.getElementById('editMenuItemForm').style.display = 'none';
-            document.getElementById('menuItemsList').style.display = 'block';
-
-            // Reset current image upload
-            state.currentImageUpload = null;
-
-            // Reload menu items
-            loadMenuItemsForAdmin();
-            displayMenuItems('all');
-
-            showNotification(itemId ? "Menu item updated successfully." : "Menu item added successfully.");
-        }
 
         // Function to delete menu item
         function deleteMenuItem(itemId) {
@@ -6404,6 +6373,39 @@
 
                 showNotification(`Category "${category.displayName}" deleted successfully.`);
             }
+        }
+
+        // Function to move a category up or down in order
+            function moveCategory(categoryId, direction) {
+            const index = state.categories.findIndex(c => c.id === categoryId);
+            if (index === -1) return;
+
+            const newIndex = direction === 'up' ? index - 1 : index + 1;
+            if (newIndex < 0 || newIndex >= state.categories.length) return;
+
+            // Swap sortOrder values
+            const temp = state.categories[index].sortOrder;
+            state.categories[index].sortOrder = state.categories[newIndex].sortOrder;
+            state.categories[newIndex].sortOrder = temp;
+
+            // Re-sort the array to reflect new order
+            state.categories.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+
+            // Save to Firestore (use set with merge to avoid "no document" errors)
+            const batch = db.batch();
+            state.categories.forEach(cat => {
+                const ref = db.collection("categories").doc(cat.id);
+                batch.set(ref, { sortOrder: cat.sortOrder }, { merge: true });
+            });
+            batch.commit().catch(console.error);
+
+            saveToLocalStorage();
+            loadCategoriesForAdmin();
+            if (typeof loadCategoriesForAdminModal === 'function') {
+                loadCategoriesForAdminModal();
+            }
+            updateCategoryTabs();
+            showNotification(`Category moved ${direction}.`);
         }
 
         // Function to get category display name
@@ -7176,7 +7178,7 @@ function selectTable(tableName) {
                     <div class="item-content">
                         <div class="item-header">
                             <div class="item-name">${item.name} ${customizableBadge}</div>
-                            <div class="item-price">$${item.price.toFixed(2)}</div>
+                            <div class="item-price">$${(item.price ?? 0).toFixed(2)}</div>
                         </div>
                         <div class="item-description">${item.description}</div>
                         <div class="item-footer">
@@ -7572,24 +7574,24 @@ function selectTable(tableName) {
                     });
                     
                     // IMPORTANT: Replace local menu items with cloud data
-                    state.menuItems = cloudItems;
-
-                    // Ensure all menu items have subcategories array if not present
-                    state.menuItems.forEach(item => {
-                        if (!item.subcategories) {
-                            item.subcategories = [];
-                        }
-                        // Ensure all subcategories have proper structure
-                        if (item.subcategories) {
-                            item.subcategories.forEach(subcategory => {
-                                if (!subcategory.id) subcategory.id = `subcategory-${Date.now()}`;
-                                if (!subcategory.options) subcategory.options = [];
-                                subcategory.options.forEach(option => {
-                                    if (!option.id) option.id = `option-${Date.now()}`;
-                                });
-                            });
-                        }
+                    // IMPORTANT: Replace local menu items with cloud data, but ensure required fields
+                state.menuItems = cloudItems.map(item => {
+                    // Ensure price is a number (default 0 if missing or invalid)
+                    if (typeof item.price !== 'number' || isNaN(item.price)) {
+                        item.price = 0;
+                    }
+                    // Ensure subcategories array exists
+                    if (!item.subcategories) item.subcategories = [];
+                    // Ensure each subcategory has an id and options array
+                    item.subcategories.forEach(sub => {
+                        if (!sub.id) sub.id = `subcategory-${Date.now()}-${Math.random()}`;
+                        if (!sub.options) sub.options = [];
+                        sub.options.forEach(opt => {
+                            if (!opt.id) opt.id = `option-${Date.now()}-${Math.random()}`;
+                        });
                     });
+                    return item;
+                });
 
                     // Refresh displays
                     displayMenuItems('all');
