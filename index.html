@@ -1605,8 +1605,8 @@ VIP Table</textarea>
             myOrdersButton.style.display = 'flex';
             showSection('menuSection');
             
-            // Admin icon visibility: only when table is exactly "Admin"
-            if (name === "Admin") {
+            // Admin icon visibility: only when table is "Admin" (case-insensitive)
+            if (name.toLowerCase() === "admin") {
                 adminFloating.style.display = 'flex';
             } else {
                 adminFloating.style.display = 'none';
@@ -2660,9 +2660,9 @@ VIP Table</textarea>
             document.getElementById('backToMenuFromOrdersBtn').addEventListener('click', ()=> showSection('menuSection'));
             document.getElementById('placeNewOrderBtn').addEventListener('click', function() { resetCart(); showSection('menuSection'); });
 
-            // ADMIN ICON CLICK – now only visible when currentTable === "Admin"
+            // ADMIN ICON CLICK – now only visible when currentTable is "Admin" (case-insensitive)
             adminFloating.addEventListener('click', function() {
-                if (state.currentTable !== "Admin") {
+                if (!state.currentTable || state.currentTable.toLowerCase() !== "admin") {
                     showNotification('Admin access is only available via Admin table QR code.');
                     return;
                 }
@@ -2729,7 +2729,7 @@ VIP Table</textarea>
 
         initApp();
 
-        // ========== FAKE LOADING: HIDE AFTER 7 SECONDS ==========
+        // ========== FAKE LOADING: HIDE AFTER 5 SECONDS ==========
         setTimeout(() => {
             const overlay = document.getElementById('loadingOverlay');
             if (overlay) {
