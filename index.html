@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Restaurant Dining App - Instant + Delete by Table</title>
+    <title>Restaurant Dining App - Instant + Auto QR Login</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
     <!-- Firebase SDK -->
@@ -381,7 +381,7 @@
     </header>
 
     <!-- ========== SCANNER SECTION ========== -->
-    <section id="scannerSection" class="app-section active-section">
+    <section id="scannerSection" class="app-section">
         <div class="container scanner-section">
             <div class="scanner-container">
                 <h2 class="section-title">Scan Table QR Code</h2>
@@ -569,7 +569,6 @@
                             </div>
                         </div>
                         <div class="admin-form-group"><label class="admin-label">Tags (separate with commas)</label><input type="text" class="admin-input" id="editItemTags" placeholder="Vegetarian, Popular, Spicy"></div>
-                        <!-- Options / Subcategories will be injected here dynamically via JavaScript -->
                         <div class="payment-actions">
                             <button class="btn btn-secondary" id="cancelEditBtn"><i class="fas fa-times"></i> Cancel</button>
                             <button class="btn btn-primary" id="saveMenuItemBtn"><i class="fas fa-save"></i> Save Changes</button>
@@ -594,8 +593,6 @@
                 <div class="admin-content" id="ordersTab">
                     <div class="admin-form-group"><label class="admin-label">Filter by Status</label><select class="admin-select" id="orderStatusFilter"><option value="all">All Orders</option><option value="pending">Pending</option><option value="preparing">Preparing</option><option value="ready">Ready</option><option value="served">Served</option><option value="cancelled">Cancelled</option></select></div>
                     <div id="adminOrdersList"><p style="text-align: center; color: var(--gray); padding: 40px;">No orders yet. Orders will appear here when customers place them.</p></div>
-                    
-                    <!-- DELETE ORDERS BY TABLE -->
                     <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid var(--light-gray);">
                         <h4 style="margin-bottom: 15px;"><i class="fas fa-trash-alt"></i> Delete Orders by Table</h4>
                         <div style="display: flex; gap: 10px; align-items: flex-end;">
@@ -610,7 +607,7 @@
                         <p style="margin-top: 10px; font-size: 13px; color: var(--warning);"><i class="fas fa-exclamation-triangle"></i> This action cannot be undone. Orders will be permanently deleted from the database.</p>
                     </div>
                 </div>
-                <!-- Visual Customization (20 themes) -->
+                <!-- Visual Customization -->
                 <div class="admin-content" id="customizationTab">
                     <div class="customization-panel">
                         <div class="customization-section">
@@ -738,8 +735,6 @@
             <div class="admin-content" id="ordersTabModal">
                 <div class="admin-form-group"><label class="admin-label">Filter by Status</label><select class="admin-select" id="orderStatusFilterModal"><option value="all">All Orders</option><option value="pending">Pending</option><option value="preparing">Preparing</option><option value="ready">Ready</option><option value="served">Served</option><option value="cancelled">Cancelled</option></select></div>
                 <div id="adminOrdersListModal"><p style="text-align: center; color: var(--gray); padding: 40px;">No orders yet. Orders will appear here when customers place them.</p></div>
-                
-                <!-- DELETE ORDERS BY TABLE (MODAL) -->
                 <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid var(--light-gray);">
                     <h4 style="margin-bottom: 15px;"><i class="fas fa-trash-alt"></i> Delete Orders by Table</h4>
                     <div style="display: flex; gap: 10px; align-items: flex-end;">
@@ -804,7 +799,7 @@
         </div>
     </div>
 
-    <!-- ========== OPTIONS MODAL (for item customizations) ========== -->
+    <!-- ========== OPTIONS MODAL ========== -->
     <div class="options-modal" id="optionsModal">
         <div class="options-modal-container">
             <div id="optionsModalContent"></div>
@@ -897,7 +892,7 @@
             { id: "beverages", name: "beverages", displayName: "Beverages", isDefault: true, displayOrder: 5 }
         ];
 
-        // ========== THEMES ==========
+        // ========== THEMES & FONTS ==========
         const themes = {
             default: { name: "Classic Modern", category: "Modern", primary: "#e63946", secondary: "#457b9d", background: "#fefefe", text: "#212529", cardBg: "#ffffff", lightGray: "#e9ecef" },
             midnight: { name: "Midnight Elegance", category: "Modern", primary: "#6c63ff", secondary: "#4cc9f0", background: "#121212", text: "#f5f5f5", cardBg: "#1e1e1e", lightGray: "#2d2d2d" },
@@ -920,7 +915,6 @@
             candy: { name: "Candy Shop", category: "Playful", primary: "#ff5d8f", secondary: "#ff97b7", background: "#f8f9fa", text: "#212529", cardBg: "#ffffff", lightGray: "#ffcad4" },
             tropical: { name: "Tropical Paradise", category: "Playful", primary: "#06d6a0", secondary: "#118ab2", background: "#f8f9fa", text: "#073b4c", cardBg: "#ffffff", lightGray: "#cbf3f0" }
         };
-        // ========== FONTS ==========
         const fonts = {
             poppins: { name: "Poppins", primary: "'Poppins', sans-serif", secondary: "'Playfair Display', serif" },
             roboto: { name: "Roboto", primary: "'Roboto', sans-serif", secondary: "'Roboto Slab', serif" },
@@ -985,7 +979,7 @@
         const optionsModal = document.getElementById('optionsModal');
         const optionsModalContent = document.getElementById('optionsModalContent');
 
-        // ========== GRANULAR FIRESTORE SAVE (non‑blocking) ==========
+        // ========== GRANULAR FIRESTORE SAVE ==========
         async function saveRestaurantInfo() { try { await db.collection('settings').doc('restaurantInfo').set(state.restaurantInfo); } catch (e) { console.error(e); } }
         async function saveMenuItem(item) { try { await db.collection('menuItems').doc(item.id.toString()).set(item); } catch (e) { console.error(e); } }
         async function deleteMenuItemFirestore(id) { try { await db.collection('menuItems').doc(id.toString()).delete(); } catch (e) { console.error(e); } }
@@ -1394,7 +1388,7 @@
                 const updated = Array.from(grid.children).filter(c=>c.classList.contains('admin-card'));
                 updated.forEach((c,i)=>{ const id = parseInt(c.dataset.itemId); const mi = state.menuItems.find(m=>m.id===id); if (mi) mi.displayOrder = i; });
                 state.menuItems.sort((a,b)=>(a.displayOrder||0)-(b.displayOrder||0));
-                saveMenuItem(state.menuItems.find(m=>m.id===parseInt(dragged.dataset.itemId))); // optimistic update of order
+                saveMenuItem(state.menuItems.find(m=>m.id===parseInt(dragged.dataset.itemId)));
             });
         }
         function makeCategoriesDraggable(containerId) {
@@ -1423,7 +1417,7 @@
             });
         }
 
-        // ========== DELETE ORDERS BY TABLE (OPTIMISTIC) ==========
+        // ========== DELETE ORDERS BY TABLE ==========
         function populateTableSelect(selectId) {
             const sel = document.getElementById(selectId); if (!sel) return;
             const tables = [...new Set(state.orders.filter(o=>o.table&&o.table.toLowerCase()!=='admin').map(o=>o.table))].sort();
@@ -1992,10 +1986,39 @@
             });
         }
 
-        // ========== EVENT LISTENERS (instant actions) ==========
+        // ========== 🚀 AUTO‑LOGIN FROM URL ==========
+        function autoLoginFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tableParam = urlParams.get('table');
+            if (tableParam) {
+                // Decode URL encoding (e.g., Table%201 -> Table 1)
+                const tableName = decodeURIComponent(tableParam);
+                // Small delay to ensure Firebase is loaded and state is ready
+                setTimeout(() => {
+                    if (state.menuItems.length > 0 || state.categories.length > 0) {
+                        selectTable(tableName);
+                    } else {
+                        // If data not yet loaded, wait a bit more
+                        const checkInterval = setInterval(() => {
+                            if (state.menuItems.length > 0 || state.categories.length > 0) {
+                                clearInterval(checkInterval);
+                                selectTable(tableName);
+                            }
+                        }, 100);
+                        // Timeout after 5 seconds
+                        setTimeout(() => clearInterval(checkInterval), 5000);
+                    }
+                }, 300);
+            }
+        }
+
+        // ========== EVENT LISTENERS ==========
         async function initApp() {
             await loadInitialData();
             setupListeners();
+            
+            // Try auto‑login after initial load
+            autoLoginFromUrl();
 
             // Table selection
             document.querySelectorAll('.table-btn').forEach(btn => btn.addEventListener('click', function() { selectTable(this.dataset.table); }));
