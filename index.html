@@ -381,7 +381,7 @@
     </header>
 
     <!-- ========== SCANNER SECTION ========== -->
-    <section id="scannerSection" class="app-section">
+    <section id="scannerSection" class="app-section active-section">
         <div class="container scanner-section">
             <div class="scanner-container">
                 <h2 class="section-title">Scan Table QR Code</h2>
@@ -1323,10 +1323,23 @@
             });
             myOrdersSubtitle.textContent = `You have ${tableOrders.length} order${tableOrders.length!==1?'s':''} for ${state.currentTable}`;
         }
-        function selectTable(name) {
+
+        // ========== 🚀 AUTO‑LOGIN FROM URL (NEVER ASKS FOR CODE UNLESS CLICKED MANUALLY) ==========
+        function selectTable(name, isAutoLogin = false) {
             state.currentTable = name;
-            // EXACT check: only if table name is exactly "Admin" (case-insensitive) we show code prompt
-            if (name.toLowerCase() === "admin") { showAdminCodePrompt(); return; }
+            // 🔥 CRITICAL FIX: Auto‑login from QR code NEVER triggers admin code prompt
+            if (name.toLowerCase() === "admin") {
+                if (isAutoLogin) {
+                    // If someone scans an "Admin" QR code, just show a notification and stay on scanner
+                    showNotification("Admin access requires manual click on the Admin button.");
+                    return;
+                } else {
+                    // Manual click on Admin button → show code prompt
+                    showAdminCodePrompt();
+                    return;
+                }
+            }
+            // Normal table selection
             tableInfo.innerHTML = `<i class="fas fa-chair"></i> ${name}`;
             menuSubtitle.textContent = `Select items to add to your order for ${name}`;
             cartSubtitle.textContent = `Your order for ${name}`;
@@ -1338,6 +1351,17 @@
             myOrdersButton.style.display = 'flex';
             showSection('menuSection');
         }
+
+        function autoLoginFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tableParam = urlParams.get('table');
+            if (tableParam) {
+                const tableName = decodeURIComponent(tableParam);
+                // Pass isAutoLogin = true so it never asks for code
+                selectTable(tableName, true);
+            }
+        }
+
         function showHelpNotification() { if (state.currentTable) showNotification(`Ένας σερβιτόρος θα σας εξυπηρετήσει σύντομα.`); else showNotification('Ένας σερβιτόρος θα σας εξυπηρετήσει σύντομα.'); }
 
         // ========== ADMIN MODE ==========
@@ -1387,7 +1411,6 @@
                 if (dragIdx<targetIdx) grid.insertBefore(dragged, target.nextSibling);
                 else grid.insertBefore(dragged, target);
                 
-                // Update displayOrder for ALL menu items based on new visual order
                 const updated = Array.from(grid.children).filter(c=>c.classList.contains('admin-card'));
                 updated.forEach((c, idx) => {
                     const id = parseInt(c.dataset.itemId);
@@ -1396,11 +1419,8 @@
                 });
                 state.menuItems.sort((a,b) => (a.displayOrder||0) - (b.displayOrder||0));
                 
-                // Save ALL menu items to Firestore (batched via Promise.all)
                 await Promise.all(state.menuItems.map(item => saveMenuItem(item)));
                 showNotification("Menu order updated");
-                
-                // Also refresh admin view and menu display
                 loadMenuItemsForAdmin();
                 displayMenuItems(document.querySelector('.category-tab.active')?.dataset?.category || 'all');
             });
@@ -2004,27 +2024,16 @@
             });
         }
 
-        // ========== 🚀 AUTO‑LOGIN FROM URL (NEVER ASKS FOR CODE UNLESS TABLE IS "ADMIN") ==========
-        function autoLoginFromUrl() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const tableParam = urlParams.get('table');
-            if (tableParam) {
-                const tableName = decodeURIComponent(tableParam);
-                // Only triggers code prompt if tableName is exactly "Admin" (case-insensitive)
-                selectTable(tableName);
-            }
-        }
-
         // ========== EVENT LISTENERS ==========
         async function initApp() {
             await loadInitialData();
             setupListeners();
             
-            // Auto‑login after data is loaded – works instantly
+            // Auto‑login from URL – now works without any code prompt
             autoLoginFromUrl();
 
             // Table selection (manual)
-            document.querySelectorAll('.table-btn').forEach(btn => btn.addEventListener('click', function() { selectTable(this.dataset.table); }));
+            document.querySelectorAll('.table-btn').forEach(btn => btn.addEventListener('click', function() { selectTable(this.dataset.table, false); }));
 
             // Cart
             cartFloating.addEventListener('click', function() { if (!state.isAdminMode) showSection('cartSection'); });
