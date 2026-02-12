@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Restaurant Dining App - Instant + Auto QR Login</title>
+    <title>Restaurant Dining App - PERFECT</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
     <!-- Firebase SDK -->
@@ -1325,6 +1325,7 @@
         }
         function selectTable(name) {
             state.currentTable = name;
+            // EXACT check: only if table name is exactly "Admin" (case-insensitive) we show code prompt
             if (name.toLowerCase() === "admin") { showAdminCodePrompt(); return; }
             tableInfo.innerHTML = `<i class="fas fa-chair"></i> ${name}`;
             menuSubtitle.textContent = `Select items to add to your order for ${name}`;
@@ -1366,8 +1367,8 @@
             showNotification("Logged out of admin mode.");
         }
 
-        // ========== DRAG AND DROP ==========
-        function makeAdminGridDraggable(gridId) {
+        // ========== DRAG AND DROP – FULLY FIXED ==========
+        async function makeAdminGridDraggable(gridId) {
             const grid = document.getElementById(gridId); if (!grid) return;
             let dragged = null;
             grid.addEventListener('dragstart', e => {
@@ -1376,7 +1377,7 @@
             });
             grid.addEventListener('dragend', e => { if (dragged) { dragged.classList.remove('dragging'); dragged=null; } });
             grid.addEventListener('dragover', e => e.preventDefault());
-            grid.addEventListener('drop', e => {
+            grid.addEventListener('drop', async function(e) {
                 e.preventDefault(); if (!dragged) return;
                 const target = e.target.classList.contains('admin-card')?e.target:e.target.closest('.admin-card');
                 if (!target || target===dragged) return;
@@ -1385,10 +1386,23 @@
                 if (dragIdx===-1 || targetIdx===-1) return;
                 if (dragIdx<targetIdx) grid.insertBefore(dragged, target.nextSibling);
                 else grid.insertBefore(dragged, target);
+                
+                // Update displayOrder for ALL menu items based on new visual order
                 const updated = Array.from(grid.children).filter(c=>c.classList.contains('admin-card'));
-                updated.forEach((c,i)=>{ const id = parseInt(c.dataset.itemId); const mi = state.menuItems.find(m=>m.id===id); if (mi) mi.displayOrder = i; });
-                state.menuItems.sort((a,b)=>(a.displayOrder||0)-(b.displayOrder||0));
-                saveMenuItem(state.menuItems.find(m=>m.id===parseInt(dragged.dataset.itemId)));
+                updated.forEach((c, idx) => {
+                    const id = parseInt(c.dataset.itemId);
+                    const mi = state.menuItems.find(m => m.id === id);
+                    if (mi) mi.displayOrder = idx;
+                });
+                state.menuItems.sort((a,b) => (a.displayOrder||0) - (b.displayOrder||0));
+                
+                // Save ALL menu items to Firestore (batched via Promise.all)
+                await Promise.all(state.menuItems.map(item => saveMenuItem(item)));
+                showNotification("Menu order updated");
+                
+                // Also refresh admin view and menu display
+                loadMenuItemsForAdmin();
+                displayMenuItems(document.querySelector('.category-tab.active')?.dataset?.category || 'all');
             });
         }
         function makeCategoriesDraggable(containerId) {
@@ -1400,7 +1414,7 @@
             });
             c.addEventListener('dragend', e => { if (dragged) { dragged.classList.remove('dragging'); dragged=null; } });
             c.addEventListener('dragover', e => e.preventDefault());
-            c.addEventListener('drop', e => {
+            c.addEventListener('drop', async function(e) {
                 e.preventDefault(); if (!dragged) return;
                 const target = e.target.classList.contains('category-item')?e.target:e.target.closest('.category-item');
                 if (!target || target===dragged) return;
@@ -1410,9 +1424,13 @@
                 if (dragIdx<targetIdx) c.insertBefore(dragged, target.nextSibling);
                 else c.insertBefore(dragged, target);
                 const updated = Array.from(c.children).filter(el=>el.classList.contains('category-item'));
-                updated.forEach((el,i)=>{ const catId = el.dataset.categoryId; const cat = state.categories.find(ca=>ca.id===catId); if (cat) cat.displayOrder = i; });
-                state.categories.sort((a,b)=>(a.displayOrder||0)-(b.displayOrder||0));
-                saveCategories();
+                updated.forEach((el, i) => {
+                    const catId = el.dataset.categoryId;
+                    const cat = state.categories.find(ca=>ca.id===catId);
+                    if (cat) cat.displayOrder = i;
+                });
+                state.categories.sort((a,b) => (a.displayOrder||0) - (b.displayOrder||0));
+                await saveCategories();
                 updateCategoryTabs();
             });
         }
@@ -1986,29 +2004,14 @@
             });
         }
 
-        // ========== 🚀 AUTO‑LOGIN FROM URL ==========
+        // ========== 🚀 AUTO‑LOGIN FROM URL (NEVER ASKS FOR CODE UNLESS TABLE IS "ADMIN") ==========
         function autoLoginFromUrl() {
             const urlParams = new URLSearchParams(window.location.search);
             const tableParam = urlParams.get('table');
             if (tableParam) {
-                // Decode URL encoding (e.g., Table%201 -> Table 1)
                 const tableName = decodeURIComponent(tableParam);
-                // Small delay to ensure Firebase is loaded and state is ready
-                setTimeout(() => {
-                    if (state.menuItems.length > 0 || state.categories.length > 0) {
-                        selectTable(tableName);
-                    } else {
-                        // If data not yet loaded, wait a bit more
-                        const checkInterval = setInterval(() => {
-                            if (state.menuItems.length > 0 || state.categories.length > 0) {
-                                clearInterval(checkInterval);
-                                selectTable(tableName);
-                            }
-                        }, 100);
-                        // Timeout after 5 seconds
-                        setTimeout(() => clearInterval(checkInterval), 5000);
-                    }
-                }, 300);
+                // Only triggers code prompt if tableName is exactly "Admin" (case-insensitive)
+                selectTable(tableName);
             }
         }
 
@@ -2017,10 +2020,10 @@
             await loadInitialData();
             setupListeners();
             
-            // Try auto‑login after initial load
+            // Auto‑login after data is loaded – works instantly
             autoLoginFromUrl();
 
-            // Table selection
+            // Table selection (manual)
             document.querySelectorAll('.table-btn').forEach(btn => btn.addEventListener('click', function() { selectTable(this.dataset.table); }));
 
             // Cart
