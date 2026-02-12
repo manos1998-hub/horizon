@@ -9,6 +9,9 @@
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <!-- QR & PDF generation libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         /* ========== COMPLETE STYLES – UNCHANGED ========== */
         :root {
@@ -42,8 +45,8 @@
         header { background-color: var(--header-bg); box-shadow: var(--shadow); position: sticky; top: 0; z-index: 100; }
         .nav-container { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; position: relative; }
         .logo { font-family: var(--font-secondary); font-size: 36px; font-weight: 600; color: var(--primary); display: flex; align-items: center; flex: 1; }
-        .logo i { margin-right: 30px; }
-        .logo-img { width: 40px; height: 40px; border-radius: 0px; margin-right: 12px; object-fit: contain; display: none; }
+        .logo i { margin-right: 10px; }
+        .logo-img { width: 70px; height: 70px; border-radius: 8px; margin-right: 12px; object-fit: cover; display: none; }
         .header-center { display: flex; justify-content: center; flex: 1; }
         .help-button { background-color: transparent; border: 2px solid var(--secondary); color: var(--secondary); padding: 8px 20px; border-radius: 50px; font-weight: 500; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 8px; font-size: 15px; }
         .help-button:hover { background-color: var(--secondary); color: var(--button-text); transform: translateY(-2px); box-shadow: 0 4px 8px rgba(69, 123, 157, 0.2); }
@@ -530,6 +533,7 @@
                     <button class="admin-tab" data-tab="categories">Category Management</button>
                     <button class="admin-tab" data-tab="orders">Order Management</button>
                     <button class="admin-tab" data-tab="customization">Visual Customization</button>
+                    <button class="admin-tab" data-tab="qr">Table QR Codes</button>
                     <button class="admin-tab" data-tab="system">System Tools</button>
                 </div>
                 <!-- Restaurant Settings -->
@@ -667,6 +671,23 @@
                         <button class="btn btn-primary" id="saveCustomizationBtn"><i class="fas fa-save"></i> Save All Changes</button>
                     </div>
                 </div>
+                <!-- NEW: QR Code Table Generator -->
+                <div class="admin-content" id="qrTab">
+                    <h3 style="margin-bottom: 20px;"><i class="fas fa-qrcode"></i> QR Code Table Generator</h3>
+                    <p style="margin-bottom: 15px; color: var(--gray);">Generate a PDF with QR codes for your tables. Each code links to this page with the table name pre-filled.</p>
+                    <div class="admin-form-group">
+                        <label class="admin-label">Table Names (one per line)</label>
+                        <textarea id="tableNamesForQR" class="admin-textarea" rows="8" placeholder="Table 1&#10;Table 2&#10;Table 3&#10;VIP Table&#10;Outdoor 1">Table 1
+Table 2
+Table 3
+VIP Table</textarea>
+                        <small style="color: var(--gray);">Enter each table name on a new line.</small>
+                    </div>
+                    <div style="display: flex; gap: 15px; align-items: center;">
+                        <button class="btn btn-primary" id="generateQRPDFBtn"><i class="fas fa-file-pdf"></i> Generate QR Code PDF</button>
+                        <span style="color: var(--gray); font-size: 14px;"><i class="fas fa-info-circle"></i> PDF will open in a new tab.</span>
+                    </div>
+                </div>
                 <!-- System Tools -->
                 <div class="admin-content" id="systemTab">
                     <h3 style="margin-bottom: 20px;">System Management</h3>
@@ -693,6 +714,7 @@
                 <button class="admin-tab" data-tab="categories">Category Management</button>
                 <button class="admin-tab" data-tab="orders">Order Management</button>
                 <button class="admin-tab" data-tab="customization">Visual Customization</button>
+                <button class="admin-tab" data-tab="qr">Table QR Codes</button>
                 <button class="admin-tab" data-tab="system">System Tools</button>
             </div>
             <!-- Restaurant Settings Modal -->
@@ -756,6 +778,19 @@
                 <div style="margin-bottom: 30px;"><div style="font-weight: 500; margin-bottom: 15px; color: var(--text);">Theme Selection</div><div class="theme-gallery" id="themeGalleryModal"></div></div>
                 <div style="margin-bottom: 30px;"><div style="font-weight: 500; margin-bottom: 15px; color: var(--text);">Font Selection</div><div class="font-options" id="fontOptionsModal"></div></div>
                 <div class="customization-actions"><button class="btn btn-secondary" id="resetCustomizationBtnModal"><i class="fas fa-undo"></i> Reset</button><button class="btn btn-primary" id="saveCustomizationBtnModal"><i class="fas fa-save"></i> Save</button></div>
+            </div>
+            <!-- NEW: QR Code Table Generator Modal -->
+            <div class="admin-content" id="qrTabModal">
+                <h3 style="margin-bottom: 20px;"><i class="fas fa-qrcode"></i> QR Code Table Generator</h3>
+                <p style="margin-bottom: 15px; color: var(--gray);">Generate a PDF with QR codes for your tables. Each code links to this page with the table name pre-filled.</p>
+                <div class="admin-form-group">
+                    <label class="admin-label">Table Names (one per line)</label>
+                    <textarea id="tableNamesForQRModal" class="admin-textarea" rows="8" placeholder="Table 1&#10;Table 2&#10;Table 3&#10;VIP Table">Table 1
+Table 2
+Table 3
+VIP Table</textarea>
+                </div>
+                <button class="btn btn-primary" id="generateQRPDFBtnModal"><i class="fas fa-file-pdf"></i> Generate QR Code PDF</button>
             </div>
             <!-- System Tools Modal -->
             <div class="admin-content" id="systemTabModal">
@@ -1483,6 +1518,74 @@
             await Promise.all(toDelete.map(o=>deleteOrderFirestore(o.orderNumber)));
         }
 
+        // ========== QR CODE PDF GENERATOR ==========
+        function generateTableQRCodePDF(tableNamesArray) {
+            if (!tableNamesArray || tableNamesArray.length === 0) {
+                showNotification("Please enter at least one table name.");
+                return;
+            }
+            // Use jsPDF
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4'
+            });
+            const baseUrl = window.location.origin + window.location.pathname;
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
+            const margin = 15;
+            const qrSize = 50; // mm
+            const cols = 2;
+            const rowsPerPage = 3;
+            const cellWidth = (pageWidth - 2 * margin) / cols;
+            const cellHeight = (pageHeight - 2 * margin) / rowsPerPage;
+            
+            let index = 0;
+            tableNamesArray.forEach((tableName, i) => {
+                if (i > 0 && i % (cols * rowsPerPage) === 0) {
+                    doc.addPage();
+                }
+                const col = i % cols;
+                const row = Math.floor((i % (cols * rowsPerPage)) / cols);
+                const x = margin + col * cellWidth;
+                const y = margin + row * cellHeight;
+                
+                // Generate QR code as dataURL
+                const qr = qrcode(0, 'M');
+                qr.addData(baseUrl + '?table=' + encodeURIComponent(tableName));
+                qr.make();
+                const qrCanvas = document.createElement('canvas');
+                qrCanvas.width = qr.getModuleCount() * 5;
+                qrCanvas.height = qr.getModuleCount() * 5;
+                const ctx = qrCanvas.getContext('2d');
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, qrCanvas.width, qrCanvas.height);
+                ctx.fillStyle = '#000000';
+                for (let r = 0; r < qr.getModuleCount(); r++) {
+                    for (let c = 0; c < qr.getModuleCount(); c++) {
+                        if (qr.isDark(r, c)) {
+                            ctx.fillRect(c * 5, r * 5, 5, 5);
+                        }
+                    }
+                }
+                const qrDataURL = qrCanvas.toDataURL('image/png');
+                
+                // Add QR code image
+                doc.addImage(qrDataURL, 'PNG', x, y, qrSize, qrSize);
+                // Add table name
+                doc.setFontSize(12);
+                doc.setTextColor(0, 0, 0);
+                doc.text(tableName, x + qrSize/2, y + qrSize + 8, { align: 'center' });
+                // Add URL below (optional)
+                doc.setFontSize(8);
+                doc.setTextColor(100, 100, 100);
+                doc.text('Scan to order', x + qrSize/2, y + qrSize + 16, { align: 'center' });
+            });
+            doc.save('restaurant-table-qrcodes.pdf');
+            showNotification(`PDF generated with ${tableNamesArray.length} QR code(s).`);
+        }
+
         // ========== ADMIN DASHBOARD ==========
         function loadAdminDashboardData() {
             document.getElementById('adminRestaurantName').value = state.restaurantInfo.name;
@@ -1506,6 +1609,7 @@
                     if (tid==='customization') setTimeout(initializeCustomizationTab,100);
                     if (tid==='categories') setTimeout(()=>makeCategoriesDraggable('categoriesListContainer'),200);
                     if (tid==='orders') { loadOrdersForAdmin(); populateTableSelect('tableSelectForDelete'); }
+                    if (tid==='qr') { /* nothing special */ }
                 });
             });
             document.getElementById('uploadLogoBtn').addEventListener('click', ()=>document.getElementById('logoUpload').click());
@@ -1524,6 +1628,12 @@
                 const sel = document.getElementById('tableSelectForDelete');
                 if (sel.value) showAdminChangePrompt(()=>deleteOrdersForTable(sel.value));
                 else showNotification('Please select a table.');
+            });
+            // QR Generator button
+            document.getElementById('generateQRPDFBtn').addEventListener('click', function() {
+                const textarea = document.getElementById('tableNamesForQR');
+                const tableNames = textarea.value.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+                generateTableQRCodePDF(tableNames);
             });
             adminDashboardSection.addEventListener('click', e => {
                 if (e.target.classList.contains('update-status') || e.target.closest('.update-status')) {
@@ -1924,6 +2034,7 @@
                     if (tid==='menu') setTimeout(()=>makeAdminGridDraggable('menuItemsListModal'),500);
                     if (tid==='categories') setTimeout(()=>makeCategoriesDraggable('categoriesListContainerModal'),200);
                     if (tid==='orders') { loadOrdersForAdminModal(); populateTableSelect('tableSelectForDeleteModal'); }
+                    if (tid==='qr') { /* nothing special */ }
                 });
             });
             document.getElementById('adminRestaurantNameModal').value = state.restaurantInfo.name;
@@ -1933,6 +2044,12 @@
             updateLogoPreview();
             loadMenuItemsForAdminModal();
             loadCategoriesForAdminModal();
+            // QR Generator modal button
+            document.getElementById('generateQRPDFBtnModal').addEventListener('click', function() {
+                const textarea = document.getElementById('tableNamesForQRModal');
+                const tableNames = textarea.value.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+                generateTableQRCodePDF(tableNames);
+            });
             document.getElementById('deleteOrdersForTableBtnModal').addEventListener('click', function() {
                 const sel = document.getElementById('tableSelectForDeleteModal');
                 if (sel.value) showAdminChangePrompt(()=>deleteOrdersForTable(sel.value));
