@@ -185,10 +185,11 @@
         .cart-floating { position: fixed; bottom: 30px; right: 30px; background-color: var(--primary); color: var(--button-text); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: 0 6px 20px rgba(230, 57, 70, 0.3); z-index: 99; transition: all 0.3s; }
         .cart-floating:hover { background-color: var(--primary-dark); transform: translateY(-3px); }
         .cart-count { position: absolute; top: -5px; right: -5px; background-color: var(--secondary); color: var(--button-text); width: 24px; height: 24px; border-radius: 50%; font-size: 12px; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+        /* ===== NEW ELEGANT ADMIN ICON – HIDDEN BY DEFAULT ===== */
         .admin-floating { position: fixed; bottom: 30px; right: 100px; background-color: var(--dark); color: white; width: 50px; height: 50px; border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 99; transition: all 0.3s; border: 2px solid rgba(255,255,255,0.2); }
         .admin-floating:hover { background-color: var(--secondary); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(69,123,157,0.4); }
         .admin-floating i { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
-        .admin-mode .admin-floating { display: none; }
+        .admin-mode .admin-floating { display: none; } /* hide when in admin mode */
         .admin-mode header { border-bottom: 3px solid var(--warning); }
         .admin-mode .admin-badge { background-color: var(--warning); color: var(--text); padding: 8px 16px; border-radius: 50px; font-weight: 600; display: flex; align-items: center; gap: 8px; font-size: 15px; }
         .admin-mode .logout-button { background-color: var(--danger); color: var(--button-text); border: none; padding: 8px 16px; border-radius: 50px; font-weight: 500; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 8px; font-size: 15px; }
@@ -259,6 +260,7 @@
         .preview-menu-item { display: flex; justify-content: space-between; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid rgba(0,0,0,0.1); }
         .preview-button-group { display: flex; gap: 10px; flex-wrap: wrap; }
         .preview-btn { padding: 8px 16px; border-radius: 6px; font-weight: 500; border: none; }
+        .customization-actions { display: flex; gap: 15px; margin-top: 30px; padding-top: 20px; border-top: 2px solid var(--light-gray); }
         .image-upload-container { margin-bottom: 20px; }
         .image-preview { width: 100%; height: 200px; background-color: var(--light-gray); border-radius: 8px; margin-top: 10px; overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center; }
         .image-preview img { max-width: 100%; max-height: 100%; object-fit: contain; }
@@ -744,10 +746,10 @@
                         <button class="btn btn-primary" id="saveCustomizationBtn"><i class="fas fa-save"></i> Save All Changes</button>
                     </div>
                 </div>
-                <!-- Sound Effects Settings – including NEW ORDER SOUND (Admin) -->
+                <!-- Sound Effects Settings – including Help Sound -->
                 <div class="admin-content" id="soundTab">
                     <h3 style="margin-bottom: 20px;"><i class="fas fa-music"></i> Sound Effects</h3>
-                    <p style="margin-bottom: 25px; color: var(--gray);">Upload custom sounds that will play when customers add items to cart, confirm payment, request help, or when a NEW ORDER arrives (admin only).</p>
+                    <p style="margin-bottom: 25px; color: var(--gray);">Upload custom sounds that will play when customers add items to cart, confirm payment, or request help.</p>
                     
                     <div style="margin-bottom: 30px;">
                         <label class="admin-label" style="display: flex; align-items: center; gap: 10px;">
@@ -793,20 +795,6 @@
                                 <button class="btn btn-secondary upload-btn" id="uploadHelpSoundBtn"><i class="fas fa-upload"></i> Upload Sound</button>
                                 <button class="remove-image-btn" id="removeHelpSoundBtn"><i class="fas fa-trash"></i> Remove</button>
                                 <button class="btn btn-primary" id="testHelpSoundBtn"><i class="fas fa-play"></i> Test</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- NEW: New Order Sound (Admin Notification) -->
-                    <div class="sound-effect-card">
-                        <div class="sound-effect-title"><i class="fas fa-bell"></i> New Order Sound (Admin)</div>
-                        <div class="image-upload-container">
-                            <div class="audio-preview" id="newOrderSoundPreview"></div>
-                            <div class="upload-actions">
-                                <input type="file" id="newOrderSoundUpload" accept="audio/*" style="display: none;">
-                                <button class="btn btn-secondary upload-btn" id="uploadNewOrderSoundBtn"><i class="fas fa-upload"></i> Upload Sound</button>
-                                <button class="remove-image-btn" id="removeNewOrderSoundBtn"><i class="fas fa-trash"></i> Remove</button>
-                                <button class="btn btn-primary" id="testNewOrderSoundBtn"><i class="fas fa-play"></i> Test</button>
                             </div>
                         </div>
                     </div>
@@ -1050,7 +1038,6 @@ VIP Table</textarea>
             orders: [],
             helpRequests: [],
             seenHelpRequests: new Set(),
-            seenOrders: new Set(), // NEW: track seen order IDs to avoid replay on load
             adminAccessCode: "3232",
             adminChangeCode: "6262",
             categories: [],
@@ -1087,9 +1074,9 @@ VIP Table</textarea>
                 enabled: true,
                 addToCartSound: null,
                 checkoutSound: null,
-                helpRequestSound: null,
-                newOrderSound: null // NEW: sound for new order arrival
+                helpRequestSound: null
             },
+            // NEW: interval ID for periodic help sound check
             helpSoundInterval: null
         };
 
@@ -1245,8 +1232,6 @@ VIP Table</textarea>
                 }
                 
                 state.orders = ordersSnap.docs.map(doc => ({ ...doc.data(), orderNumber: doc.id }));
-                // NEW: populate seenOrders set with existing order IDs
-                state.seenOrders = new Set(state.orders.map(o => o.orderNumber));
                 
                 if (catDoc.exists) {
                     state.categories = catDoc.data().list || [];
@@ -1291,21 +1276,7 @@ VIP Table</textarea>
         // ========== REAL‑TIME LISTENERS ==========
         function setupListeners() {
             db.collection('orders').onSnapshot(snap => {
-                // Update orders array
                 state.orders = snap.docs.map(d => ({ ...d.data(), orderNumber: d.id }));
-                
-                // NEW: detect added orders and play new order sound if admin mode
-                snap.docChanges().forEach(change => {
-                    if (change.type === 'added') {
-                        const orderId = change.doc.id;
-                        // Only play sound if we haven't seen this order before AND admin mode is active
-                        if (!state.seenOrders.has(orderId) && state.isAdminMode) {
-                            playSound(state.soundEffects.newOrderSound);
-                        }
-                        state.seenOrders.add(orderId);
-                    }
-                });
-
                 if (!state.isAdminMode && document.querySelector('#myOrdersSection.active-section')) loadMyOrders();
                 if (state.isAdminMode && document.querySelector('#adminDashboardSection.active-section')) {
                     loadOrdersForAdmin();
@@ -2408,127 +2379,110 @@ VIP Table</textarea>
         function darkenColor(c,p) { const n = parseInt(c.replace("#",""),16); const a = Math.round(2.55*p); const r = (n>>16)-a, g = (n>>8&0x00FF)-a, b = (n&0x0000FF)-a; return "#" + (0x1000000 + (r<255?r<1?0:r:255)*0x10000 + (g<255?g<1?0:g:255)*0x100 + (b<255?b<1?0:b:255)).toString(16).slice(1); }
         function getContrastColor(h) { const r=parseInt(h.substr(1,2),16), g=parseInt(h.substr(3,2),16), b=parseInt(h.substr(5,2),16), yiq=((r*299)+(g*587)+(b*114))/1000; return yiq>=128?'#000000':'#ffffff'; }
 
-        // ========== SOUND EFFECTS ADMIN UI (UPDATED) ==========
+        // ========== SOUND EFFECTS ADMIN UI ==========
         function loadSoundSettingsUI() {
-    const enabledCheck = document.getElementById('soundEffectsEnabled');
-    if (enabledCheck) enabledCheck.checked = state.soundEffects.enabled;
+            const enabledCheck = document.getElementById('soundEffectsEnabled');
+            if (enabledCheck) enabledCheck.checked = state.soundEffects.enabled;
 
-    const cartPreview = document.getElementById('cartSoundPreview');
-    const checkoutPreview = document.getElementById('checkoutSoundPreview');
-    const helpPreview = document.getElementById('helpSoundPreview');
+            const cartPreview = document.getElementById('cartSoundPreview');
+            const checkoutPreview = document.getElementById('checkoutSoundPreview');
+            const helpPreview = document.getElementById('helpSoundPreview');
+            
+            if (state.soundEffects.addToCartSound) {
+                cartPreview.innerHTML = `<audio controls src="${state.soundEffects.addToCartSound}" style="width:100%;"></audio>`;
+            } else {
+                cartPreview.innerHTML = '<div class="image-preview-placeholder"><i class="fas fa-music"></i><p>No sound uploaded</p></div>';
+            }
+            if (state.soundEffects.checkoutSound) {
+                checkoutPreview.innerHTML = `<audio controls src="${state.soundEffects.checkoutSound}" style="width:100%;"></audio>`;
+            } else {
+                checkoutPreview.innerHTML = '<div class="image-preview-placeholder"><i class="fas fa-music"></i><p>No sound uploaded</p></div>';
+            }
+            if (state.soundEffects.helpRequestSound) {
+                helpPreview.innerHTML = `<audio controls src="${state.soundEffects.helpRequestSound}" style="width:100%;"></audio>`;
+            } else {
+                helpPreview.innerHTML = '<div class="image-preview-placeholder"><i class="fas fa-music"></i><p>No sound uploaded</p></div>';
+            }
 
-    if (state.soundEffects.addToCartSound) {
-        cartPreview.innerHTML = `<audio controls src="${state.soundEffects.addToCartSound}" style="width:100%;"></audio>`;
-    } else {
-        cartPreview.innerHTML = '<div class="image-preview-placeholder"><i class="fas fa-music"></i><p>No sound uploaded</p></div>';
-    }
-    if (state.soundEffects.checkoutSound) {
-        checkoutPreview.innerHTML = `<audio controls src="${state.soundEffects.checkoutSound}" style="width:100%;"></audio>`;
-    } else {
-        checkoutPreview.innerHTML = '<div class="image-preview-placeholder"><i class="fas fa-music"></i><p>No sound uploaded</p></div>';
-    }
-    if (state.soundEffects.helpRequestSound) {
-        helpPreview.innerHTML = `<audio controls src="${state.soundEffects.helpRequestSound}" style="width:100%;"></audio>`;
-    } else {
-        helpPreview.innerHTML = '<div class="image-preview-placeholder"><i class="fas fa-music"></i><p>No sound uploaded</p></div>';
-    }
-
-    ['Cart','Checkout','Help'].forEach(type => {
-        const uploadBtn = document.getElementById(`upload${type}SoundBtn`);
-        const removeBtn = document.getElementById(`remove${type}SoundBtn`);
-        const testBtn = document.getElementById(`test${type}SoundBtn`);
-        const fileInputId = `${type.toLowerCase()}SoundUpload`;
-
-        // ---------- UPLOAD BUTTON (FIXED) ----------
-        if (uploadBtn) {
-            const newUploadBtn = uploadBtn.cloneNode(true);
-            uploadBtn.parentNode.replaceChild(newUploadBtn, uploadBtn);
-            newUploadBtn.addEventListener('click', () => {
-                // ✅ Always use the current file input from the DOM
-                document.getElementById(fileInputId).click();
+            ['Cart','Checkout','Help'].forEach(type => {
+                const uploadBtn = document.getElementById(`upload${type}SoundBtn`);
+                const removeBtn = document.getElementById(`remove${type}SoundBtn`);
+                const testBtn = document.getElementById(`test${type}SoundBtn`);
+                const fileInput = document.getElementById(`${type.toLowerCase()}SoundUpload`);
+                if (uploadBtn) {
+                    const newBtn = uploadBtn.cloneNode(true);
+                    uploadBtn.parentNode.replaceChild(newBtn, uploadBtn);
+                    newBtn.addEventListener('click', () => fileInput.click());
+                }
+                if (removeBtn) {
+                    const newBtn = removeBtn.cloneNode(true);
+                    removeBtn.parentNode.replaceChild(newBtn, removeBtn);
+                    newBtn.addEventListener('click', () => {
+                        if (type === 'Cart') state.soundEffects.addToCartSound = null;
+                        else if (type === 'Checkout') state.soundEffects.checkoutSound = null;
+                        else if (type === 'Help') state.soundEffects.helpRequestSound = null;
+                        loadSoundSettingsUI();
+                        showNotification(`${type} sound removed.`);
+                    });
+                }
+                if (testBtn) {
+                    const newBtn = testBtn.cloneNode(true);
+                    testBtn.parentNode.replaceChild(newBtn, testBtn);
+                    newBtn.addEventListener('click', () => {
+                        let sound = null;
+                        if (type === 'Cart') sound = state.soundEffects.addToCartSound;
+                        else if (type === 'Checkout') sound = state.soundEffects.checkoutSound;
+                        else if (type === 'Help') sound = state.soundEffects.helpRequestSound;
+                        playSound(sound);
+                    });
+                }
+                if (fileInput) {
+                    const newInput = fileInput.cloneNode(true);
+                    fileInput.parentNode.replaceChild(newInput, fileInput);
+                    newInput.addEventListener('change', (e) => {
+                        const file = e.target.files[0];
+                        if (!file || !file.type.startsWith('audio/')) return;
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                            if (type === 'Cart') state.soundEffects.addToCartSound = ev.target.result;
+                            else if (type === 'Checkout') state.soundEffects.checkoutSound = ev.target.result;
+                            else if (type === 'Help') state.soundEffects.helpRequestSound = ev.target.result;
+                            loadSoundSettingsUI();
+                            showNotification(`${type} sound loaded. Don't forget to save.`);
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                }
             });
-        }
 
-        // ---------- REMOVE BUTTON ----------
-        if (removeBtn) {
-            const newRemoveBtn = removeBtn.cloneNode(true);
-            removeBtn.parentNode.replaceChild(newRemoveBtn, removeBtn);
-            newRemoveBtn.addEventListener('click', () => {
-                if (type === 'Cart') state.soundEffects.addToCartSound = null;
-                else if (type === 'Checkout') state.soundEffects.checkoutSound = null;
-                else if (type === 'Help') state.soundEffects.helpRequestSound = null;
-                loadSoundSettingsUI();
-                showNotification(`${type} sound removed.`);
-            });
-        }
-
-        // ---------- TEST BUTTON ----------
-        if (testBtn) {
-            const newTestBtn = testBtn.cloneNode(true);
-            testBtn.parentNode.replaceChild(newTestBtn, testBtn);
-            newTestBtn.addEventListener('click', () => {
-                let sound = null;
-                if (type === 'Cart') sound = state.soundEffects.addToCartSound;
-                else if (type === 'Checkout') sound = state.soundEffects.checkoutSound;
-                else if (type === 'Help') sound = state.soundEffects.helpRequestSound;
-                playSound(sound);
-            });
-        }
-
-        // ---------- FILE INPUT CHANGE HANDLER ----------
-        const fileInput = document.getElementById(fileInputId);
-        if (fileInput) {
-            const newFileInput = fileInput.cloneNode(true);
-            fileInput.parentNode.replaceChild(newFileInput, fileInput);
-            newFileInput.addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (!file || !file.type.startsWith('audio/')) return;
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    if (type === 'Cart') state.soundEffects.addToCartSound = ev.target.result;
-                    else if (type === 'Checkout') state.soundEffects.checkoutSound = ev.target.result;
-                    else if (type === 'Help') state.soundEffects.helpRequestSound = ev.target.result;
+            document.getElementById('resetSoundDefaultsBtn').addEventListener('click', () => {
+                if (confirm("Clear all uploaded sounds?")) {
+                    state.soundEffects.addToCartSound = null;
+                    state.soundEffects.checkoutSound = null;
+                    state.soundEffects.helpRequestSound = null;
                     loadSoundSettingsUI();
-                    showNotification(`${type} sound loaded. Don't forget to save.`);
-                };
-                reader.readAsDataURL(file);
+                    showNotification("All sounds cleared. Save to persist.");
+                }
             });
-        }
-    });
 
-    // ---------- RESET ALL SOUNDS ----------
-    document.getElementById('resetSoundDefaultsBtn').addEventListener('click', () => {
-        if (confirm("Clear all uploaded sounds?")) {
-            state.soundEffects.addToCartSound = null;
-            state.soundEffects.checkoutSound = null;
-            state.soundEffects.helpRequestSound = null;
-            loadSoundSettingsUI();
-            showNotification("All sounds cleared. Save to persist.");
-        }
-    });
-
-    // ---------- SAVE SOUND SETTINGS ----------
-    document.getElementById('saveSoundEffectsBtn').addEventListener('click', () => 
-        showAdminChangePrompt(async function() {
-            state.soundEffects.enabled = document.getElementById('soundEffectsEnabled').checked;
-            await saveSoundEffects();
-            showNotification("Sound effects saved.");
-        })
-    );
-
-    // ---------- MODAL SOUND SETTINGS ----------
-    const modalEnabled = document.getElementById('soundEffectsEnabledModal');
-    if (modalEnabled) {
-        modalEnabled.checked = state.soundEffects.enabled;
-        document.getElementById('saveSoundEffectsModalBtn').onclick = function() {
-            state.soundEffects.enabled = modalEnabled.checked;
-            showAdminChangePrompt(async function() {
+            document.getElementById('saveSoundEffectsBtn').addEventListener('click', ()=> showAdminChangePrompt(async function() {
+                state.soundEffects.enabled = document.getElementById('soundEffectsEnabled').checked;
                 await saveSoundEffects();
-                showNotification("Sound settings saved from modal.");
-            });
-        };
-    }
-}
+                showNotification("Sound effects saved.");
+            }));
+
+            const modalEnabled = document.getElementById('soundEffectsEnabledModal');
+            if (modalEnabled) {
+                modalEnabled.checked = state.soundEffects.enabled;
+                document.getElementById('saveSoundEffectsModalBtn').onclick = function() {
+                    state.soundEffects.enabled = modalEnabled.checked;
+                    showAdminChangePrompt(async function() {
+                        await saveSoundEffects();
+                        showNotification("Sound settings saved from modal.");
+                    });
+                };
+            }
+        }
 
         // --- MODAL ADMIN ---
         function setupAdminPanel() {
