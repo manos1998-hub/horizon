@@ -337,6 +337,35 @@
         .help-badge-pending { background-color: #fff3cd; color: #856404; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 500; }
         .help-badge-resolved { background-color: #d4edda; color: #155724; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 500; }
 
+        /* ===== FAKE LOADING OVERLAY ===== */
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: var(--font-primary);
+            transition: opacity 0.5s ease;
+        }
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 6px solid var(--light-gray);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         @media (max-width: 992px) { .theme-gallery { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); } .font-options { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); } }
         @media (max-width: 768px) { 
             .theme-gallery { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); } 
@@ -379,6 +408,12 @@
     </style>
 </head>
 <body>
+    <!-- ========== FAKE LOADING OVERLAY ========== -->
+    <div id="loadingOverlay">
+        <div class="spinner"></div>
+        <h2 style="color: var(--primary); margin-top:20px;">Loading menu...</h2>
+    </div>
+
     <!-- ========== HEADER ========== -->
     <header>
         <div class="container nav-container">
@@ -2689,6 +2724,17 @@ VIP Table</textarea>
         };
 
         initApp();
+
+        // ========== FAKE LOADING: HIDE AFTER 5 SECONDS ==========
+        setTimeout(() => {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) {
+                overlay.style.opacity = '0';
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                }, 500);
+            }
+        }, 10000);
     </script>
 </body>
 </html>
