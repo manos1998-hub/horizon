@@ -1075,7 +1075,9 @@ VIP Table</textarea>
                 addToCartSound: null,
                 checkoutSound: null,
                 helpRequestSound: null
-            }
+            },
+            // NEW: interval ID for periodic help sound check
+            helpSoundInterval: null
         };
 
         // ========== DEFAULT DATA – NOW WITH REAL MENU ITEMS ==========
@@ -1655,6 +1657,20 @@ VIP Table</textarea>
         // ========== ADMIN MODE ==========
         function showAdminCodePrompt() { adminCodePrompt.style.display = 'flex'; adminCodeInput.focus(); }
         function showAdminChangePrompt(action) { state.pendingAdminAction = action; adminChangePrompt.style.display = 'flex'; adminChangeCodeInput.focus(); }
+        
+        // NEW: function to play help sound every minute if there are pending requests
+        function startHelpSoundInterval() {
+            // Clear any existing interval first
+            if (state.helpSoundInterval) clearInterval(state.helpSoundInterval);
+            state.helpSoundInterval = setInterval(() => {
+                // Only play sound if there is at least one pending help request
+                const hasPending = state.helpRequests.some(r => r.status === 'pending');
+                if (hasPending) {
+                    playSound(state.soundEffects.helpRequestSound);
+                }
+            }, 60000); // 1 minute = 60000 ms
+        }
+        
         function enterAdminMode() {
             state.isAdminMode = true; state.currentTable = "Admin";
             document.body.classList.add('admin-mode');
@@ -1667,6 +1683,9 @@ VIP Table</textarea>
             localStorage.setItem('dineEasyAdminMode', 'true');
             playSound(state.soundEffects.helpRequestSound);
             showNotification("Admin mode activated. Full administrative access granted.");
+            
+            // NEW: start the 1‑minute interval to replay help sound for pending requests
+            startHelpSoundInterval();
         }
         function exitAdminMode() {
             state.isAdminMode = false; state.currentTable = null;
@@ -1680,6 +1699,12 @@ VIP Table</textarea>
             // Hide admin icon on logout
             adminFloating.style.display = 'none';
             showNotification("Logged out of admin mode.");
+            
+            // NEW: clear the help sound interval
+            if (state.helpSoundInterval) {
+                clearInterval(state.helpSoundInterval);
+                state.helpSoundInterval = null;
+            }
         }
 
         // ========== DRAG AND DROP (unchanged) ==========
