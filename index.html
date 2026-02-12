@@ -584,10 +584,25 @@
                         </div>
                     </div>
                 </div>
-                <!-- Order Management (modified to show options and direct status update) -->
+                <!-- Order Management (modified to show options and direct status update) + NEW DELETE BY TABLE -->
                 <div class="admin-content" id="ordersTab">
                     <div class="admin-form-group"><label class="admin-label">Filter by Status</label><select class="admin-select" id="orderStatusFilter"><option value="all">All Orders</option><option value="pending">Pending</option><option value="preparing">Preparing</option><option value="ready">Ready</option><option value="served">Served</option><option value="cancelled">Cancelled</option></select></div>
                     <div id="adminOrdersList"><p style="text-align: center; color: var(--gray); padding: 40px;">No orders yet. Orders will appear here when customers place them.</p></div>
+                    
+                    <!-- NEW: Delete orders by table -->
+                    <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid var(--light-gray);">
+                        <h4 style="margin-bottom: 15px;"><i class="fas fa-trash-alt"></i> Delete Orders by Table</h4>
+                        <div style="display: flex; gap: 10px; align-items: flex-end;">
+                            <div style="flex: 1;">
+                                <label class="admin-label">Select Table</label>
+                                <select class="admin-select" id="tableSelectForDelete">
+                                    <option value="">-- No tables with orders --</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-danger" id="deleteOrdersForTableBtn" style="flex: 0 0 auto;"><i class="fas fa-trash"></i> Delete Orders for Selected Table</button>
+                        </div>
+                        <p style="margin-top: 10px; font-size: 13px; color: var(--warning);"><i class="fas fa-exclamation-triangle"></i> This action cannot be undone. Orders will be permanently deleted from the database.</p>
+                    </div>
                 </div>
                 <!-- Visual Customization (20 themes) -->
                 <div class="admin-content" id="customizationTab">
@@ -713,10 +728,25 @@
                     </div>
                 </div>
             </div>
-            <!-- Order Management Modal -->
+            <!-- Order Management Modal + NEW DELETE BY TABLE -->
             <div class="admin-content" id="ordersTabModal">
                 <div class="admin-form-group"><label class="admin-label">Filter by Status</label><select class="admin-select" id="orderStatusFilterModal"><option value="all">All Orders</option><option value="pending">Pending</option><option value="preparing">Preparing</option><option value="ready">Ready</option><option value="served">Served</option><option value="cancelled">Cancelled</option></select></div>
                 <div id="adminOrdersListModal"><p style="text-align: center; color: var(--gray); padding: 40px;">No orders yet. Orders will appear here when customers place them.</p></div>
+                
+                <!-- NEW: Delete orders by table (modal version) -->
+                <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid var(--light-gray);">
+                    <h4 style="margin-bottom: 15px;"><i class="fas fa-trash-alt"></i> Delete Orders by Table</h4>
+                    <div style="display: flex; gap: 10px; align-items: flex-end;">
+                        <div style="flex: 1;">
+                            <label class="admin-label">Select Table</label>
+                            <select class="admin-select" id="tableSelectForDeleteModal">
+                                <option value="">-- No tables with orders --</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-danger" id="deleteOrdersForTableBtnModal" style="flex: 0 0 auto;"><i class="fas fa-trash"></i> Delete Orders for Selected Table</button>
+                    </div>
+                    <p style="margin-top: 10px; font-size: 13px; color: var(--warning);"><i class="fas fa-exclamation-triangle"></i> This action cannot be undone. Orders will be permanently deleted from the database.</p>
+                </div>
             </div>
             <!-- Visual Customization Modal (simplified) -->
             <div class="admin-content" id="customizationTabModal">
@@ -1737,6 +1767,80 @@
             });
         }
 
+        // ========== NEW: DELETE ORDERS BY TABLE ==========
+        function populateTableSelect(selectId) {
+            const select = document.getElementById(selectId);
+            if (!select) return;
+            
+            // Get unique table names from orders (excluding Admin)
+            const tables = [...new Set(state.orders
+                .filter(order => order.table && order.table.toLowerCase() !== 'admin')
+                .map(order => order.table))].sort();
+            
+            select.innerHTML = '';
+            if (tables.length === 0) {
+                select.innerHTML = '<option value="">-- No tables with orders --</option>';
+            } else {
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = '-- Select a table --';
+                select.appendChild(defaultOption);
+                tables.forEach(table => {
+                    const option = document.createElement('option');
+                    option.value = table;
+                    option.textContent = table + ` (${state.orders.filter(o => o.table === table).length} orders)`;
+                    select.appendChild(option);
+                });
+            }
+        }
+
+        async function deleteOrdersForTable(tableName) {
+            if (!tableName) {
+                showNotification('Please select a table.');
+                return;
+            }
+            
+            const ordersToDelete = state.orders.filter(order => order.table === tableName);
+            if (ordersToDelete.length === 0) {
+                showNotification(`No orders found for table "${tableName}".`);
+                return;
+            }
+            
+            // Confirm via prompt (already wrapped in showAdminChangePrompt, but add extra confirm)
+            if (!confirm(`Are you sure you want to delete ALL orders for table "${tableName}"? This action cannot be undone.`)) {
+                return;
+            }
+            
+            // Show notification of deletion start
+            showNotification(`Deleting ${ordersToDelete.length} orders for table "${tableName}"...`);
+            
+            try {
+                // Delete from Firestore
+                await Promise.all(ordersToDelete.map(order => 
+                    db.collection('orders').doc(order.orderNumber).delete()
+                ));
+                
+                // Remove from local state (will be synced by listener, but we do it immediately for instant UI)
+                state.orders = state.orders.filter(order => order.table !== tableName);
+                
+                // Refresh UI
+                loadOrdersForAdmin();
+                if (document.getElementById('adminDashboardSection').classList.contains('active-section')) {
+                    // Update the table dropdowns
+                    populateTableSelect('tableSelectForDelete');
+                    populateTableSelect('tableSelectForDeleteModal');
+                }
+                if (adminPanel.style.display === 'flex') {
+                    populateTableSelect('tableSelectForDeleteModal');
+                }
+                
+                showNotification(`Successfully deleted all orders for table "${tableName}".`);
+            } catch (error) {
+                console.error("Error deleting orders:", error);
+                showNotification('Error deleting orders. Please try again.');
+            }
+        }
+
         // ========== ADMIN DASHBOARD DATA ==========
         function loadAdminDashboardData() {
             document.getElementById('adminRestaurantName').value = state.restaurantInfo.name;
@@ -1759,6 +1863,10 @@
                     document.getElementById(tabId + 'Tab').classList.add('active');
                     if (tabId === 'customization') setTimeout(() => initializeCustomizationTab(), 100);
                     if (tabId === 'categories') setTimeout(() => makeCategoriesDraggable('categoriesListContainer'), 200);
+                    if (tabId === 'orders') {
+                        loadOrdersForAdmin();
+                        populateTableSelect('tableSelectForDelete');
+                    }
                 });
             });
             document.getElementById('uploadLogoBtn').addEventListener('click', () => document.getElementById('logoUpload').click());
@@ -1773,6 +1881,21 @@
             document.getElementById('exportDataBtn').addEventListener('click', exportData);
             document.getElementById('importDataBtn').addEventListener('click', () => document.getElementById('importDataInput').click());
             document.getElementById('importDataInput').addEventListener('change', (e) => showAdminChangePrompt(() => importData(e)));
+            
+            // NEW: Delete orders by table button listener
+            const deleteTableBtn = document.getElementById('deleteOrdersForTableBtn');
+            if (deleteTableBtn) {
+                deleteTableBtn.addEventListener('click', function() {
+                    const select = document.getElementById('tableSelectForDelete');
+                    const tableName = select.value;
+                    if (tableName) {
+                        showAdminChangePrompt(() => deleteOrdersForTable(tableName));
+                    } else {
+                        showNotification('Please select a table.');
+                    }
+                });
+            }
+            
             adminDashboardSection.addEventListener('click', function(e) {
                 if (e.target && (e.target.classList.contains('update-status') || e.target.closest('.update-status'))) {
                     const updateBtn = e.target.classList.contains('update-status') ? e.target : e.target.closest('.update-status');
@@ -1787,6 +1910,7 @@
             setTimeout(() => {
                 makeAdminGridDraggable('menuItemsList');
                 makeCategoriesDraggable('categoriesListContainer');
+                populateTableSelect('tableSelectForDelete'); // NEW
             }, 500);
         }
 
@@ -2266,6 +2390,10 @@
                                         </div>`;
                 adminOrdersList.appendChild(orderCard);
             });
+            
+            // NEW: Refresh the table dropdowns
+            populateTableSelect('tableSelectForDelete');
+            populateTableSelect('tableSelectForDeleteModal');
         }
 
         async function updateOrderStatus(orderId, newStatus) {
@@ -2359,6 +2487,10 @@
                     if (tabId === 'customization') setTimeout(() => initializeModalCustomizationTab(), 100);
                     if (tabId === 'menu') setTimeout(() => { makeAdminGridDraggable('menuItemsListModal'); }, 500);
                     if (tabId === 'categories') setTimeout(() => { makeCategoriesDraggable('categoriesListContainerModal'); }, 200);
+                    if (tabId === 'orders') {
+                        loadOrdersForAdminModal();
+                        populateTableSelect('tableSelectForDeleteModal');
+                    }
                 });
             });
             document.getElementById('adminRestaurantNameModal').value = state.restaurantInfo.name;
@@ -2369,6 +2501,20 @@
             
             loadMenuItemsForAdminModal();
             loadCategoriesForAdminModal();
+            
+            // NEW: Delete orders by table button listener in modal
+            const deleteTableBtnModal = document.getElementById('deleteOrdersForTableBtnModal');
+            if (deleteTableBtnModal) {
+                deleteTableBtnModal.addEventListener('click', function() {
+                    const select = document.getElementById('tableSelectForDeleteModal');
+                    const tableName = select.value;
+                    if (tableName) {
+                        showAdminChangePrompt(() => deleteOrdersForTable(tableName));
+                    } else {
+                        showNotification('Please select a table.');
+                    }
+                });
+            }
         }
 
         function loadMenuItemsForAdminModal() {
@@ -2430,6 +2576,83 @@
             makeCategoriesDraggable('categoriesListContainerModal');
         }
 
+        function loadOrdersForAdminModal() {
+            const adminOrdersList = document.getElementById('adminOrdersListModal');
+            const statusFilter = document.getElementById('orderStatusFilterModal').value;
+            let filteredOrders = [...state.orders]; if (statusFilter !== 'all') filteredOrders = filteredOrders.filter(order => order.status === statusFilter);
+            filteredOrders.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            if (filteredOrders.length === 0) { adminOrdersList.innerHTML = '<p style="text-align: center; color: var(--gray); padding: 40px;">No orders found.</p>'; return; }
+            adminOrdersList.innerHTML = '';
+            filteredOrders.forEach(order => {
+                const orderCard = document.createElement('div'); orderCard.className = 'admin-card'; orderCard.style.marginBottom = '15px';
+                const date = new Date(order.timestamp); const formattedDate = date.toLocaleString();
+                let statusBadge = ''; switch(order.status) { case 'pending': statusBadge = '<span class="order-status-badge status-pending">Pending</span>'; break; case 'preparing': statusBadge = '<span class="order-status-badge status-preparing">Preparing</span>'; break; case 'ready': statusBadge = '<span class="order-status-badge status-ready">Ready</span>'; break; case 'served': statusBadge = '<span class="order-status-badge status-served">Served</span>'; break; case 'cancelled': statusBadge = '<span class="order-status-badge status-cancelled">Cancelled</span>'; break; }
+                
+                let itemsHtml = '';
+                order.items.forEach(item => {
+                    itemsHtml += `<div style="margin-bottom: 8px;">
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <span><strong>${item.quantity}x ${item.name}</strong></span>
+                                        <span style="color: var(--primary);">$${(item.price * item.quantity).toFixed(2)}</span>
+                                    </div>`;
+                    if (item.selectedOptions && item.selectedOptions.length) {
+                        itemsHtml += '<div style="margin-left: 20px; font-size: 12px; color: var(--gray);">';
+                        item.selectedOptions.forEach(opt => {
+                            if (opt.isComment) {
+                                itemsHtml += `<div><i class="fas fa-comment"></i> ${opt.groupName}: "${opt.choiceName}"</div>`;
+                            } else {
+                                itemsHtml += `<div>• ${opt.groupName}: ${opt.choiceName} ${opt.price > 0 ? `(+$${opt.price.toFixed(2)})` : opt.price < 0 ? `(-$${Math.abs(opt.price).toFixed(2)})` : ''}</div>`;
+                            }
+                        });
+                        itemsHtml += '</div>';
+                    }
+                    itemsHtml += '</div>';
+                });
+
+                orderCard.innerHTML = `<div class="admin-card-header">
+                                            <div>
+                                                <div class="admin-card-title">Order #${order.orderNumber}</div>
+                                                <div style="font-size: 12px; color: var(--gray);">${formattedDate}</div>
+                                            </div>
+                                            <div>${statusBadge}</div>
+                                        </div>
+                                        <p style="margin-bottom: 10px; font-size: 14px;">
+                                            <strong>Table:</strong> ${order.table}<br>
+                                            <strong>Items:</strong>
+                                        </p>
+                                        <div style="margin-bottom: 15px;">${itemsHtml}</div>
+                                        <p style="margin-bottom: 10px; font-size: 14px;">
+                                            <strong>Total:</strong> $${order.total.toFixed(2)}<br>
+                                            <strong>Payment:</strong> ${order.paymentMethod === 'card' ? 'Card' : 'Cash'} (${order.paymentTime === 'now' ? 'Pay Now' : 'Pay Later'})
+                                        </p>
+                                        <div style="display: flex; gap: 10px; margin-top: 15px;">
+                                            <select class="admin-select" style="flex: 1;" data-order-id="${order.orderNumber}">
+                                                <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
+                                                <option value="preparing" ${order.status === 'preparing' ? 'selected' : ''}>Preparing</option>
+                                                <option value="ready" ${order.status === 'ready' ? 'selected' : ''}>Ready</option>
+                                                <option value="served" ${order.status === 'served' ? 'selected' : ''}>Served</option>
+                                                <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                                            </select>
+                                            <button class="btn btn-primary btn-small update-status-modal" data-order-id="${order.orderNumber}" style="padding: 8px 15px;">Update</button>
+                                        </div>`;
+                adminOrdersList.appendChild(orderCard);
+            });
+            
+            // NEW: Refresh modal table dropdown
+            populateTableSelect('tableSelectForDeleteModal');
+            
+            // Add listener for modal update buttons
+            document.querySelectorAll('.update-status-modal').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const orderId = this.getAttribute('data-order-id');
+                    const select = document.querySelector(`select[data-order-id="${orderId}"]`);
+                    if (select && orderId) {
+                        updateOrderStatus(orderId, select.value);
+                    }
+                });
+            });
+        }
+
         function initializeModalCustomizationTab() {
             const themeGalleryModal = document.getElementById('themeGalleryModal'); if (!themeGalleryModal) return;
             themeGalleryModal.innerHTML = '';
@@ -2482,6 +2705,11 @@
                     if (state.isAdminMode && document.querySelector('#adminDashboardSection.active-section')) {
                         loadOrdersForAdmin();
                         loadSystemStats();
+                        populateTableSelect('tableSelectForDelete');
+                    }
+                    if (adminPanel.style.display === 'flex') {
+                        loadOrdersForAdminModal();
+                        populateTableSelect('tableSelectForDeleteModal');
                     }
                 }, (error) => {
                     console.error("Orders snapshot error:", error);
