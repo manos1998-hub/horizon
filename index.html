@@ -445,26 +445,26 @@
             <div class="payment-container">
                 <div class="payment-options">
                     <div class="option-group">
-                        <div class="option-title">Payment Method</div>
+                        <div class="option-title">Τρόπος πληρωμής</div>
                         <div class="option-cards">
-                            <div class="option-card" data-payment="card"><div class="option-icon"><i class="fas fa-credit-card"></i></div><div class="option-name">Credit/Debit Card</div><div class="option-desc">Pay with your card</div></div>
-                            <div class="option-card" data-payment="cash"><div class="option-icon"><i class="fas fa-money-bill-wave"></i></div><div class="option-name">Cash</div><div class="option-desc">Pay with cash</div></div>
+                            <div class="option-card" data-payment="card"><div class="option-icon"><i class="fas fa-credit-card"></i></div><div class="option-name">Χρεωστική/Πιστωτικη κάρτα</div><div class="option-desc">Πληρώστε με κάρτα</div></div>
+                            <div class="option-card" data-payment="cash"><div class="option-icon"><i class="fas fa-money-bill-wave"></i></div><div class="option-name">Μετρητά</div><div class="option-desc">Πληρώστε με μετρητά</div></div>
                         </div>
                     </div>
                     <div class="option-group">
-                        <div class="option-title">Payment Time</div>
+                        <div class="option-title">Περίοδος πληρωμλης</div>
                         <div class="option-cards">
-                            <div class="option-card" data-time="now"><div class="option-icon"><i class="fas fa-bolt"></i></div><div class="option-name">Pay Now</div><div class="option-desc">Complete payment immediately</div></div>
-                            <div class="option-card" data-time="later"><div class="option-icon"><i class="fas fa-clock"></i></div><div class="option-name">Pay Later</div><div class="option-desc">Pay at the counter when leaving</div></div>
+                            <div class="option-card" data-time="now"><div class="option-icon"><i class="fas fa-bolt"></i></div><div class="option-name">Πληρώστε τώρα</div><div class="option-desc">Θα πληρώσετε κατευθείαν με την παραγγελία σας</div></div>
+                            <div class="option-card" data-time="later"><div class="option-icon"><i class="fas fa-clock"></i></div><div class="option-name">Πληρώστε αργότερα</div><div class="option-desc">Θα πληρώσετε αργότερα</div></div>
                         </div>
                     </div>
                 </div>
                 <div class="cart-summary">
                     <div class="summary-row"><span>Subtotal (tax included)</span><span id="paymentSubtotal">$0.00</span></div>
-                    <div class="summary-row summary-total"><span>Total</span><span class="amount" id="paymentTotal">$0.00</span></div>
+                    <div class="summary-row summary-total"><span>Σύνολο</span><span class="amount" id="paymentTotal">$0.00</span></div>
                     <div class="payment-actions">
-                        <button class="btn btn-secondary" id="backToCartBtn"><i class="fas fa-arrow-left"></i> Back to Cart</button>
-                        <button class="btn btn-primary" id="confirmPaymentBtn"><i class="fas fa-check"></i> Confirm Payment</button>
+                        <button class="btn btn-secondary" id="backToCartBtn"><i class="fas fa-arrow-left"></i> Πίσω στο καλάθι</button>
+                        <button class="btn btn-primary" id="confirmPaymentBtn"><i class="fas fa-check"></i> Πληρωμή</button>
                     </div>
                 </div>
             </div>
@@ -487,11 +487,11 @@
         <div class="container confirmation-container">
             <div class="confirmation-card">
                 <div class="confirmation-icon"><i class="fas fa-check"></i></div>
-                <h2 class="section-title">Order Confirmed!</h2>
+                <h2 class="section-title">Επιβεβαίωση Παραγγελίας!</h2>
                 <div class="order-number">Order #<span id="orderNumberDisplay">0000</span></div>
-                <p class="order-message">Thank you for your order. Your food will be prepared shortly.</p>
+                <p class="order-message">Ευχαριστούμε για την Παραγγελία σας. Σύντομα θα είναι έτοιμη</p>
                 <div class="payment-actions" style="justify-content: center; gap: 15px;">
-                    <button class="btn btn-success" id="newOrderBtn"><i class="fas fa-utensils"></i> Start New Order</button>
+                    <button class="btn btn-success" id="newOrderBtn"><i class="fas fa-utensils"></i> Νέα Παραγγελία</button>
                     <button class="btn btn-secondary" id="viewMyOrdersBtn"><i class="fas fa-clipboard-list"></i> Προβολή των Παραγγελιών μου</button>
                 </div>
             </div>
@@ -501,9 +501,9 @@
                 <div class="order-total"><span>Total Amount (tax included)</span><span class="amount" id="confirmationTotal">$0.00</span></div>
                 <div class="payment-details">
                     <div class="payment-details-title">Payment Information</div>
-                    <div class="payment-info"><div class="info-label">Payment Method:</div><div class="info-value" id="confirmationPaymentMethod">-</div></div>
-                    <div class="payment-info"><div class="info-label">Payment Time:</div><div class="info-value" id="confirmationPaymentTime">-</div></div>
-                    <div class="payment-info"><div class="info-label">Order Status:</div><div class="info-value" id="confirmationOrderStatus" style="color: var(--success);">Confirmed</div></div>
+                    <div class="payment-info"><div class="info-label">Τρόπος πληρωμής:</div><div class="info-value" id="confirmationPaymentMethod">-</div></div>
+                    <div class="payment-info"><div class="info-label">Περίοδος πληρωμλης:</div><div class="info-value" id="confirmationPaymentTime">-</div></div>
+                    <div class="payment-info"><div class="info-label">Κατάσταση Παραγγελίας:</div><div class="info-value" id="confirmationOrderStatus" style="color: var(--success);">Confirmed</div></div>
                 </div>
                 <div class="estimated-time"><div class="time-icon"><i class="fas fa-clock"></i></div><div class="time-text"><strong>Estimated preparation time:</strong> <span id="estimatedTime">15-25</span> minutes</div></div>
             </div>
