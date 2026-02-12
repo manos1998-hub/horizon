@@ -280,7 +280,7 @@
         .admin-code-input { width: 100%; padding: 15px; border: 2px solid var(--light-gray); border-radius: 8px; font-size: 18px; text-align: center; letter-spacing: 3px; margin-bottom: 20px; font-family: 'Poppins', monospace; background-color: var(--card-bg); color: var(--text); }
         .admin-code-input:focus { border-color: var(--primary); outline: none; }
 
-        /* ===== NEW STYLES FOR SUBCATEGORIES (OPTIONS) ===== */
+        /* ===== STYLES FOR SUBCATEGORIES (OPTIONS) ===== */
         .item-options-indicator { font-size: 12px; color: var(--secondary); margin-top: 8px; display: flex; align-items: center; gap: 5px; }
         .item-options-indicator i { font-size: 12px; }
         .options-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); z-index: 2001; display: none; align-items: center; justify-content: center; padding: 20px; }
@@ -308,22 +308,29 @@
         .admin-choice-input { flex: 1; }
         .admin-choice-price { width: 100px; }
         .add-choice-btn { margin-top: 10px; }
-        /* ===== NEW STYLE FOR COMMENT FIELDS ===== */
         .comment-field { margin: 10px 0; }
         .comment-field textarea { width: 100%; padding: 10px; border: 1px solid var(--light-gray); border-radius: 8px; font-family: var(--font-primary); resize: vertical; }
-        /* ===== DRAG AND DROP STYLES ===== */
         .admin-card.dragging { opacity: 0.5; cursor: grabbing; }
         .admin-card[draggable="true"] { cursor: grab; }
         .admin-card[draggable="true"]:active { cursor: grabbing; }
         .drag-handle { cursor: grab; padding: 5px; margin-right: 8px; color: var(--gray); }
         .drag-handle-category { cursor: grab; color: var(--gray); margin-right: 8px; }
-        /* ===== SOUND EFFECTS STYLES ===== */
         .audio-preview { width: 100%; margin-top: 10px; }
         .audio-actions { display: flex; gap: 10px; margin-top: 10px; }
         .audio-controls { display: flex; align-items: center; gap: 10px; background-color: var(--light); padding: 8px 15px; border-radius: 8px; }
         .sound-effect-card { background-color: var(--card-bg); border: 1px solid var(--light-gray); border-radius: 10px; padding: 20px; margin-bottom: 20px; }
         .sound-effect-title { font-weight: 600; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; color: var(--secondary); }
         .sound-effect-title i { font-size: 20px; }
+
+        /* ===== NEW STYLES FOR HELP REQUESTS ===== */
+        .help-request-card { background-color: var(--card-bg); border-left: 4px solid var(--warning); margin-bottom: 15px; padding: 20px; border-radius: 10px; box-shadow: var(--shadow); }
+        .help-request-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .help-request-table { font-size: 18px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 8px; }
+        .help-request-table i { color: var(--warning); }
+        .help-request-time { font-size: 14px; color: var(--gray); }
+        .help-request-actions { margin-top: 15px; display: flex; gap: 10px; }
+        .help-badge-pending { background-color: #fff3cd; color: #856404; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 500; }
+        .help-badge-resolved { background-color: #d4edda; color: #155724; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 500; }
 
         @media (max-width: 992px) { .theme-gallery { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); } .font-options { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); } }
         @media (max-width: 768px) { 
@@ -539,6 +546,7 @@
                     <button class="admin-tab" data-tab="menu">Menu Management</button>
                     <button class="admin-tab" data-tab="categories">Category Management</button>
                     <button class="admin-tab" data-tab="orders">Order Management</button>
+                    <button class="admin-tab" data-tab="helpRequests">🆘 Help Requests</button>
                     <button class="admin-tab" data-tab="customization">Visual Customization</button>
                     <button class="admin-tab" data-tab="sound">🔊 Sound Effects</button>
                     <button class="admin-tab" data-tab="qr">Table QR Codes</button>
@@ -619,6 +627,24 @@
                         <p style="margin-top: 10px; font-size: 13px; color: var(--warning);"><i class="fas fa-exclamation-triangle"></i> This action cannot be undone. Orders will be permanently deleted from the database.</p>
                     </div>
                 </div>
+                <!-- ===== NEW: HELP REQUESTS MANAGEMENT ===== -->
+                <div class="admin-content" id="helpRequestsTab">
+                    <div class="admin-form-group">
+                        <label class="admin-label">Filter by Status</label>
+                        <select class="admin-select" id="helpRequestStatusFilter">
+                            <option value="all">All Requests</option>
+                            <option value="pending">Pending</option>
+                            <option value="resolved">Resolved</option>
+                        </select>
+                    </div>
+                    <div id="adminHelpRequestsList" style="margin-top: 20px;">
+                        <p style="text-align: center; color: var(--gray); padding: 40px;">No help requests yet.</p>
+                    </div>
+                    <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid var(--light-gray);">
+                        <h4 style="margin-bottom: 15px;"><i class="fas fa-trash-alt"></i> Delete Old Requests</h4>
+                        <button class="btn btn-danger" id="deleteAllResolvedHelpBtn"><i class="fas fa-trash"></i> Delete All Resolved</button>
+                    </div>
+                </div>
                 <!-- Visual Customization -->
                 <div class="admin-content" id="customizationTab">
                     <div class="customization-panel">
@@ -679,17 +705,18 @@
                         <button class="btn btn-primary" id="saveCustomizationBtn"><i class="fas fa-save"></i> Save All Changes</button>
                     </div>
                 </div>
-                <!-- ===== NEW: SOUND EFFECTS SETTINGS ===== -->
+                <!-- ===== SOUND EFFECTS SETTINGS – INCLUDING HELP SOUND ===== -->
                 <div class="admin-content" id="soundTab">
                     <h3 style="margin-bottom: 20px;"><i class="fas fa-music"></i> Sound Effects</h3>
-                    <p style="margin-bottom: 25px; color: var(--gray);">Upload custom sounds that will play when customers add items to cart and confirm payment. These sounds are stored in the database and will be the same everywhere.</p>
+                    <p style="margin-bottom: 25px; color: var(--gray);">Upload custom sounds that will play when customers add items to cart, confirm payment, or request help.</p>
                     
                     <div style="margin-bottom: 30px;">
                         <label class="admin-label" style="display: flex; align-items: center; gap: 10px;">
-                            <input type="checkbox" id="soundEffectsEnabled" checked> Enable sound effects
+                            <input type="checkbox" id="soundEffectsEnabled" checked> Enable all sound effects
                         </label>
                     </div>
 
+                    <!-- Add to Cart Sound -->
                     <div class="sound-effect-card">
                         <div class="sound-effect-title"><i class="fas fa-cart-plus"></i> Add to Cart Sound</div>
                         <div class="image-upload-container">
@@ -700,10 +727,10 @@
                                 <button class="remove-image-btn" id="removeCartSoundBtn"><i class="fas fa-trash"></i> Remove</button>
                                 <button class="btn btn-primary" id="testCartSoundBtn"><i class="fas fa-play"></i> Test</button>
                             </div>
-                            <small style="color: var(--gray); display: block; margin-top: 8px;">Supported formats: MP3, WAV, OGG (max 1MB).</small>
                         </div>
                     </div>
 
+                    <!-- Checkout Sound -->
                     <div class="sound-effect-card">
                         <div class="sound-effect-title"><i class="fas fa-credit-card"></i> Checkout / Payment Sound</div>
                         <div class="image-upload-container">
@@ -714,7 +741,20 @@
                                 <button class="remove-image-btn" id="removeCheckoutSoundBtn"><i class="fas fa-trash"></i> Remove</button>
                                 <button class="btn btn-primary" id="testCheckoutSoundBtn"><i class="fas fa-play"></i> Test</button>
                             </div>
-                            <small style="color: var(--gray); display: block; margin-top: 8px;">This sound plays when the payment is confirmed and order placed.</small>
+                        </div>
+                    </div>
+
+                    <!-- ===== NEW: Help Request Sound ===== -->
+                    <div class="sound-effect-card">
+                        <div class="sound-effect-title"><i class="fas fa-headset"></i> Help Request Sound</div>
+                        <div class="image-upload-container">
+                            <div class="audio-preview" id="helpSoundPreview"></div>
+                            <div class="upload-actions">
+                                <input type="file" id="helpSoundUpload" accept="audio/*" style="display: none;">
+                                <button class="btn btn-secondary upload-btn" id="uploadHelpSoundBtn"><i class="fas fa-upload"></i> Upload Sound</button>
+                                <button class="remove-image-btn" id="removeHelpSoundBtn"><i class="fas fa-trash"></i> Remove</button>
+                                <button class="btn btn-primary" id="testHelpSoundBtn"><i class="fas fa-play"></i> Test</button>
+                            </div>
                         </div>
                     </div>
 
@@ -723,7 +763,7 @@
                         <button class="btn btn-primary" id="saveSoundEffectsBtn"><i class="fas fa-save"></i> Save Sound Settings</button>
                     </div>
                 </div>
-                <!-- NEW: QR Code Table Generator -->
+                <!-- QR Code Table Generator -->
                 <div class="admin-content" id="qrTab">
                     <h3 style="margin-bottom: 20px;"><i class="fas fa-qrcode"></i> QR Code Table Generator</h3>
                     <p style="margin-bottom: 15px; color: var(--gray);">Generate a PDF with QR codes for your tables. Each code links to this page with the table name pre-filled.</p>
@@ -733,7 +773,6 @@
 Table 2
 Table 3
 VIP Table</textarea>
-                        <small style="color: var(--gray);">Enter each table name on a new line.</small>
                     </div>
                     <div style="display: flex; gap: 15px; align-items: center;">
                         <button class="btn btn-primary" id="generateQRPDFBtn"><i class="fas fa-file-pdf"></i> Generate QR Code PDF</button>
@@ -755,7 +794,7 @@ VIP Table</textarea>
         </div>
     </section>
 
-    <!-- ========== ADMIN PANEL (MODAL) ========== -->
+    <!-- ========== ADMIN PANEL (MODAL) – SIMPLIFIED, BUT INCLUDES HELP REQUESTS ========== -->
     <div class="admin-panel" id="adminPanel">
         <div class="admin-container">
             <button class="admin-close" id="adminClose"><i class="fas fa-times"></i></button>
@@ -765,10 +804,11 @@ VIP Table</textarea>
                 <button class="admin-tab" data-tab="menu">Menu Management</button>
                 <button class="admin-tab" data-tab="categories">Category Management</button>
                 <button class="admin-tab" data-tab="orders">Order Management</button>
+                <button class="admin-tab" data-tab="helpRequests">🆘 Help Requests</button>
                 <button class="admin-tab" data-tab="customization">Visual Customization</button>
-                <button class="admin-tab" data-tab="sound">🔊 Sound Effects</button>
-                <button class="admin-tab" data-tab="qr">Table QR Codes</button>
-                <button class="admin-tab" data-tab="system">System Tools</button>
+                <button class="admin-tab" data-tab="sound">🔊 Sound</button>
+                <button class="admin-tab" data-tab="qr">QR Codes</button>
+                <button class="admin-tab" data-tab="system">System</button>
             </div>
             <!-- Restaurant Settings Modal -->
             <div class="admin-content active" id="restaurantTabModal">
@@ -795,13 +835,13 @@ VIP Table</textarea>
             <!-- Category Management Modal -->
             <div class="admin-content" id="categoriesTabModal">
                 <h3 style="margin-bottom: 20px;">Manage Categories</h3>
-                <p style="margin-bottom: 25px; color: var(--gray);">Add, edit, or remove menu categories. Note: You cannot delete categories that have menu items assigned to them.</p>
+                <p style="margin-bottom: 25px; color: var(--gray);">Add, edit, or remove menu categories.</p>
                 <div class="categories-management">
                     <div class="categories-list"><h4 style="margin-bottom: 15px;">Existing Categories</h4><div class="categories-list-container" id="categoriesListContainerModal"></div></div>
                     <div class="add-category-form">
                         <h4 style="margin-bottom: 15px;">Add New Category</h4>
                         <div class="admin-form-group"><label class="admin-label">Category Name</label><input type="text" class="admin-input" id="newCategoryNameModal" placeholder="e.g., Sides, Salads, Breakfast"></div>
-                        <div class="admin-form-group"><label class="admin-label">Display Name</label><input type="text" class="admin-input" id="newCategoryDisplayNameModal" placeholder="e.g., Side Dishes"><small style="color: var(--gray);">How it will appear in the menu tabs</small></div>
+                        <div class="admin-form-group"><label class="admin-label">Display Name</label><input type="text" class="admin-input" id="newCategoryDisplayNameModal" placeholder="e.g., Side Dishes"></div>
                         <button class="btn btn-success" id="addCategoryBtnModal"><i class="fas fa-plus"></i> Add Category</button>
                     </div>
                 </div>
@@ -809,25 +849,34 @@ VIP Table</textarea>
             <!-- Order Management Modal + Delete by Table -->
             <div class="admin-content" id="ordersTabModal">
                 <div class="admin-form-group"><label class="admin-label">Filter by Status</label><select class="admin-select" id="orderStatusFilterModal"><option value="all">All Orders</option><option value="pending">Pending</option><option value="preparing">Preparing</option><option value="ready">Ready</option><option value="served">Served</option><option value="cancelled">Cancelled</option></select></div>
-                <div id="adminOrdersListModal"><p style="text-align: center; color: var(--gray); padding: 40px;">No orders yet. Orders will appear here when customers place them.</p></div>
+                <div id="adminOrdersListModal"><p style="text-align: center; color: var(--gray); padding: 40px;">No orders yet.</p></div>
                 <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid var(--light-gray);">
                     <h4 style="margin-bottom: 15px;"><i class="fas fa-trash-alt"></i> Delete Orders by Table</h4>
                     <div style="display: flex; gap: 10px; align-items: flex-end;">
                         <div style="flex: 1;">
                             <label class="admin-label">Select Table</label>
-                            <select class="admin-select" id="tableSelectForDeleteModal">
-                                <option value="">-- No tables with orders --</option>
-                            </select>
+                            <select class="admin-select" id="tableSelectForDeleteModal"><option value="">-- No tables with orders --</option></select>
                         </div>
-                        <button class="btn btn-danger" id="deleteOrdersForTableBtnModal" style="flex: 0 0 auto;"><i class="fas fa-trash"></i> Delete Orders for Selected Table</button>
+                        <button class="btn btn-danger" id="deleteOrdersForTableBtnModal"><i class="fas fa-trash"></i> Delete Orders</button>
                     </div>
-                    <p style="margin-top: 10px; font-size: 13px; color: var(--warning);"><i class="fas fa-exclamation-triangle"></i> This action cannot be undone. Orders will be permanently deleted from the database.</p>
                 </div>
+            </div>
+            <!-- ===== NEW: Help Requests Modal ===== -->
+            <div class="admin-content" id="helpRequestsTabModal">
+                <h3 style="margin-bottom: 20px;"><i class="fas fa-headset"></i> Help Requests</h3>
+                <div class="admin-form-group">
+                    <label class="admin-label">Filter by Status</label>
+                    <select class="admin-select" id="helpRequestStatusFilterModal">
+                        <option value="all">All</option>
+                        <option value="pending">Pending</option>
+                        <option value="resolved">Resolved</option>
+                    </select>
+                </div>
+                <div id="adminHelpRequestsListModal" style="margin-top: 20px;"></div>
             </div>
             <!-- Visual Customization Modal (simplified) -->
             <div class="admin-content" id="customizationTabModal">
                 <h3 style="margin-bottom: 20px;">Visual Customization</h3>
-                <p style="margin-bottom: 25px; color: var(--gray);">Quick visual customization options.</p>
                 <div style="margin-bottom: 30px;"><div style="font-weight: 500; margin-bottom: 15px; color: var(--text);">Theme Selection</div><div class="theme-gallery" id="themeGalleryModal"></div></div>
                 <div style="margin-bottom: 30px;"><div style="font-weight: 500; margin-bottom: 15px; color: var(--text);">Font Selection</div><div class="font-options" id="fontOptionsModal"></div></div>
                 <div class="customization-actions"><button class="btn btn-secondary" id="resetCustomizationBtnModal"><i class="fas fa-undo"></i> Reset</button><button class="btn btn-primary" id="saveCustomizationBtnModal"><i class="fas fa-save"></i> Save</button></div>
@@ -835,7 +884,6 @@ VIP Table</textarea>
             <!-- Sound Effects Modal (simplified) -->
             <div class="admin-content" id="soundTabModal">
                 <h3 style="margin-bottom: 20px;"><i class="fas fa-music"></i> Sound Effects</h3>
-                <p style="margin-bottom: 15px; color: var(--gray);">Enable / disable and upload sounds (use main admin panel for full options).</p>
                 <div style="margin-bottom: 20px;">
                     <label style="display: flex; align-items: center; gap: 10px;">
                         <input type="checkbox" id="soundEffectsEnabledModal" checked> Enable sounds
@@ -846,26 +894,22 @@ VIP Table</textarea>
             <!-- QR Code Table Generator Modal -->
             <div class="admin-content" id="qrTabModal">
                 <h3 style="margin-bottom: 20px;"><i class="fas fa-qrcode"></i> QR Code Table Generator</h3>
-                <p style="margin-bottom: 15px; color: var(--gray);">Generate a PDF with QR codes for your tables. Each code links to this page with the table name pre-filled.</p>
                 <div class="admin-form-group">
                     <label class="admin-label">Table Names (one per line)</label>
-                    <textarea id="tableNamesForQRModal" class="admin-textarea" rows="8" placeholder="Table 1&#10;Table 2&#10;Table 3&#10;VIP Table">Table 1
-Table 2
-Table 3
-VIP Table</textarea>
+                    <textarea id="tableNamesForQRModal" class="admin-textarea" rows="6">Table 1\nTable 2\nTable 3\nVIP Table</textarea>
                 </div>
-                <button class="btn btn-primary" id="generateQRPDFBtnModal"><i class="fas fa-file-pdf"></i> Generate QR Code PDF</button>
+                <button class="btn btn-primary" id="generateQRPDFBtnModal"><i class="fas fa-file-pdf"></i> Generate PDF</button>
             </div>
             <!-- System Tools Modal -->
             <div class="admin-content" id="systemTabModal">
                 <h3 style="margin-bottom: 20px;">System Management</h3>
                 <div class="admin-grid">
-                    <div class="admin-card"><div class="admin-card-header"><div class="admin-card-title">Clear All Orders</div></div><p style="margin-bottom: 15px; font-size: 14px; color: var(--gray);">Remove all order history from the system.</p><button class="btn btn-danger" id="clearOrdersBtnModal"><i class="fas fa-trash"></i> Clear Orders</button></div>
-                    <div class="admin-card"><div class="admin-card-header"><div class="admin-card-title">Reset Menu to Default</div></div><p style="margin-bottom: 15px; font-size: 14px; color: var(--gray);">Restore the original menu items.</p><button class="btn btn-warning" id="resetMenuBtnModal"><i class="fas fa-redo"></i> Reset Menu</button></div>
-                    <div class="admin-card"><div class="admin-card-header"><div class="admin-card-title">Export Data</div></div><p style="margin-bottom: 15px; font-size: 14px; color: var(--gray);">Download all restaurant data as JSON.</p><button class="btn btn-secondary" id="exportDataBtnModal"><i class="fas fa-download"></i> Export Data</button></div>
-                    <div class="admin-card"><div class="admin-card-header"><div class="admin-card-title">Import Data</div></div><p style="margin-bottom: 15px; font-size: 14px; color: var(--gray);">Upload and restore from a backup file.</p><input type="file" id="importDataInputModal" style="display: none;" accept=".json"><button class="btn btn-secondary" id="importDataBtnModal"><i class="fas fa-upload"></i> Import Data</button></div>
+                    <div class="admin-card"><div class="admin-card-header"><div class="admin-card-title">Clear All Orders</div></div><button class="btn btn-danger" id="clearOrdersBtnModal">Clear Orders</button></div>
+                    <div class="admin-card"><div class="admin-card-header"><div class="admin-card-title">Reset Menu</div></div><button class="btn btn-warning" id="resetMenuBtnModal">Reset Menu</button></div>
+                    <div class="admin-card"><div class="admin-card-header"><div class="admin-card-title">Export Data</div></div><button class="btn btn-secondary" id="exportDataBtnModal">Export Data</button></div>
+                    <div class="admin-card"><div class="admin-card-header"><div class="admin-card-title">Import Data</div></div><input type="file" id="importDataInputModal" style="display:none;"><button class="btn btn-secondary" id="importDataBtnModal">Import Data</button></div>
                 </div>
-                <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid var(--light-gray);"><h4 style="margin-bottom: 15px;">System Statistics</h4><div id="systemStatsModal"></div></div>
+                <div style="margin-top: 30px;"><h4>System Statistics</h4><div id="systemStatsModal"></div></div>
             </div>
         </div>
     </div>
@@ -946,6 +990,7 @@ VIP Table</textarea>
             },
             menuItems: [],
             orders: [],
+            helpRequests: [], // NEW: store help requests
             adminAccessCode: "3232",
             adminChangeCode: "6262",
             categories: [],
@@ -978,11 +1023,11 @@ VIP Table</textarea>
             },
             currentTheme: "default",
             currentFont: "poppins",
-            // ===== NEW: Sound effects state =====
             soundEffects: {
                 enabled: true,
                 addToCartSound: null,
-                checkoutSound: null
+                checkoutSound: null,
+                helpRequestSound: null // NEW: help sound
             }
         };
 
@@ -998,7 +1043,7 @@ VIP Table</textarea>
         ];
 
         // ========== THEMES & FONTS ==========
-        const themes = {
+        const themes = { /* unchanged – keep as in original */ 
             default: { name: "Classic Modern", category: "Modern", primary: "#e63946", secondary: "#457b9d", background: "#fefefe", text: "#212529", cardBg: "#ffffff", lightGray: "#e9ecef" },
             midnight: { name: "Midnight Elegance", category: "Modern", primary: "#6c63ff", secondary: "#4cc9f0", background: "#121212", text: "#f5f5f5", cardBg: "#1e1e1e", lightGray: "#2d2d2d" },
             autumn: { name: "Autumn Cozy", category: "Cozy", primary: "#e76f51", secondary: "#f4a261", background: "#fefae0", text: "#283618", cardBg: "#ffffff", lightGray: "#faedcd" },
@@ -1093,17 +1138,21 @@ VIP Table</textarea>
         async function deleteOrderFirestore(orderId) { try { await db.collection('orders').doc(orderId).delete(); } catch (e) { console.error(e); } }
         async function saveCustomization() { try { await db.collection('settings').doc('customization').set(state.customization); } catch (e) { console.error(e); } }
         async function saveSoundEffects() { try { await db.collection('settings').doc('soundEffects').set(state.soundEffects); } catch (e) { console.error(e); } }
+        // NEW: Help request Firestore functions
+        async function saveHelpRequest(request) { try { await db.collection('helpRequests').doc(request.id).set(request); } catch (e) { console.error(e); } }
+        async function deleteHelpRequestFirestore(id) { try { await db.collection('helpRequests').doc(id).delete(); } catch (e) { console.error(e); } }
 
         // ========== INITIAL LOAD ==========
         async function loadInitialData() {
             try {
-                const [restDoc, menuSnap, ordersSnap, catDoc, customDoc, soundDoc] = await Promise.all([
+                const [restDoc, menuSnap, ordersSnap, catDoc, customDoc, soundDoc, helpSnap] = await Promise.all([
                     db.collection('settings').doc('restaurantInfo').get(),
                     db.collection('menuItems').get(),
                     db.collection('orders').get(),
                     db.collection('settings').doc('categories').get(),
                     db.collection('settings').doc('customization').get(),
-                    db.collection('settings').doc('soundEffects').get()
+                    db.collection('settings').doc('soundEffects').get(),
+                    db.collection('helpRequests').get()
                 ]);
                 if (restDoc.exists) state.restaurantInfo = restDoc.data();
                 else await db.collection('settings').doc('restaurantInfo').set(state.restaurantInfo);
@@ -1130,6 +1179,9 @@ VIP Table</textarea>
                 
                 if (soundDoc.exists) state.soundEffects = soundDoc.data();
                 else await db.collection('settings').doc('soundEffects').set(state.soundEffects);
+                
+                // NEW: Load help requests
+                state.helpRequests = helpSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 
                 determineCurrentTheme();
                 determineCurrentFont();
@@ -1206,6 +1258,20 @@ VIP Table</textarea>
                 }
                 if (adminPanel.style.display === 'flex') loadCategoriesForAdminModal();
             });
+            // NEW: Real-time listener for help requests
+            db.collection('helpRequests').onSnapshot(snap => {
+                state.helpRequests = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                if (state.isAdminMode) {
+                    if (document.querySelector('#adminDashboardSection.active-section')) {
+                        const activeTab = document.querySelector('#adminDashboardSection .admin-tab.active')?.dataset?.tab;
+                        if (activeTab === 'helpRequests') loadHelpRequestsForAdmin();
+                    }
+                    if (adminPanel.style.display === 'flex') {
+                        const modalActive = document.querySelector('#adminPanel .admin-tab.active')?.dataset?.tab;
+                        if (modalActive === 'helpRequests') loadHelpRequestsForAdminModal();
+                    }
+                }
+            });
         }
 
         // ========== UI HELPERS ==========
@@ -1269,7 +1335,8 @@ VIP Table</textarea>
                 menuGrid.appendChild(el);
             });
         }
-        // ----- CART FUNCTIONS -----
+
+        // ========== CART FUNCTIONS (unchanged) ==========
         function addToCart(itemId) {
             const item = state.menuItems.find(i=>i.id===itemId);
             if (!item) return;
@@ -1293,10 +1360,9 @@ VIP Table</textarea>
             } else state.cart.push(cartItem);
             updateCart();
             showNotification(`${menuItem.name} added to cart`);
-            // === PLAY ADD TO CART SOUND ===
             playSound(state.soundEffects.addToCartSound);
         }
-        function openOptionsModal(item) {
+        function openOptionsModal(item) { /* unchanged – keep as original */ 
             let html = `<h3 class="options-modal-title">${item.name}</h3><div class="options-modal-price">$${item.price.toFixed(2)}</div><div class="item-description" style="margin-bottom:20px;">${item.description}</div>`;
             item.options.forEach((g, gi) => {
                 if (g.type === 'text') {
@@ -1474,7 +1540,35 @@ VIP Table</textarea>
             }
         }
 
-        function showHelpNotification() { if (state.currentTable) showNotification(`Ένας σερβιτόρος θα σας εξυπηρετήσει σύντομα.`); else showNotification('Ένας σερβιτόρος θα σας εξυπηρετήσει σύντομα.'); }
+        // ========== NEW: HELP REQUEST FUNCTION ==========
+        async function requestHelp() {
+            if (!state.currentTable || state.isAdminMode) {
+                showNotification('Please select a table first.');
+                return;
+            }
+            // Play help sound if enabled
+            playSound(state.soundEffects.helpRequestSound);
+            
+            // Create help request document
+            const requestId = 'help_' + Date.now() + '_' + Math.random().toString(36).substring(2);
+            const helpRequest = {
+                id: requestId,
+                table: state.currentTable,
+                timestamp: new Date().toISOString(),
+                status: 'pending'
+            };
+            state.helpRequests.push(helpRequest);
+            await saveHelpRequest(helpRequest);
+            showNotification(`Help requested for ${state.currentTable}. A waiter will assist you soon.`);
+        }
+
+        function showHelpNotification() { 
+            if (state.currentTable) {
+                requestHelp(); // now with sound and Firestore
+            } else {
+                showNotification('Ένας σερβιτόρος θα σας εξυπηρετήσει σύντομα.');
+            }
+        }
 
         // ========== ADMIN MODE ==========
         function showAdminCodePrompt() { adminCodePrompt.style.display = 'flex'; adminCodeInput.focus(); }
@@ -1670,7 +1764,8 @@ VIP Table</textarea>
             loadOrdersForAdmin();
             loadSystemStats();
             loadCustomizationSettings();
-            loadSoundSettingsUI(); // <-- NEW
+            loadSoundSettingsUI(); 
+            loadHelpRequestsForAdmin(); // NEW
 
             document.querySelectorAll('#adminDashboardSection .admin-tab').forEach(tab => {
                 tab.addEventListener('click', function() {
@@ -1682,6 +1777,7 @@ VIP Table</textarea>
                     if (tid==='customization') setTimeout(initializeCustomizationTab,100);
                     if (tid==='categories') setTimeout(()=>makeCategoriesDraggable('categoriesListContainer'),200);
                     if (tid==='orders') { loadOrdersForAdmin(); populateTableSelect('tableSelectForDelete'); }
+                    if (tid==='helpRequests') { loadHelpRequestsForAdmin(); } // NEW
                     if (tid==='sound') setTimeout(loadSoundSettingsUI,50);
                     if (tid==='qr') { /* nothing special */ }
                 });
@@ -1703,18 +1799,34 @@ VIP Table</textarea>
                 if (sel.value) showAdminChangePrompt(()=>deleteOrdersForTable(sel.value));
                 else showNotification('Please select a table.');
             });
-            // QR Generator button
             document.getElementById('generateQRPDFBtn').addEventListener('click', function() {
                 const textarea = document.getElementById('tableNamesForQR');
                 const tableNames = textarea.value.split('\n').map(s => s.trim()).filter(s => s.length > 0);
                 generateTableQRCodePDF(tableNames);
             });
+            // NEW: Help request admin listeners
+            document.getElementById('helpRequestStatusFilter').addEventListener('change', loadHelpRequestsForAdmin);
+            document.getElementById('deleteAllResolvedHelpBtn').addEventListener('click', async function() {
+                if (!confirm('Delete all resolved help requests?')) return;
+                const resolved = state.helpRequests.filter(r => r.status === 'resolved');
+                state.helpRequests = state.helpRequests.filter(r => r.status !== 'resolved');
+                await Promise.all(resolved.map(r => deleteHelpRequestFirestore(r.id)));
+                loadHelpRequestsForAdmin();
+                showNotification('All resolved help requests deleted.');
+            });
+
             adminDashboardSection.addEventListener('click', e => {
                 if (e.target.classList.contains('update-status') || e.target.closest('.update-status')) {
                     const btn = e.target.classList.contains('update-status')?e.target:e.target.closest('.update-status');
                     const oid = btn.dataset.orderId;
                     const sel = document.querySelector(`select[data-order-id="${oid}"]`);
                     if (sel && oid) updateOrderStatusOptimistic(oid, sel.value);
+                }
+                // NEW: Resolve help request
+                if (e.target.classList.contains('resolve-help-btn') || e.target.closest('.resolve-help-btn')) {
+                    const btn = e.target.classList.contains('resolve-help-btn')?e.target:e.target.closest('.resolve-help-btn');
+                    const requestId = btn.dataset.requestId;
+                    updateHelpRequestStatus(requestId, 'resolved');
                 }
             });
             setTimeout(()=>{ makeAdminGridDraggable('menuItemsList'); makeCategoriesDraggable('categoriesListContainer'); populateTableSelect('tableSelectForDelete'); },500);
@@ -1992,6 +2104,61 @@ VIP Table</textarea>
             await Promise.all(toDelete.map(o=>deleteOrderFirestore(o.orderNumber)));
         }
 
+        // ===== NEW: HELP REQUESTS ADMIN =====
+        function loadHelpRequestsForAdmin() {
+            const list = document.getElementById('adminHelpRequestsList');
+            const filter = document.getElementById('helpRequestStatusFilter').value;
+            let filtered = filter === 'all' ? [...state.helpRequests] : state.helpRequests.filter(r => r.status === filter);
+            filtered.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+            if (filtered.length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: var(--gray); padding: 40px;">No help requests found.</p>';
+                return;
+            }
+            list.innerHTML = '';
+            filtered.forEach(r => {
+                const card = document.createElement('div'); card.className = 'help-request-card';
+                const date = new Date(r.timestamp).toLocaleString();
+                const badge = r.status === 'pending' ? '<span class="help-badge-pending">Pending</span>' : '<span class="help-badge-resolved">Resolved</span>';
+                card.innerHTML = `
+                    <div class="help-request-header">
+                        <div class="help-request-table"><i class="fas fa-chair"></i> ${r.table}</div>
+                        <div>${badge}</div>
+                    </div>
+                    <div class="help-request-time">${date}</div>
+                    <div class="help-request-actions">
+                        ${r.status === 'pending' ? `<button class="btn btn-success btn-small resolve-help-btn" data-request-id="${r.id}"><i class="fas fa-check"></i> Mark Resolved</button>` : ''}
+                        <button class="btn btn-danger btn-small delete-help-btn" data-request-id="${r.id}"><i class="fas fa-trash"></i> Delete</button>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+            // Attach listeners
+            list.querySelectorAll('.resolve-help-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.dataset.requestId;
+                    updateHelpRequestStatus(id, 'resolved');
+                });
+            });
+            list.querySelectorAll('.delete-help-btn').forEach(btn => {
+                btn.addEventListener('click', async function() {
+                    const id = this.dataset.requestId;
+                    if (!confirm('Delete this help request?')) return;
+                    state.helpRequests = state.helpRequests.filter(r => r.id !== id);
+                    await deleteHelpRequestFirestore(id);
+                    loadHelpRequestsForAdmin();
+                    showNotification('Help request deleted.');
+                });
+            });
+        }
+        async function updateHelpRequestStatus(requestId, newStatus) {
+            const idx = state.helpRequests.findIndex(r => r.id === requestId);
+            if (idx !== -1) {
+                state.helpRequests[idx].status = newStatus;
+                await saveHelpRequest(state.helpRequests[idx]);
+                loadHelpRequestsForAdmin();
+                showNotification(`Help request marked as ${newStatus}.`);
+            }
+        }
         // --- SYSTEM ---
         function loadSystemStats() {
             const stats = document.getElementById('systemStats');
@@ -2006,7 +2173,7 @@ VIP Table</textarea>
             stats.innerHTML = `<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px,1fr)); gap:15px;"><div style="background-color:var(--light); padding:15px; border-radius:8px;"><div style="font-size:24px; font-weight:600; color:var(--primary);">${total}</div><div style="font-size:14px; color:var(--gray);">Total Orders</div></div><div style="background-color:var(--light); padding:15px; border-radius:8px;"><div style="font-size:24px; font-weight:600; color:var(--primary);">$${revenue.toFixed(2)}</div><div style="font-size:14px; color:var(--gray);">Total Revenue</div></div><div style="background-color:var(--light); padding:15px; border-radius:8px;"><div style="font-size:24px; font-weight:600; color:var(--primary);">$${avg.toFixed(2)}</div><div style="font-size:14px; color:var(--gray);">Average Order</div></div><div style="background-color:var(--light); padding:15px; border-radius:8px;"><div style="font-size:24px; font-weight:600; color:var(--primary);">${state.menuItems.length}</div><div style="font-size:14px; color:var(--gray);">Menu Items</div></div><div style="background-color:var(--light); padding:15px; border-radius:8px;"><div style="font-size:24px; font-weight:600; color:var(--primary);">${state.categories.length}</div><div style="font-size:14px; color:var(--gray);">Categories</div></div></div><div style="margin-top:20px;"><h5 style="margin-bottom:10px;">Order Status Distribution</h5><div style="display:flex; gap:10px; flex-wrap:wrap;"><div style="display:flex; align-items:center; gap:5px;"><div style="width:12px; height:12px; background-color:#fff3cd; border-radius:2px;"></div><span>Pending: ${pending}</span></div><div style="display:flex; align-items:center; gap:5px;"><div style="width:12px; height:12px; background-color:#d1ecf1; border-radius:2px;"></div><span>Preparing: ${prep}</span></div><div style="display:flex; align-items:center; gap:5px;"><div style="width:12px; height:12px; background-color:#d4edda; border-radius:2px;"></div><span>Ready: ${ready}</span></div><div style="display:flex; align-items:center; gap:5px;"><div style="width:12px; height:12px; background-color:#cce5ff; border-radius:2px;"></div><span>Served: ${served}</span></div><div style="display:flex; align-items:center; gap:5px;"><div style="width:12px; height:12px; background-color:#f8d7da; border-radius:2px;"></div><span>Cancelled: ${cancelled}</span></div></div></div>`;
         }
         function exportData() {
-            const data = { restaurantInfo: state.restaurantInfo, menuItems: state.menuItems, orders: state.orders, categories: state.categories, customization: state.customization, soundEffects: state.soundEffects, exportDate: new Date().toISOString() };
+            const data = { restaurantInfo: state.restaurantInfo, menuItems: state.menuItems, orders: state.orders, categories: state.categories, customization: state.customization, soundEffects: state.soundEffects, helpRequests: state.helpRequests, exportDate: new Date().toISOString() };
             const str = JSON.stringify(data,null,2); const uri = 'data:application/json;charset=utf-8,'+encodeURIComponent(str);
             const a = document.createElement('a'); a.href = uri; a.download = `dineeasy-backup-${new Date().toISOString().split('T')[0]}.json`; a.click(); showNotification("Data exported successfully.");
         }
@@ -2023,14 +2190,16 @@ VIP Table</textarea>
                         if (d.categories) state.categories = d.categories;
                         if (d.customization) state.customization = d.customization;
                         if (d.soundEffects) state.soundEffects = d.soundEffects;
+                        if (d.helpRequests) state.helpRequests = d.helpRequests;
                         await Promise.all(state.menuItems.map(i=>saveMenuItem(i)));
                         await saveCategories();
                         await Promise.all(state.orders.map(o=>saveOrder(o)));
                         await saveRestaurantInfo();
                         await saveCustomization();
                         await saveSoundEffects();
+                        await Promise.all(state.helpRequests.map(r=>saveHelpRequest(r)));
                         updateRestaurantUI(); displayMenuItems('all'); updateCategoryTabs(); applyCustomization();
-                        loadMenuItemsForAdmin(); loadCategoriesForAdmin(); loadOrdersForAdmin(); loadSystemStats();
+                        loadMenuItemsForAdmin(); loadCategoriesForAdmin(); loadOrdersForAdmin(); loadSystemStats(); loadHelpRequestsForAdmin();
                         showNotification("Data imported successfully.");
                     }
                 } catch { showNotification("Error importing data. Invalid file format."); }
@@ -2096,7 +2265,7 @@ VIP Table</textarea>
         function darkenColor(c,p) { const n = parseInt(c.replace("#",""),16); const a = Math.round(2.55*p); const r = (n>>16)-a, g = (n>>8&0x00FF)-a, b = (n&0x0000FF)-a; return "#" + (0x1000000 + (r<255?r<1?0:r:255)*0x10000 + (g<255?g<1?0:g:255)*0x100 + (b<255?b<1?0:b:255)).toString(16).slice(1); }
         function getContrastColor(h) { const r=parseInt(h.substr(1,2),16), g=parseInt(h.substr(3,2),16), b=parseInt(h.substr(5,2),16), yiq=((r*299)+(g*587)+(b*114))/1000; return yiq>=128?'#000000':'#ffffff'; }
 
-        // ========== NEW: SOUND EFFECTS ADMIN UI ==========
+        // ========== SOUND EFFECTS ADMIN UI – INCLUDING HELP SOUND ==========
         function loadSoundSettingsUI() {
             const enabledCheck = document.getElementById('soundEffectsEnabled');
             if (enabledCheck) enabledCheck.checked = state.soundEffects.enabled;
@@ -2104,6 +2273,7 @@ VIP Table</textarea>
             // Update previews
             const cartPreview = document.getElementById('cartSoundPreview');
             const checkoutPreview = document.getElementById('checkoutSoundPreview');
+            const helpPreview = document.getElementById('helpSoundPreview'); // NEW
             
             if (state.soundEffects.addToCartSound) {
                 cartPreview.innerHTML = `<audio controls src="${state.soundEffects.addToCartSound}" style="width:100%;"></audio>`;
@@ -2115,44 +2285,71 @@ VIP Table</textarea>
             } else {
                 checkoutPreview.innerHTML = '<div class="image-preview-placeholder"><i class="fas fa-music"></i><p>No sound uploaded</p></div>';
             }
+            if (state.soundEffects.helpRequestSound) {
+                helpPreview.innerHTML = `<audio controls src="${state.soundEffects.helpRequestSound}" style="width:100%;"></audio>`;
+            } else {
+                helpPreview.innerHTML = '<div class="image-preview-placeholder"><i class="fas fa-music"></i><p>No sound uploaded</p></div>';
+            }
 
-            // Attach listeners (only once)
-            document.getElementById('uploadCartSoundBtn').replaceWith(document.getElementById('uploadCartSoundBtn').cloneNode(true));
-            document.getElementById('uploadCheckoutSoundBtn').replaceWith(document.getElementById('uploadCheckoutSoundBtn').cloneNode(true));
-            document.getElementById('removeCartSoundBtn').replaceWith(document.getElementById('removeCartSoundBtn').cloneNode(true));
-            document.getElementById('removeCheckoutSoundBtn').replaceWith(document.getElementById('removeCheckoutSoundBtn').cloneNode(true));
-            document.getElementById('testCartSoundBtn').replaceWith(document.getElementById('testCartSoundBtn').cloneNode(true));
-            document.getElementById('testCheckoutSoundBtn').replaceWith(document.getElementById('testCheckoutSoundBtn').cloneNode(true));
-            document.getElementById('saveSoundEffectsBtn').replaceWith(document.getElementById('saveSoundEffectsBtn').cloneNode(true));
-            document.getElementById('resetSoundDefaultsBtn').replaceWith(document.getElementById('resetSoundDefaultsBtn').cloneNode(true));
-
-            document.getElementById('uploadCartSoundBtn').addEventListener('click', ()=> document.getElementById('cartSoundUpload').click());
-            document.getElementById('cartSoundUpload').addEventListener('change', (e)=> {
-                const file = e.target.files[0]; if (!file || !file.type.startsWith('audio/')) return;
-                const reader = new FileReader();
-                reader.onload = (ev) => { state.soundEffects.addToCartSound = ev.target.result; loadSoundSettingsUI(); showNotification("Cart sound loaded. Don't forget to save."); };
-                reader.readAsDataURL(file);
+            // Attach listeners (clone to avoid duplicates)
+            ['Cart','Checkout','Help'].forEach(type => {
+                const uploadBtn = document.getElementById(`upload${type}SoundBtn`);
+                const removeBtn = document.getElementById(`remove${type}SoundBtn`);
+                const testBtn = document.getElementById(`test${type}SoundBtn`);
+                const fileInput = document.getElementById(`${type.toLowerCase()}SoundUpload`);
+                if (uploadBtn) {
+                    const newBtn = uploadBtn.cloneNode(true);
+                    uploadBtn.parentNode.replaceChild(newBtn, uploadBtn);
+                    newBtn.addEventListener('click', () => fileInput.click());
+                }
+                if (removeBtn) {
+                    const newBtn = removeBtn.cloneNode(true);
+                    removeBtn.parentNode.replaceChild(newBtn, removeBtn);
+                    newBtn.addEventListener('click', () => {
+                        if (type === 'Cart') state.soundEffects.addToCartSound = null;
+                        else if (type === 'Checkout') state.soundEffects.checkoutSound = null;
+                        else if (type === 'Help') state.soundEffects.helpRequestSound = null;
+                        loadSoundSettingsUI();
+                        showNotification(`${type} sound removed.`);
+                    });
+                }
+                if (testBtn) {
+                    const newBtn = testBtn.cloneNode(true);
+                    testBtn.parentNode.replaceChild(newBtn, testBtn);
+                    newBtn.addEventListener('click', () => {
+                        let sound = null;
+                        if (type === 'Cart') sound = state.soundEffects.addToCartSound;
+                        else if (type === 'Checkout') sound = state.soundEffects.checkoutSound;
+                        else if (type === 'Help') sound = state.soundEffects.helpRequestSound;
+                        playSound(sound);
+                    });
+                }
+                if (fileInput) {
+                    const newInput = fileInput.cloneNode(true);
+                    fileInput.parentNode.replaceChild(newInput, fileInput);
+                    newInput.addEventListener('change', (e) => {
+                        const file = e.target.files[0];
+                        if (!file || !file.type.startsWith('audio/')) return;
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                            if (type === 'Cart') state.soundEffects.addToCartSound = ev.target.result;
+                            else if (type === 'Checkout') state.soundEffects.checkoutSound = ev.target.result;
+                            else if (type === 'Help') state.soundEffects.helpRequestSound = ev.target.result;
+                            loadSoundSettingsUI();
+                            showNotification(`${type} sound loaded. Don't forget to save.`);
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                }
             });
-            document.getElementById('removeCartSoundBtn').addEventListener('click', ()=> { state.soundEffects.addToCartSound = null; loadSoundSettingsUI(); showNotification("Cart sound removed."); });
 
-            document.getElementById('uploadCheckoutSoundBtn').addEventListener('click', ()=> document.getElementById('checkoutSoundUpload').click());
-            document.getElementById('checkoutSoundUpload').addEventListener('change', (e)=> {
-                const file = e.target.files[0]; if (!file || !file.type.startsWith('audio/')) return;
-                const reader = new FileReader();
-                reader.onload = (ev) => { state.soundEffects.checkoutSound = ev.target.result; loadSoundSettingsUI(); showNotification("Checkout sound loaded. Don't forget to save."); };
-                reader.readAsDataURL(file);
-            });
-            document.getElementById('removeCheckoutSoundBtn').addEventListener('click', ()=> { state.soundEffects.checkoutSound = null; loadSoundSettingsUI(); showNotification("Checkout sound removed."); });
-
-            document.getElementById('testCartSoundBtn').addEventListener('click', ()=> playSound(state.soundEffects.addToCartSound));
-            document.getElementById('testCheckoutSoundBtn').addEventListener('click', ()=> playSound(state.soundEffects.checkoutSound));
-
-            document.getElementById('resetSoundDefaultsBtn').addEventListener('click', ()=> {
+            document.getElementById('resetSoundDefaultsBtn').addEventListener('click', () => {
                 if (confirm("Clear all uploaded sounds?")) {
                     state.soundEffects.addToCartSound = null;
                     state.soundEffects.checkoutSound = null;
+                    state.soundEffects.helpRequestSound = null;
                     loadSoundSettingsUI();
-                    showNotification("Sounds cleared. Save to persist.");
+                    showNotification("All sounds cleared. Save to persist.");
                 }
             });
 
@@ -2190,7 +2387,7 @@ VIP Table</textarea>
                     if (tid==='menu') setTimeout(()=>makeAdminGridDraggable('menuItemsListModal'),500);
                     if (tid==='categories') setTimeout(()=>makeCategoriesDraggable('categoriesListContainerModal'),200);
                     if (tid==='orders') { loadOrdersForAdminModal(); populateTableSelect('tableSelectForDeleteModal'); }
-                    if (tid==='qr') { /* nothing special */ }
+                    if (tid==='helpRequests') { loadHelpRequestsForAdminModal(); } // NEW
                     if (tid==='sound') { 
                         const modalEnabled = document.getElementById('soundEffectsEnabledModal');
                         if (modalEnabled) modalEnabled.checked = state.soundEffects.enabled;
@@ -2204,7 +2401,6 @@ VIP Table</textarea>
             updateLogoPreview();
             loadMenuItemsForAdminModal();
             loadCategoriesForAdminModal();
-            // QR Generator modal button
             document.getElementById('generateQRPDFBtnModal').addEventListener('click', function() {
                 const textarea = document.getElementById('tableNamesForQRModal');
                 const tableNames = textarea.value.split('\n').map(s => s.trim()).filter(s => s.length > 0);
@@ -2215,6 +2411,8 @@ VIP Table</textarea>
                 if (sel.value) showAdminChangePrompt(()=>deleteOrdersForTable(sel.value));
                 else showNotification('Please select a table.');
             });
+            // NEW: Help request modal filter
+            document.getElementById('helpRequestStatusFilterModal').addEventListener('change', loadHelpRequestsForAdminModal);
         }
         function loadMenuItemsForAdminModal() {
             const list = document.getElementById('menuItemsListModal'); if (!list) return;
@@ -2274,6 +2472,52 @@ VIP Table</textarea>
             });
             populateTableSelect('tableSelectForDeleteModal');
             document.querySelectorAll('.update-status-modal').forEach(b=> b.addEventListener('click', function() { const oid = this.dataset.orderId; const sel = document.querySelector(`select[data-order-id="${oid}"]`); if (sel && oid) updateOrderStatusOptimistic(oid, sel.value); }));
+        }
+        // NEW: load help requests for modal
+        function loadHelpRequestsForAdminModal() {
+            const list = document.getElementById('adminHelpRequestsListModal');
+            if (!list) return;
+            const filter = document.getElementById('helpRequestStatusFilterModal').value;
+            let filtered = filter === 'all' ? [...state.helpRequests] : state.helpRequests.filter(r => r.status === filter);
+            filtered.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+            if (filtered.length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: var(--gray); padding: 40px;">No help requests found.</p>';
+                return;
+            }
+            list.innerHTML = '';
+            filtered.forEach(r => {
+                const card = document.createElement('div'); card.className = 'help-request-card';
+                const date = new Date(r.timestamp).toLocaleString();
+                const badge = r.status === 'pending' ? '<span class="help-badge-pending">Pending</span>' : '<span class="help-badge-resolved">Resolved</span>';
+                card.innerHTML = `
+                    <div class="help-request-header">
+                        <div class="help-request-table"><i class="fas fa-chair"></i> ${r.table}</div>
+                        <div>${badge}</div>
+                    </div>
+                    <div class="help-request-time">${date}</div>
+                    <div class="help-request-actions">
+                        ${r.status === 'pending' ? `<button class="btn btn-success btn-small resolve-help-btn-modal" data-request-id="${r.id}"><i class="fas fa-check"></i> Resolve</button>` : ''}
+                        <button class="btn btn-danger btn-small delete-help-btn-modal" data-request-id="${r.id}"><i class="fas fa-trash"></i> Delete</button>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+            list.querySelectorAll('.resolve-help-btn-modal').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.dataset.requestId;
+                    updateHelpRequestStatus(id, 'resolved');
+                });
+            });
+            list.querySelectorAll('.delete-help-btn-modal').forEach(btn => {
+                btn.addEventListener('click', async function() {
+                    const id = this.dataset.requestId;
+                    if (!confirm('Delete this help request?')) return;
+                    state.helpRequests = state.helpRequests.filter(r => r.id !== id);
+                    await deleteHelpRequestFirestore(id);
+                    loadHelpRequestsForAdminModal();
+                    showNotification('Help request deleted.');
+                });
+            });
         }
         function initializeModalCustomizationTab() {
             const g = document.getElementById('themeGalleryModal'); if (!g) return;
@@ -2359,7 +2603,6 @@ VIP Table</textarea>
             showSection('confirmationSection');
             resetCart();
             showNotification(`Order #${orderNumber} confirmed!`);
-            // === PLAY CHECKOUT SOUND ===
             playSound(state.soundEffects.checkoutSound);
             await saveOrder(order);
         };
