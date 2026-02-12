@@ -2410,119 +2410,125 @@ VIP Table</textarea>
 
         // ========== SOUND EFFECTS ADMIN UI (UPDATED) ==========
         function loadSoundSettingsUI() {
-            const enabledCheck = document.getElementById('soundEffectsEnabled');
-            if (enabledCheck) enabledCheck.checked = state.soundEffects.enabled;
+    const enabledCheck = document.getElementById('soundEffectsEnabled');
+    if (enabledCheck) enabledCheck.checked = state.soundEffects.enabled;
 
-            const cartPreview = document.getElementById('cartSoundPreview');
-            const checkoutPreview = document.getElementById('checkoutSoundPreview');
-            const helpPreview = document.getElementById('helpSoundPreview');
-            const newOrderPreview = document.getElementById('newOrderSoundPreview'); // NEW
-            
-            if (state.soundEffects.addToCartSound) {
-                cartPreview.innerHTML = `<audio controls src="${state.soundEffects.addToCartSound}" style="width:100%;"></audio>`;
-            } else {
-                cartPreview.innerHTML = '<div class="image-preview-placeholder"><i class="fas fa-music"></i><p>No sound uploaded</p></div>';
-            }
-            if (state.soundEffects.checkoutSound) {
-                checkoutPreview.innerHTML = `<audio controls src="${state.soundEffects.checkoutSound}" style="width:100%;"></audio>`;
-            } else {
-                checkoutPreview.innerHTML = '<div class="image-preview-placeholder"><i class="fas fa-music"></i><p>No sound uploaded</p></div>';
-            }
-            if (state.soundEffects.helpRequestSound) {
-                helpPreview.innerHTML = `<audio controls src="${state.soundEffects.helpRequestSound}" style="width:100%;"></audio>`;
-            } else {
-                helpPreview.innerHTML = '<div class="image-preview-placeholder"><i class="fas fa-music"></i><p>No sound uploaded</p></div>';
-            }
-            // NEW: new order sound preview
-            if (state.soundEffects.newOrderSound) {
-                newOrderPreview.innerHTML = `<audio controls src="${state.soundEffects.newOrderSound}" style="width:100%;"></audio>`;
-            } else {
-                newOrderPreview.innerHTML = '<div class="image-preview-placeholder"><i class="fas fa-music"></i><p>No sound uploaded</p></div>';
-            }
+    const cartPreview = document.getElementById('cartSoundPreview');
+    const checkoutPreview = document.getElementById('checkoutSoundPreview');
+    const helpPreview = document.getElementById('helpSoundPreview');
 
-            ['Cart','Checkout','Help','NewOrder'].forEach(type => {
-                const uploadBtn = document.getElementById(`upload${type}SoundBtn`);
-                const removeBtn = document.getElementById(`remove${type}SoundBtn`);
-                const testBtn = document.getElementById(`test${type}SoundBtn`);
-                const fileInput = document.getElementById(`${type.toLowerCase()}SoundUpload`);
-                if (uploadBtn) {
-                    const newBtn = uploadBtn.cloneNode(true);
-                    uploadBtn.parentNode.replaceChild(newBtn, uploadBtn);
-                    newBtn.addEventListener('click', () => fileInput.click());
-                }
-                if (removeBtn) {
-                    const newBtn = removeBtn.cloneNode(true);
-                    removeBtn.parentNode.replaceChild(newBtn, removeBtn);
-                    newBtn.addEventListener('click', () => {
-                        if (type === 'Cart') state.soundEffects.addToCartSound = null;
-                        else if (type === 'Checkout') state.soundEffects.checkoutSound = null;
-                        else if (type === 'Help') state.soundEffects.helpRequestSound = null;
-                        else if (type === 'NewOrder') state.soundEffects.newOrderSound = null; // NEW
-                        loadSoundSettingsUI();
-                        showNotification(`${type} sound removed.`);
-                    });
-                }
-                if (testBtn) {
-                    const newBtn = testBtn.cloneNode(true);
-                    testBtn.parentNode.replaceChild(newBtn, testBtn);
-                    newBtn.addEventListener('click', () => {
-                        let sound = null;
-                        if (type === 'Cart') sound = state.soundEffects.addToCartSound;
-                        else if (type === 'Checkout') sound = state.soundEffects.checkoutSound;
-                        else if (type === 'Help') sound = state.soundEffects.helpRequestSound;
-                        else if (type === 'NewOrder') sound = state.soundEffects.newOrderSound; // NEW
-                        playSound(sound);
-                    });
-                }
-                if (fileInput) {
-                    const newInput = fileInput.cloneNode(true);
-                    fileInput.parentNode.replaceChild(newInput, fileInput);
-                    newInput.addEventListener('change', (e) => {
-                        const file = e.target.files[0];
-                        if (!file || !file.type.startsWith('audio/')) return;
-                        const reader = new FileReader();
-                        reader.onload = (ev) => {
-                            if (type === 'Cart') state.soundEffects.addToCartSound = ev.target.result;
-                            else if (type === 'Checkout') state.soundEffects.checkoutSound = ev.target.result;
-                            else if (type === 'Help') state.soundEffects.helpRequestSound = ev.target.result;
-                            else if (type === 'NewOrder') state.soundEffects.newOrderSound = ev.target.result; // NEW
-                            loadSoundSettingsUI();
-                            showNotification(`${type} sound loaded. Don't forget to save.`);
-                        };
-                        reader.readAsDataURL(file);
-                    });
-                }
+    if (state.soundEffects.addToCartSound) {
+        cartPreview.innerHTML = `<audio controls src="${state.soundEffects.addToCartSound}" style="width:100%;"></audio>`;
+    } else {
+        cartPreview.innerHTML = '<div class="image-preview-placeholder"><i class="fas fa-music"></i><p>No sound uploaded</p></div>';
+    }
+    if (state.soundEffects.checkoutSound) {
+        checkoutPreview.innerHTML = `<audio controls src="${state.soundEffects.checkoutSound}" style="width:100%;"></audio>`;
+    } else {
+        checkoutPreview.innerHTML = '<div class="image-preview-placeholder"><i class="fas fa-music"></i><p>No sound uploaded</p></div>';
+    }
+    if (state.soundEffects.helpRequestSound) {
+        helpPreview.innerHTML = `<audio controls src="${state.soundEffects.helpRequestSound}" style="width:100%;"></audio>`;
+    } else {
+        helpPreview.innerHTML = '<div class="image-preview-placeholder"><i class="fas fa-music"></i><p>No sound uploaded</p></div>';
+    }
+
+    ['Cart','Checkout','Help'].forEach(type => {
+        const uploadBtn = document.getElementById(`upload${type}SoundBtn`);
+        const removeBtn = document.getElementById(`remove${type}SoundBtn`);
+        const testBtn = document.getElementById(`test${type}SoundBtn`);
+        const fileInputId = `${type.toLowerCase()}SoundUpload`;
+
+        // ---------- UPLOAD BUTTON (FIXED) ----------
+        if (uploadBtn) {
+            const newUploadBtn = uploadBtn.cloneNode(true);
+            uploadBtn.parentNode.replaceChild(newUploadBtn, uploadBtn);
+            newUploadBtn.addEventListener('click', () => {
+                // ✅ Always use the current file input from the DOM
+                document.getElementById(fileInputId).click();
             });
-
-            document.getElementById('resetSoundDefaultsBtn').addEventListener('click', () => {
-                if (confirm("Clear all uploaded sounds?")) {
-                    state.soundEffects.addToCartSound = null;
-                    state.soundEffects.checkoutSound = null;
-                    state.soundEffects.helpRequestSound = null;
-                    state.soundEffects.newOrderSound = null; // NEW
-                    loadSoundSettingsUI();
-                    showNotification("All sounds cleared. Save to persist.");
-                }
-            });
-
-            document.getElementById('saveSoundEffectsBtn').addEventListener('click', ()=> showAdminChangePrompt(async function() {
-                state.soundEffects.enabled = document.getElementById('soundEffectsEnabled').checked;
-                await saveSoundEffects();
-                showNotification("Sound effects saved.");
-            }));
-
-            const modalEnabled = document.getElementById('soundEffectsEnabledModal');
-            if (modalEnabled) {
-                modalEnabled.checked = state.soundEffects.enabled;
-                document.getElementById('saveSoundEffectsModalBtn').onclick = function() {
-                    state.soundEffects.enabled = modalEnabled.checked;
-                    showAdminChangePrompt(async function() {
-                        await saveSoundEffects();
-                        showNotification("Sound settings saved from modal.");
-                    });
-                };
-            }
         }
+
+        // ---------- REMOVE BUTTON ----------
+        if (removeBtn) {
+            const newRemoveBtn = removeBtn.cloneNode(true);
+            removeBtn.parentNode.replaceChild(newRemoveBtn, removeBtn);
+            newRemoveBtn.addEventListener('click', () => {
+                if (type === 'Cart') state.soundEffects.addToCartSound = null;
+                else if (type === 'Checkout') state.soundEffects.checkoutSound = null;
+                else if (type === 'Help') state.soundEffects.helpRequestSound = null;
+                loadSoundSettingsUI();
+                showNotification(`${type} sound removed.`);
+            });
+        }
+
+        // ---------- TEST BUTTON ----------
+        if (testBtn) {
+            const newTestBtn = testBtn.cloneNode(true);
+            testBtn.parentNode.replaceChild(newTestBtn, testBtn);
+            newTestBtn.addEventListener('click', () => {
+                let sound = null;
+                if (type === 'Cart') sound = state.soundEffects.addToCartSound;
+                else if (type === 'Checkout') sound = state.soundEffects.checkoutSound;
+                else if (type === 'Help') sound = state.soundEffects.helpRequestSound;
+                playSound(sound);
+            });
+        }
+
+        // ---------- FILE INPUT CHANGE HANDLER ----------
+        const fileInput = document.getElementById(fileInputId);
+        if (fileInput) {
+            const newFileInput = fileInput.cloneNode(true);
+            fileInput.parentNode.replaceChild(newFileInput, fileInput);
+            newFileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file || !file.type.startsWith('audio/')) return;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    if (type === 'Cart') state.soundEffects.addToCartSound = ev.target.result;
+                    else if (type === 'Checkout') state.soundEffects.checkoutSound = ev.target.result;
+                    else if (type === 'Help') state.soundEffects.helpRequestSound = ev.target.result;
+                    loadSoundSettingsUI();
+                    showNotification(`${type} sound loaded. Don't forget to save.`);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+    });
+
+    // ---------- RESET ALL SOUNDS ----------
+    document.getElementById('resetSoundDefaultsBtn').addEventListener('click', () => {
+        if (confirm("Clear all uploaded sounds?")) {
+            state.soundEffects.addToCartSound = null;
+            state.soundEffects.checkoutSound = null;
+            state.soundEffects.helpRequestSound = null;
+            loadSoundSettingsUI();
+            showNotification("All sounds cleared. Save to persist.");
+        }
+    });
+
+    // ---------- SAVE SOUND SETTINGS ----------
+    document.getElementById('saveSoundEffectsBtn').addEventListener('click', () => 
+        showAdminChangePrompt(async function() {
+            state.soundEffects.enabled = document.getElementById('soundEffectsEnabled').checked;
+            await saveSoundEffects();
+            showNotification("Sound effects saved.");
+        })
+    );
+
+    // ---------- MODAL SOUND SETTINGS ----------
+    const modalEnabled = document.getElementById('soundEffectsEnabledModal');
+    if (modalEnabled) {
+        modalEnabled.checked = state.soundEffects.enabled;
+        document.getElementById('saveSoundEffectsModalBtn').onclick = function() {
+            state.soundEffects.enabled = modalEnabled.checked;
+            showAdminChangePrompt(async function() {
+                await saveSoundEffects();
+                showNotification("Sound settings saved from modal.");
+            });
+        };
+    }
+}
 
         // --- MODAL ADMIN ---
         function setupAdminPanel() {
