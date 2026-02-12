@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Restaurant Dining App - PERFECT</title>
+    <title>Restaurant Dining App - PERFECT + SOUNDS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
     <!-- Firebase SDK -->
@@ -317,6 +317,13 @@
         .admin-card[draggable="true"]:active { cursor: grabbing; }
         .drag-handle { cursor: grab; padding: 5px; margin-right: 8px; color: var(--gray); }
         .drag-handle-category { cursor: grab; color: var(--gray); margin-right: 8px; }
+        /* ===== SOUND EFFECTS STYLES ===== */
+        .audio-preview { width: 100%; margin-top: 10px; }
+        .audio-actions { display: flex; gap: 10px; margin-top: 10px; }
+        .audio-controls { display: flex; align-items: center; gap: 10px; background-color: var(--light); padding: 8px 15px; border-radius: 8px; }
+        .sound-effect-card { background-color: var(--card-bg); border: 1px solid var(--light-gray); border-radius: 10px; padding: 20px; margin-bottom: 20px; }
+        .sound-effect-title { font-weight: 600; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; color: var(--secondary); }
+        .sound-effect-title i { font-size: 20px; }
 
         @media (max-width: 992px) { .theme-gallery { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); } .font-options { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); } }
         @media (max-width: 768px) { 
@@ -533,6 +540,7 @@
                     <button class="admin-tab" data-tab="categories">Category Management</button>
                     <button class="admin-tab" data-tab="orders">Order Management</button>
                     <button class="admin-tab" data-tab="customization">Visual Customization</button>
+                    <button class="admin-tab" data-tab="sound">🔊 Sound Effects</button>
                     <button class="admin-tab" data-tab="qr">Table QR Codes</button>
                     <button class="admin-tab" data-tab="system">System Tools</button>
                 </div>
@@ -671,6 +679,50 @@
                         <button class="btn btn-primary" id="saveCustomizationBtn"><i class="fas fa-save"></i> Save All Changes</button>
                     </div>
                 </div>
+                <!-- ===== NEW: SOUND EFFECTS SETTINGS ===== -->
+                <div class="admin-content" id="soundTab">
+                    <h3 style="margin-bottom: 20px;"><i class="fas fa-music"></i> Sound Effects</h3>
+                    <p style="margin-bottom: 25px; color: var(--gray);">Upload custom sounds that will play when customers add items to cart and confirm payment. These sounds are stored in the database and will be the same everywhere.</p>
+                    
+                    <div style="margin-bottom: 30px;">
+                        <label class="admin-label" style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="soundEffectsEnabled" checked> Enable sound effects
+                        </label>
+                    </div>
+
+                    <div class="sound-effect-card">
+                        <div class="sound-effect-title"><i class="fas fa-cart-plus"></i> Add to Cart Sound</div>
+                        <div class="image-upload-container">
+                            <div class="audio-preview" id="cartSoundPreview"></div>
+                            <div class="upload-actions">
+                                <input type="file" id="cartSoundUpload" accept="audio/*" style="display: none;">
+                                <button class="btn btn-secondary upload-btn" id="uploadCartSoundBtn"><i class="fas fa-upload"></i> Upload Sound</button>
+                                <button class="remove-image-btn" id="removeCartSoundBtn"><i class="fas fa-trash"></i> Remove</button>
+                                <button class="btn btn-primary" id="testCartSoundBtn"><i class="fas fa-play"></i> Test</button>
+                            </div>
+                            <small style="color: var(--gray); display: block; margin-top: 8px;">Supported formats: MP3, WAV, OGG (max 1MB).</small>
+                        </div>
+                    </div>
+
+                    <div class="sound-effect-card">
+                        <div class="sound-effect-title"><i class="fas fa-credit-card"></i> Checkout / Payment Sound</div>
+                        <div class="image-upload-container">
+                            <div class="audio-preview" id="checkoutSoundPreview"></div>
+                            <div class="upload-actions">
+                                <input type="file" id="checkoutSoundUpload" accept="audio/*" style="display: none;">
+                                <button class="btn btn-secondary upload-btn" id="uploadCheckoutSoundBtn"><i class="fas fa-upload"></i> Upload Sound</button>
+                                <button class="remove-image-btn" id="removeCheckoutSoundBtn"><i class="fas fa-trash"></i> Remove</button>
+                                <button class="btn btn-primary" id="testCheckoutSoundBtn"><i class="fas fa-play"></i> Test</button>
+                            </div>
+                            <small style="color: var(--gray); display: block; margin-top: 8px;">This sound plays when the payment is confirmed and order placed.</small>
+                        </div>
+                    </div>
+
+                    <div class="customization-actions">
+                        <button class="btn btn-secondary" id="resetSoundDefaultsBtn"><i class="fas fa-undo"></i> Clear All Sounds</button>
+                        <button class="btn btn-primary" id="saveSoundEffectsBtn"><i class="fas fa-save"></i> Save Sound Settings</button>
+                    </div>
+                </div>
                 <!-- NEW: QR Code Table Generator -->
                 <div class="admin-content" id="qrTab">
                     <h3 style="margin-bottom: 20px;"><i class="fas fa-qrcode"></i> QR Code Table Generator</h3>
@@ -714,6 +766,7 @@ VIP Table</textarea>
                 <button class="admin-tab" data-tab="categories">Category Management</button>
                 <button class="admin-tab" data-tab="orders">Order Management</button>
                 <button class="admin-tab" data-tab="customization">Visual Customization</button>
+                <button class="admin-tab" data-tab="sound">🔊 Sound Effects</button>
                 <button class="admin-tab" data-tab="qr">Table QR Codes</button>
                 <button class="admin-tab" data-tab="system">System Tools</button>
             </div>
@@ -779,7 +832,18 @@ VIP Table</textarea>
                 <div style="margin-bottom: 30px;"><div style="font-weight: 500; margin-bottom: 15px; color: var(--text);">Font Selection</div><div class="font-options" id="fontOptionsModal"></div></div>
                 <div class="customization-actions"><button class="btn btn-secondary" id="resetCustomizationBtnModal"><i class="fas fa-undo"></i> Reset</button><button class="btn btn-primary" id="saveCustomizationBtnModal"><i class="fas fa-save"></i> Save</button></div>
             </div>
-            <!-- NEW: QR Code Table Generator Modal -->
+            <!-- Sound Effects Modal (simplified) -->
+            <div class="admin-content" id="soundTabModal">
+                <h3 style="margin-bottom: 20px;"><i class="fas fa-music"></i> Sound Effects</h3>
+                <p style="margin-bottom: 15px; color: var(--gray);">Enable / disable and upload sounds (use main admin panel for full options).</p>
+                <div style="margin-bottom: 20px;">
+                    <label style="display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" id="soundEffectsEnabledModal" checked> Enable sounds
+                    </label>
+                </div>
+                <button class="btn btn-primary" id="saveSoundEffectsModalBtn"><i class="fas fa-save"></i> Save Settings</button>
+            </div>
+            <!-- QR Code Table Generator Modal -->
             <div class="admin-content" id="qrTabModal">
                 <h3 style="margin-bottom: 20px;"><i class="fas fa-qrcode"></i> QR Code Table Generator</h3>
                 <p style="margin-bottom: 15px; color: var(--gray);">Generate a PDF with QR codes for your tables. Each code links to this page with the table name pre-filled.</p>
@@ -913,7 +977,13 @@ VIP Table</textarea>
                 fontSecondary: "'Playfair Display', serif"
             },
             currentTheme: "default",
-            currentFont: "poppins"
+            currentFont: "poppins",
+            // ===== NEW: Sound effects state =====
+            soundEffects: {
+                enabled: true,
+                addToCartSound: null,
+                checkoutSound: null
+            }
         };
 
         // ========== DEFAULT DATA ==========
@@ -1014,7 +1084,7 @@ VIP Table</textarea>
         const optionsModal = document.getElementById('optionsModal');
         const optionsModalContent = document.getElementById('optionsModalContent');
 
-        // ========== GRANULAR FIRESTORE SAVE ==========
+        // ========== FIRESTORE SAVE / LOAD ==========
         async function saveRestaurantInfo() { try { await db.collection('settings').doc('restaurantInfo').set(state.restaurantInfo); } catch (e) { console.error(e); } }
         async function saveMenuItem(item) { try { await db.collection('menuItems').doc(item.id.toString()).set(item); } catch (e) { console.error(e); } }
         async function deleteMenuItemFirestore(id) { try { await db.collection('menuItems').doc(id.toString()).delete(); } catch (e) { console.error(e); } }
@@ -1022,16 +1092,18 @@ VIP Table</textarea>
         async function saveOrder(order) { try { await db.collection('orders').doc(order.orderNumber).set(order); } catch (e) { console.error(e); } }
         async function deleteOrderFirestore(orderId) { try { await db.collection('orders').doc(orderId).delete(); } catch (e) { console.error(e); } }
         async function saveCustomization() { try { await db.collection('settings').doc('customization').set(state.customization); } catch (e) { console.error(e); } }
+        async function saveSoundEffects() { try { await db.collection('settings').doc('soundEffects').set(state.soundEffects); } catch (e) { console.error(e); } }
 
         // ========== INITIAL LOAD ==========
         async function loadInitialData() {
             try {
-                const [restDoc, menuSnap, ordersSnap, catDoc, customDoc] = await Promise.all([
+                const [restDoc, menuSnap, ordersSnap, catDoc, customDoc, soundDoc] = await Promise.all([
                     db.collection('settings').doc('restaurantInfo').get(),
                     db.collection('menuItems').get(),
                     db.collection('orders').get(),
                     db.collection('settings').doc('categories').get(),
-                    db.collection('settings').doc('customization').get()
+                    db.collection('settings').doc('customization').get(),
+                    db.collection('settings').doc('soundEffects').get()
                 ]);
                 if (restDoc.exists) state.restaurantInfo = restDoc.data();
                 else await db.collection('settings').doc('restaurantInfo').set(state.restaurantInfo);
@@ -1056,6 +1128,9 @@ VIP Table</textarea>
                 if (customDoc.exists) state.customization = customDoc.data();
                 else await db.collection('settings').doc('customization').set(state.customization);
                 
+                if (soundDoc.exists) state.soundEffects = soundDoc.data();
+                else await db.collection('settings').doc('soundEffects').set(state.soundEffects);
+                
                 determineCurrentTheme();
                 determineCurrentFont();
                 applyCustomization();
@@ -1063,6 +1138,16 @@ VIP Table</textarea>
                 updateCategoryTabs();
                 displayMenuItems('all');
             } catch (e) { console.error("loadInitialData", e); }
+        }
+
+        // ========== PLAY SOUND UTILITY ==========
+        function playSound(dataUrl) {
+            if (!state.soundEffects.enabled || !dataUrl) return;
+            try {
+                const audio = new Audio(dataUrl);
+                audio.volume = 0.6;
+                audio.play().catch(e => console.log('Audio play failed:', e));
+            } catch(e) { console.error('Sound error:', e); }
         }
 
         // ========== REAL‑TIME LISTENERS ==========
@@ -1208,6 +1293,8 @@ VIP Table</textarea>
             } else state.cart.push(cartItem);
             updateCart();
             showNotification(`${menuItem.name} added to cart`);
+            // === PLAY ADD TO CART SOUND ===
+            playSound(state.soundEffects.addToCartSound);
         }
         function openOptionsModal(item) {
             let html = `<h3 class="options-modal-title">${item.name}</h3><div class="options-modal-price">$${item.price.toFixed(2)}</div><div class="item-description" style="margin-bottom:20px;">${item.description}</div>`;
@@ -1359,22 +1446,13 @@ VIP Table</textarea>
             myOrdersSubtitle.textContent = `You have ${tableOrders.length} order${tableOrders.length!==1?'s':''} for ${state.currentTable}`;
         }
 
-        // ========== 🚀 AUTO‑LOGIN FROM URL (NEVER ASKS FOR CODE UNLESS CLICKED MANUALLY) ==========
+        // ========== 🔐 FIXED: ADMIN QR PROMPTS, NORMAL QR NEVER ASKS ==========
         function selectTable(name, isAutoLogin = false) {
             state.currentTable = name;
-            // 🔥 CRITICAL FIX: Auto‑login from QR code NEVER triggers admin code prompt
             if (name.toLowerCase() === "admin") {
-                if (isAutoLogin) {
-                    // If someone scans an "Admin" QR code, just show a notification and stay on scanner
-                    showNotification("Admin access requires manual click on the Admin button.");
-                    return;
-                } else {
-                    // Manual click on Admin button → show code prompt
-                    showAdminCodePrompt();
-                    return;
-                }
+                showAdminCodePrompt();
+                return;
             }
-            // Normal table selection
             tableInfo.innerHTML = `<i class="fas fa-chair"></i> ${name}`;
             menuSubtitle.textContent = `Select items to add to your order for ${name}`;
             cartSubtitle.textContent = `Your order for ${name}`;
@@ -1392,7 +1470,6 @@ VIP Table</textarea>
             const tableParam = urlParams.get('table');
             if (tableParam) {
                 const tableName = decodeURIComponent(tableParam);
-                // Pass isAutoLogin = true so it never asks for code
                 selectTable(tableName, true);
             }
         }
@@ -1524,7 +1601,6 @@ VIP Table</textarea>
                 showNotification("Please enter at least one table name.");
                 return;
             }
-            // Use jsPDF
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({
                 orientation: 'portrait',
@@ -1535,7 +1611,7 @@ VIP Table</textarea>
             const pageWidth = doc.internal.pageSize.getWidth();
             const pageHeight = doc.internal.pageSize.getHeight();
             const margin = 15;
-            const qrSize = 50; // mm
+            const qrSize = 50;
             const cols = 2;
             const rowsPerPage = 3;
             const cellWidth = (pageWidth - 2 * margin) / cols;
@@ -1551,7 +1627,6 @@ VIP Table</textarea>
                 const x = margin + col * cellWidth;
                 const y = margin + row * cellHeight;
                 
-                // Generate QR code as dataURL
                 const qr = qrcode(0, 'M');
                 qr.addData(baseUrl + '?table=' + encodeURIComponent(tableName));
                 qr.make();
@@ -1571,13 +1646,10 @@ VIP Table</textarea>
                 }
                 const qrDataURL = qrCanvas.toDataURL('image/png');
                 
-                // Add QR code image
                 doc.addImage(qrDataURL, 'PNG', x, y, qrSize, qrSize);
-                // Add table name
                 doc.setFontSize(12);
                 doc.setTextColor(0, 0, 0);
                 doc.text(tableName, x + qrSize/2, y + qrSize + 8, { align: 'center' });
-                // Add URL below (optional)
                 doc.setFontSize(8);
                 doc.setTextColor(100, 100, 100);
                 doc.text('Scan to order', x + qrSize/2, y + qrSize + 16, { align: 'center' });
@@ -1598,6 +1670,7 @@ VIP Table</textarea>
             loadOrdersForAdmin();
             loadSystemStats();
             loadCustomizationSettings();
+            loadSoundSettingsUI(); // <-- NEW
 
             document.querySelectorAll('#adminDashboardSection .admin-tab').forEach(tab => {
                 tab.addEventListener('click', function() {
@@ -1609,6 +1682,7 @@ VIP Table</textarea>
                     if (tid==='customization') setTimeout(initializeCustomizationTab,100);
                     if (tid==='categories') setTimeout(()=>makeCategoriesDraggable('categoriesListContainer'),200);
                     if (tid==='orders') { loadOrdersForAdmin(); populateTableSelect('tableSelectForDelete'); }
+                    if (tid==='sound') setTimeout(loadSoundSettingsUI,50);
                     if (tid==='qr') { /* nothing special */ }
                 });
             });
@@ -1932,7 +2006,7 @@ VIP Table</textarea>
             stats.innerHTML = `<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px,1fr)); gap:15px;"><div style="background-color:var(--light); padding:15px; border-radius:8px;"><div style="font-size:24px; font-weight:600; color:var(--primary);">${total}</div><div style="font-size:14px; color:var(--gray);">Total Orders</div></div><div style="background-color:var(--light); padding:15px; border-radius:8px;"><div style="font-size:24px; font-weight:600; color:var(--primary);">$${revenue.toFixed(2)}</div><div style="font-size:14px; color:var(--gray);">Total Revenue</div></div><div style="background-color:var(--light); padding:15px; border-radius:8px;"><div style="font-size:24px; font-weight:600; color:var(--primary);">$${avg.toFixed(2)}</div><div style="font-size:14px; color:var(--gray);">Average Order</div></div><div style="background-color:var(--light); padding:15px; border-radius:8px;"><div style="font-size:24px; font-weight:600; color:var(--primary);">${state.menuItems.length}</div><div style="font-size:14px; color:var(--gray);">Menu Items</div></div><div style="background-color:var(--light); padding:15px; border-radius:8px;"><div style="font-size:24px; font-weight:600; color:var(--primary);">${state.categories.length}</div><div style="font-size:14px; color:var(--gray);">Categories</div></div></div><div style="margin-top:20px;"><h5 style="margin-bottom:10px;">Order Status Distribution</h5><div style="display:flex; gap:10px; flex-wrap:wrap;"><div style="display:flex; align-items:center; gap:5px;"><div style="width:12px; height:12px; background-color:#fff3cd; border-radius:2px;"></div><span>Pending: ${pending}</span></div><div style="display:flex; align-items:center; gap:5px;"><div style="width:12px; height:12px; background-color:#d1ecf1; border-radius:2px;"></div><span>Preparing: ${prep}</span></div><div style="display:flex; align-items:center; gap:5px;"><div style="width:12px; height:12px; background-color:#d4edda; border-radius:2px;"></div><span>Ready: ${ready}</span></div><div style="display:flex; align-items:center; gap:5px;"><div style="width:12px; height:12px; background-color:#cce5ff; border-radius:2px;"></div><span>Served: ${served}</span></div><div style="display:flex; align-items:center; gap:5px;"><div style="width:12px; height:12px; background-color:#f8d7da; border-radius:2px;"></div><span>Cancelled: ${cancelled}</span></div></div></div>`;
         }
         function exportData() {
-            const data = { restaurantInfo: state.restaurantInfo, menuItems: state.menuItems, orders: state.orders, categories: state.categories, customization: state.customization, exportDate: new Date().toISOString() };
+            const data = { restaurantInfo: state.restaurantInfo, menuItems: state.menuItems, orders: state.orders, categories: state.categories, customization: state.customization, soundEffects: state.soundEffects, exportDate: new Date().toISOString() };
             const str = JSON.stringify(data,null,2); const uri = 'data:application/json;charset=utf-8,'+encodeURIComponent(str);
             const a = document.createElement('a'); a.href = uri; a.download = `dineeasy-backup-${new Date().toISOString().split('T')[0]}.json`; a.click(); showNotification("Data exported successfully.");
         }
@@ -1948,11 +2022,13 @@ VIP Table</textarea>
                         if (d.orders) state.orders = d.orders;
                         if (d.categories) state.categories = d.categories;
                         if (d.customization) state.customization = d.customization;
+                        if (d.soundEffects) state.soundEffects = d.soundEffects;
                         await Promise.all(state.menuItems.map(i=>saveMenuItem(i)));
                         await saveCategories();
                         await Promise.all(state.orders.map(o=>saveOrder(o)));
                         await saveRestaurantInfo();
                         await saveCustomization();
+                        await saveSoundEffects();
                         updateRestaurantUI(); displayMenuItems('all'); updateCategoryTabs(); applyCustomization();
                         loadMenuItemsForAdmin(); loadCategoriesForAdmin(); loadOrdersForAdmin(); loadSystemStats();
                         showNotification("Data imported successfully.");
@@ -2020,6 +2096,86 @@ VIP Table</textarea>
         function darkenColor(c,p) { const n = parseInt(c.replace("#",""),16); const a = Math.round(2.55*p); const r = (n>>16)-a, g = (n>>8&0x00FF)-a, b = (n&0x0000FF)-a; return "#" + (0x1000000 + (r<255?r<1?0:r:255)*0x10000 + (g<255?g<1?0:g:255)*0x100 + (b<255?b<1?0:b:255)).toString(16).slice(1); }
         function getContrastColor(h) { const r=parseInt(h.substr(1,2),16), g=parseInt(h.substr(3,2),16), b=parseInt(h.substr(5,2),16), yiq=((r*299)+(g*587)+(b*114))/1000; return yiq>=128?'#000000':'#ffffff'; }
 
+        // ========== NEW: SOUND EFFECTS ADMIN UI ==========
+        function loadSoundSettingsUI() {
+            const enabledCheck = document.getElementById('soundEffectsEnabled');
+            if (enabledCheck) enabledCheck.checked = state.soundEffects.enabled;
+
+            // Update previews
+            const cartPreview = document.getElementById('cartSoundPreview');
+            const checkoutPreview = document.getElementById('checkoutSoundPreview');
+            
+            if (state.soundEffects.addToCartSound) {
+                cartPreview.innerHTML = `<audio controls src="${state.soundEffects.addToCartSound}" style="width:100%;"></audio>`;
+            } else {
+                cartPreview.innerHTML = '<div class="image-preview-placeholder"><i class="fas fa-music"></i><p>No sound uploaded</p></div>';
+            }
+            if (state.soundEffects.checkoutSound) {
+                checkoutPreview.innerHTML = `<audio controls src="${state.soundEffects.checkoutSound}" style="width:100%;"></audio>`;
+            } else {
+                checkoutPreview.innerHTML = '<div class="image-preview-placeholder"><i class="fas fa-music"></i><p>No sound uploaded</p></div>';
+            }
+
+            // Attach listeners (only once)
+            document.getElementById('uploadCartSoundBtn').replaceWith(document.getElementById('uploadCartSoundBtn').cloneNode(true));
+            document.getElementById('uploadCheckoutSoundBtn').replaceWith(document.getElementById('uploadCheckoutSoundBtn').cloneNode(true));
+            document.getElementById('removeCartSoundBtn').replaceWith(document.getElementById('removeCartSoundBtn').cloneNode(true));
+            document.getElementById('removeCheckoutSoundBtn').replaceWith(document.getElementById('removeCheckoutSoundBtn').cloneNode(true));
+            document.getElementById('testCartSoundBtn').replaceWith(document.getElementById('testCartSoundBtn').cloneNode(true));
+            document.getElementById('testCheckoutSoundBtn').replaceWith(document.getElementById('testCheckoutSoundBtn').cloneNode(true));
+            document.getElementById('saveSoundEffectsBtn').replaceWith(document.getElementById('saveSoundEffectsBtn').cloneNode(true));
+            document.getElementById('resetSoundDefaultsBtn').replaceWith(document.getElementById('resetSoundDefaultsBtn').cloneNode(true));
+
+            document.getElementById('uploadCartSoundBtn').addEventListener('click', ()=> document.getElementById('cartSoundUpload').click());
+            document.getElementById('cartSoundUpload').addEventListener('change', (e)=> {
+                const file = e.target.files[0]; if (!file || !file.type.startsWith('audio/')) return;
+                const reader = new FileReader();
+                reader.onload = (ev) => { state.soundEffects.addToCartSound = ev.target.result; loadSoundSettingsUI(); showNotification("Cart sound loaded. Don't forget to save."); };
+                reader.readAsDataURL(file);
+            });
+            document.getElementById('removeCartSoundBtn').addEventListener('click', ()=> { state.soundEffects.addToCartSound = null; loadSoundSettingsUI(); showNotification("Cart sound removed."); });
+
+            document.getElementById('uploadCheckoutSoundBtn').addEventListener('click', ()=> document.getElementById('checkoutSoundUpload').click());
+            document.getElementById('checkoutSoundUpload').addEventListener('change', (e)=> {
+                const file = e.target.files[0]; if (!file || !file.type.startsWith('audio/')) return;
+                const reader = new FileReader();
+                reader.onload = (ev) => { state.soundEffects.checkoutSound = ev.target.result; loadSoundSettingsUI(); showNotification("Checkout sound loaded. Don't forget to save."); };
+                reader.readAsDataURL(file);
+            });
+            document.getElementById('removeCheckoutSoundBtn').addEventListener('click', ()=> { state.soundEffects.checkoutSound = null; loadSoundSettingsUI(); showNotification("Checkout sound removed."); });
+
+            document.getElementById('testCartSoundBtn').addEventListener('click', ()=> playSound(state.soundEffects.addToCartSound));
+            document.getElementById('testCheckoutSoundBtn').addEventListener('click', ()=> playSound(state.soundEffects.checkoutSound));
+
+            document.getElementById('resetSoundDefaultsBtn').addEventListener('click', ()=> {
+                if (confirm("Clear all uploaded sounds?")) {
+                    state.soundEffects.addToCartSound = null;
+                    state.soundEffects.checkoutSound = null;
+                    loadSoundSettingsUI();
+                    showNotification("Sounds cleared. Save to persist.");
+                }
+            });
+
+            document.getElementById('saveSoundEffectsBtn').addEventListener('click', ()=> showAdminChangePrompt(async function() {
+                state.soundEffects.enabled = document.getElementById('soundEffectsEnabled').checked;
+                await saveSoundEffects();
+                showNotification("Sound effects saved.");
+            }));
+
+            // Modal sync
+            const modalEnabled = document.getElementById('soundEffectsEnabledModal');
+            if (modalEnabled) {
+                modalEnabled.checked = state.soundEffects.enabled;
+                document.getElementById('saveSoundEffectsModalBtn').onclick = function() {
+                    state.soundEffects.enabled = modalEnabled.checked;
+                    showAdminChangePrompt(async function() {
+                        await saveSoundEffects();
+                        showNotification("Sound settings saved from modal.");
+                    });
+                };
+            }
+        }
+
         // --- MODAL ADMIN (simplified) ---
         function setupAdminPanel() {
             adminClose.addEventListener('click', ()=> adminPanel.style.display = 'none');
@@ -2035,6 +2191,10 @@ VIP Table</textarea>
                     if (tid==='categories') setTimeout(()=>makeCategoriesDraggable('categoriesListContainerModal'),200);
                     if (tid==='orders') { loadOrdersForAdminModal(); populateTableSelect('tableSelectForDeleteModal'); }
                     if (tid==='qr') { /* nothing special */ }
+                    if (tid==='sound') { 
+                        const modalEnabled = document.getElementById('soundEffectsEnabledModal');
+                        if (modalEnabled) modalEnabled.checked = state.soundEffects.enabled;
+                    }
                 });
             });
             document.getElementById('adminRestaurantNameModal').value = state.restaurantInfo.name;
@@ -2146,19 +2306,15 @@ VIP Table</textarea>
             await loadInitialData();
             setupListeners();
             
-            // Auto‑login from URL – now works without any code prompt
             autoLoginFromUrl();
 
-            // Table selection (manual)
             document.querySelectorAll('.table-btn').forEach(btn => btn.addEventListener('click', function() { selectTable(this.dataset.table, false); }));
 
-            // Cart
             cartFloating.addEventListener('click', function() { if (!state.isAdminMode) showSection('cartSection'); });
             document.getElementById('backToMenuBtn').addEventListener('click', ()=> showSection('menuSection'));
             document.getElementById('proceedToPaymentBtn').addEventListener('click', function() { if (state.cart.length===0) { showNotification('Please add items to your cart before proceeding to payment'); return; } updatePaymentSummary(); showSection('paymentSection'); });
             document.getElementById('backToCartBtn').addEventListener('click', ()=> showSection('cartSection'));
 
-            // Payment method
             document.querySelectorAll('.option-card[data-payment]').forEach(card => {
                 card.addEventListener('click', function() { document.querySelectorAll('.option-card[data-payment]').forEach(c=>c.classList.remove('selected')); this.classList.add('selected'); state.selectedPaymentMethod = this.dataset.payment; });
             });
@@ -2167,7 +2323,6 @@ VIP Table</textarea>
             });
             document.getElementById('confirmPaymentBtn').addEventListener('click', placeOrderOptimistic);
 
-            // Confirmation & orders
             document.getElementById('newOrderBtn').addEventListener('click', function() { resetOrder(); showSection('scannerSection'); });
             document.getElementById('viewMyOrdersBtn').addEventListener('click', function() { loadMyOrders(); showSection('myOrdersSection'); });
             document.getElementById('viewMenuBtn').addEventListener('click', function() { resetCart(); state.selectedPaymentMethod = null; state.selectedPaymentTime = null; document.querySelectorAll('.option-card').forEach(c=>c.classList.remove('selected')); if (state.currentTable) menuSubtitle.textContent = `Start a new order for ${state.currentTable}`; showSection('menuSection'); showNotification('Ready to start a new order!'); });
@@ -2177,19 +2332,17 @@ VIP Table</textarea>
             document.getElementById('backToMenuFromOrdersBtn').addEventListener('click', ()=> showSection('menuSection'));
             document.getElementById('placeNewOrderBtn').addEventListener('click', function() { resetCart(); showSection('menuSection'); });
 
-            // Admin code
             submitAdminCodeBtn.addEventListener('click', function() { if (adminCodeInput.value === state.adminAccessCode) { adminCodePrompt.style.display = 'none'; adminCodeInput.value = ''; enterAdminMode(); } else { showNotification("Incorrect admin code."); adminCodeInput.value = ''; adminCodeInput.focus(); } });
             cancelAdminCodeBtn.addEventListener('click', function() { adminCodePrompt.style.display = 'none'; adminCodeInput.value = ''; showSection('scannerSection'); });
             submitChangeCodeBtn.addEventListener('click', function() { if (adminChangeCodeInput.value === state.adminChangeCode) { adminChangePrompt.style.display = 'none'; adminChangeCodeInput.value = ''; if (state.pendingAdminAction) { state.pendingAdminAction(); } state.pendingAdminAction = null; } else { showNotification("Incorrect confirmation code."); adminChangeCodeInput.value = ''; adminChangeCodeInput.focus(); } });
             cancelChangeBtn.addEventListener('click', function() { adminChangePrompt.style.display = 'none'; adminChangeCodeInput.value = ''; state.pendingAdminAction = null; showNotification("Changes cancelled."); });
 
-            // Admin panel
             setupAdminPanel();
 
             if (localStorage.getItem('dineEasyAdminMode') === 'true') { showAdminCodePrompt(); }
         }
 
-        // Optimistic order placement
+        // Override placeOrderOptimistic to include checkout sound
         window.placeOrderOptimistic = async function() {
             if (!state.selectedPaymentMethod || !state.selectedPaymentTime) { showNotification('Please select payment method and time'); return; }
             if (state.cart.length === 0) { showNotification('Cart is empty'); return; }
@@ -2206,6 +2359,8 @@ VIP Table</textarea>
             showSection('confirmationSection');
             resetCart();
             showNotification(`Order #${orderNumber} confirmed!`);
+            // === PLAY CHECKOUT SOUND ===
+            playSound(state.soundEffects.checkoutSound);
             await saveOrder(order);
         };
 
