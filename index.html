@@ -185,8 +185,8 @@
         .cart-floating { position: fixed; bottom: 30px; right: 30px; background-color: var(--primary); color: var(--button-text); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: 0 6px 20px rgba(230, 57, 70, 0.3); z-index: 99; transition: all 0.3s; }
         .cart-floating:hover { background-color: var(--primary-dark); transform: translateY(-3px); }
         .cart-count { position: absolute; top: -5px; right: -5px; background-color: var(--secondary); color: var(--button-text); width: 24px; height: 24px; border-radius: 50%; font-size: 12px; display: flex; align-items: center; justify-content: center; font-weight: 600; }
-        /* ===== NEW ELEGANT ADMIN ICON ===== */
-        .admin-floating { position: fixed; bottom: 30px; right: 100px; background-color: var(--dark); color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 99; transition: all 0.3s; border: 2px solid rgba(255,255,255,0.2); }
+        /* ===== NEW ELEGANT ADMIN ICON – HIDDEN BY DEFAULT ===== */
+        .admin-floating { position: fixed; bottom: 30px; right: 100px; background-color: var(--dark); color: white; width: 50px; height: 50px; border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 99; transition: all 0.3s; border: 2px solid rgba(255,255,255,0.2); }
         .admin-floating:hover { background-color: var(--secondary); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(69,123,157,0.4); }
         .admin-floating i { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
         .admin-mode .admin-floating { display: none; } /* hide when in admin mode */
@@ -366,8 +366,6 @@
             100% { transform: rotate(360deg); }
         }
 
-
-
         @media (max-width: 992px) { .theme-gallery { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); } .font-options { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); } }
         @media (max-width: 768px) { 
             .theme-gallery { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); } 
@@ -410,7 +408,6 @@
     </style>
 </head>
 <body>
-     
     <!-- ========== FAKE LOADING OVERLAY ========== -->
     <div id="loadingOverlay">
         <div class="spinner"></div>
@@ -459,10 +456,10 @@
                     <button class="table-btn" data-table="Table 4">Table 4</button>
                     <button class="table-btn" data-table="Table 5">Table 5</button>
                     <button class="table-btn" data-table="VIP Table">VIP Table</button>
-                    <!-- Admin table button removed – replaced by elegant icon -->
+                    <!-- Admin table button removed – replaced by elegant icon that only appears when Admin table is selected via QR -->
                 </div>
                 <p style="margin-top: 30px; font-size: 14px; color: var(--gray);"><i class="fas fa-info-circle"></i> Once scanned, you'll be able to view the menu and place your order.</p>
-                <p style="margin-top: 10px; font-size: 14px; color: var(--warning);"><i class="fas fa-shield-alt"></i> Admin access via the lock icon at the bottom right.</p>
+                <p style="margin-top: 10px; font-size: 14px; color: var(--warning);"><i class="fas fa-shield-alt"></i> Admin access only via Admin table QR code.</p>
             </div>
         </div>
     </section>
@@ -999,7 +996,7 @@ VIP Table</textarea>
         <div class="cart-count" id="cartCount">0</div>
     </div>
 
-    <!-- ========== NEW ELEGANT ADMIN ICON ========== -->
+    <!-- ========== NEW ELEGANT ADMIN ICON – HIDDEN UNTIL ADMIN TABLE IS SELECTED ========== -->
     <div class="admin-floating" id="adminFloating" title="Admin Login">
         <i class="fas fa-shield-alt"></i>
     </div>
@@ -1040,7 +1037,7 @@ VIP Table</textarea>
             menuItems: [],
             orders: [],
             helpRequests: [],
-            seenHelpRequests: new Set(), // NEW: track seen help request IDs
+            seenHelpRequests: new Set(),
             adminAccessCode: "3232",
             adminChangeCode: "6262",
             categories: [],
@@ -1221,7 +1218,6 @@ VIP Table</textarea>
                 if (restDoc.exists) state.restaurantInfo = restDoc.data();
                 else await db.collection('settings').doc('restaurantInfo').set(state.restaurantInfo);
                 
-                // ========== LOAD DEFAULT MENU ITEMS IF EMPTY ==========
                 if (menuSnap.empty) {
                     state.menuItems = JSON.parse(JSON.stringify(defaultMenuItems));
                     await Promise.all(state.menuItems.map(i => saveMenuItem(i)));
@@ -1250,7 +1246,6 @@ VIP Table</textarea>
                 if (soundDoc.exists) state.soundEffects = soundDoc.data();
                 else await db.collection('settings').doc('soundEffects').set(state.soundEffects);
                 
-                // Load help requests and populate seen set
                 state.helpRequests = helpSnap.docs.map(doc => {
                     const req = { id: doc.id, ...doc.data() };
                     state.seenHelpRequests.add(req.id);
@@ -1332,23 +1327,17 @@ VIP Table</textarea>
                 }
                 if (adminPanel.style.display === 'flex') loadCategoriesForAdminModal();
             });
-            // ========== HELP REQUESTS LISTENER – WITH ADMIN SOUND ==========
             db.collection('helpRequests').onSnapshot(snap => {
-                // Process changes to detect new pending requests
                 snap.docChanges().forEach(change => {
                     if (change.type === 'added') {
                         const req = { id: change.doc.id, ...change.doc.data() };
-                        // If it's pending and not seen before, and admin mode is active, play sound
                         if (req.status === 'pending' && !state.seenHelpRequests.has(req.id) && state.isAdminMode) {
                             playSound(state.soundEffects.helpRequestSound);
                         }
                         state.seenHelpRequests.add(req.id);
                     }
                 });
-                
-                // Update state
                 state.helpRequests = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                
                 if (state.isAdminMode) {
                     if (document.querySelector('#adminDashboardSection.active-section')) {
                         const activeTab = document.querySelector('#adminDashboardSection .admin-tab.active')?.dataset?.tab;
@@ -1424,7 +1413,7 @@ VIP Table</textarea>
             });
         }
 
-        // ========== CART FUNCTIONS (unchanged) ==========
+        // ========== CART FUNCTIONS ==========
         function addToCart(itemId) {
             const item = state.menuItems.find(i=>i.id===itemId);
             if (!item) return;
@@ -1566,6 +1555,8 @@ VIP Table</textarea>
             tableInfo.innerHTML = `<i class="fas fa-qrcode"></i> Scan QR to begin`;
             menuSubtitle.textContent = 'Select items to add to your order';
             myOrdersButton.style.display = 'none';
+            // Hide admin icon when leaving table
+            adminFloating.style.display = 'none';
         }
         function showNotification(msg) { notificationText.textContent = msg; notification.classList.add('show'); setTimeout(()=>notification.classList.remove('show'),3000); }
         function showSection(id) {
@@ -1603,7 +1594,6 @@ VIP Table</textarea>
         // ========== SELECT TABLE – AUTO CONNECT TO TABLE 1 IF NO QR ==========
         function selectTable(name, isAutoLogin = false) {
             state.currentTable = name;
-            // Admin table removed – no special condition
             tableInfo.innerHTML = `<i class="fas fa-chair"></i> ${name}`;
             menuSubtitle.textContent = `Select items to add to your order for ${name}`;
             cartSubtitle.textContent = `Your order for ${name}`;
@@ -1614,6 +1604,13 @@ VIP Table</textarea>
             displayMenuItems('all');
             myOrdersButton.style.display = 'flex';
             showSection('menuSection');
+            
+            // Admin icon visibility: only when table is exactly "Admin"
+            if (name === "Admin") {
+                adminFloating.style.display = 'flex';
+            } else {
+                adminFloating.style.display = 'none';
+            }
         }
 
         function autoLoginFromUrl() {
@@ -1623,7 +1620,6 @@ VIP Table</textarea>
                 const tableName = decodeURIComponent(tableParam);
                 selectTable(tableName, true);
             } else {
-                // Default to Table 1
                 selectTable('Table 1', true);
             }
         }
@@ -1669,7 +1665,6 @@ VIP Table</textarea>
             showSection('adminDashboardSection');
             loadAdminDashboardData();
             localStorage.setItem('dineEasyAdminMode', 'true');
-            // Play help sound to notify admin
             playSound(state.soundEffects.helpRequestSound);
             showNotification("Admin mode activated. Full administrative access granted.");
         }
@@ -1682,6 +1677,8 @@ VIP Table</textarea>
             cartFloating.style.display = 'flex';
             showSection('scannerSection');
             localStorage.removeItem('dineEasyAdminMode');
+            // Hide admin icon on logout
+            adminFloating.style.display = 'none';
             showNotification("Logged out of admin mode.");
         }
 
@@ -2663,8 +2660,12 @@ VIP Table</textarea>
             document.getElementById('backToMenuFromOrdersBtn').addEventListener('click', ()=> showSection('menuSection'));
             document.getElementById('placeNewOrderBtn').addEventListener('click', function() { resetCart(); showSection('menuSection'); });
 
-            // NEW: Admin icon click
+            // ADMIN ICON CLICK – now only visible when currentTable === "Admin"
             adminFloating.addEventListener('click', function() {
+                if (state.currentTable !== "Admin") {
+                    showNotification('Admin access is only available via Admin table QR code.');
+                    return;
+                }
                 if (state.isAdminMode) {
                     showNotification('Already in admin mode.');
                     return;
@@ -2702,7 +2703,7 @@ VIP Table</textarea>
 
             setupAdminPanel();
 
-            if (localStorage.getItem('dineEasyAdminMode') === 'true') { showAdminCodePrompt(); }
+            // REMOVED automatic admin prompt on localStorage – only accessible via Admin table QR/icon
         }
 
         // Override placeOrderOptimistic to include checkout sound
