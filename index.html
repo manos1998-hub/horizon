@@ -47,9 +47,11 @@
         .logo { font-family: var(--font-secondary); font-size: 36px; font-weight: 600; color: var(--primary); display: flex; align-items: center; flex: 1; }
         .logo i { margin-right: 10px; }
         .logo-img { width: 70px; height: 70px; border-radius: 8px; margin-right: 12px; object-fit: cover; display: none; }
-        .header-center { display: flex; justify-content: center; flex: 1; }
+        .header-center { display: flex; justify-content: center; align-items: center; flex: 1; gap: 15px; }
         .help-button { background-color: transparent; border: 2px solid var(--secondary); color: var(--secondary); padding: 8px 20px; border-radius: 50px; font-weight: 500; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 8px; font-size: 15px; }
         .help-button:hover { background-color: var(--secondary); color: var(--button-text); transform: translateY(-2px); box-shadow: 0 4px 8px rgba(69, 123, 157, 0.2); }
+        .language-toggle { background-color: var(--primary); color: var(--button-text); border: none; padding: 8px 16px; border-radius: 50px; font-weight: 600; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 8px; font-size: 15px; }
+        .language-toggle:hover { background-color: var(--primary-dark); transform: translateY(-2px); }
         .header-right { display: flex; justify-content: flex-end; align-items: center; flex: 1; gap: 15px; }
         .my-orders-button { background-color: var(--secondary); color: var(--button-text); border: none; padding: 8px 16px; border-radius: 50px; font-weight: 500; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 8px; font-size: 15px; white-space: nowrap; }
         .my-orders-button:hover { background-color: var(--secondary); filter: brightness(0.9); transform: translateY(-2px); box-shadow: 0 4px 8px rgba(69, 123, 157, 0.2); }
@@ -185,11 +187,10 @@
         .cart-floating { position: fixed; bottom: 30px; right: 30px; background-color: var(--primary); color: var(--button-text); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: 0 6px 20px rgba(230, 57, 70, 0.3); z-index: 99; transition: all 0.3s; }
         .cart-floating:hover { background-color: var(--primary-dark); transform: translateY(-3px); }
         .cart-count { position: absolute; top: -5px; right: -5px; background-color: var(--secondary); color: var(--button-text); width: 24px; height: 24px; border-radius: 50%; font-size: 12px; display: flex; align-items: center; justify-content: center; font-weight: 600; }
-        /* ===== NEW ELEGANT ADMIN ICON – HIDDEN BY DEFAULT ===== */
         .admin-floating { position: fixed; bottom: 30px; right: 100px; background-color: var(--dark); color: white; width: 50px; height: 50px; border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 99; transition: all 0.3s; border: 2px solid rgba(255,255,255,0.2); }
         .admin-floating:hover { background-color: var(--secondary); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(69,123,157,0.4); }
         .admin-floating i { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
-        .admin-mode .admin-floating { display: none; } /* hide when in admin mode */
+        .admin-mode .admin-floating { display: none; }
         .admin-mode header { border-bottom: 3px solid var(--warning); }
         .admin-mode .admin-badge { background-color: var(--warning); color: var(--text); padding: 8px 16px; border-radius: 50px; font-weight: 600; display: flex; align-items: center; gap: 8px; font-size: 15px; }
         .admin-mode .logout-button { background-color: var(--danger); color: var(--button-text); border: none; padding: 8px 16px; border-radius: 50px; font-weight: 500; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 8px; font-size: 15px; }
@@ -284,8 +285,6 @@
         .admin-code-subtitle { color: var(--gray); margin-bottom: 25px; }
         .admin-code-input { width: 100%; padding: 15px; border: 2px solid var(--light-gray); border-radius: 8px; font-size: 18px; text-align: center; letter-spacing: 3px; margin-bottom: 20px; font-family: 'Poppins', monospace; background-color: var(--card-bg); color: var(--text); }
         .admin-code-input:focus { border-color: var(--primary); outline: none; }
-
-        /* ===== STYLES FOR SUBCATEGORIES (OPTIONS) ===== */
         .item-options-indicator { font-size: 12px; color: var(--secondary); margin-top: 8px; display: flex; align-items: center; gap: 5px; }
         .item-options-indicator i { font-size: 12px; }
         .options-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); z-index: 2001; display: none; align-items: center; justify-content: center; padding: 20px; }
@@ -326,8 +325,6 @@
         .sound-effect-card { background-color: var(--card-bg); border: 1px solid var(--light-gray); border-radius: 10px; padding: 20px; margin-bottom: 20px; }
         .sound-effect-title { font-weight: 600; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; color: var(--secondary); }
         .sound-effect-title i { font-size: 20px; }
-
-        /* ===== HELP REQUESTS STYLES ===== */
         .help-request-card { background-color: var(--card-bg); border-left: 4px solid var(--warning); margin-bottom: 15px; padding: 20px; border-radius: 10px; box-shadow: var(--shadow); }
         .help-request-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .help-request-table { font-size: 18px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 8px; }
@@ -336,36 +333,9 @@
         .help-request-actions { margin-top: 15px; display: flex; gap: 10px; }
         .help-badge-pending { background-color: #fff3cd; color: #856404; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 500; }
         .help-badge-resolved { background-color: #d4edda; color: #155724; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 500; }
-
-        /* ===== FAKE LOADING OVERLAY ===== */
-        #loadingOverlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: white;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            font-family: var(--font-primary);
-            transition: opacity 0.5s ease;
-        }
-        .spinner {
-            width: 60px;
-            height: 60px;
-            border: 6px solid var(--light-gray);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
+        #loadingOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: white; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; font-family: var(--font-primary); transition: opacity 0.5s ease; }
+        .spinner { width: 60px; height: 60px; border: 6px solid var(--light-gray); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         @media (max-width: 992px) { .theme-gallery { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); } .font-options { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); } }
         @media (max-width: 768px) { 
             .theme-gallery { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); } 
@@ -381,6 +351,7 @@
             .logo, .header-center, .header-right { width: 100%; justify-content: center; } 
             .header-center { order: 3; margin-top: 10px; } 
             .help-button { width: 100%; justify-content: center; } 
+            .language-toggle { width: 100%; justify-content: center; }
             .header-right { flex-direction: column; gap: 10px; } 
             .my-orders-button { width: 100%; justify-content: center; } 
             .table-info { margin-top: 10px; width: 100%; justify-content: center; } 
@@ -426,6 +397,9 @@
                 <button class="help-button" id="headerHelpButton">
                     <i class="fas fa-headset"></i> Χρειάζεστε βοήθεια?
                 </button>
+                <button class="language-toggle" id="languageToggleBtn">
+                    <i class="fas fa-language"></i> <span id="langToggleText">EN</span>
+                </button>
             </div>
             <div class="header-right">
                 <button class="my-orders-button" id="myOrdersButton" style="display: none;">
@@ -456,7 +430,6 @@
                     <button class="table-btn" data-table="Table 4">Τραπέζι 4</button>
                     <button class="table-btn" data-table="Table 5">Τραπέζι 5</button>
                     <button class="table-btn" data-table="VIP Table">Τραπέζι VIP</button>
-                    <!-- Admin table button removed – replaced by elegant icon that only appears when Admin table is selected via QR -->
                 </div>
                 <p style="margin-top: 30px; font-size: 14px; color: var(--gray);"><i class="fas fa-info-circle"></i> Μόλις σαρώσετε, θα μπορείτε να δείτε το μενού και να κάνετε την παραγγελία σας.</p>
                 <p style="margin-top: 10px; font-size: 14px; color: var(--warning);"><i class="fas fa-shield-alt"></i> Πρόσβαση διαχειριστή μόνο μέσω QR του τραπεζιού Admin.</p>
@@ -584,7 +557,8 @@
                 <h2 style="margin-bottom: 25px; color: var(--primary);"><i class="fas fa-lock"></i> Admin Control Panel</h2>
                 <div class="admin-tabs">
                     <button class="admin-tab active" data-tab="restaurant">Restaurant Settings</button>
-                    <button class="admin-tab" data-tab="menu">Menu Management</button>
+                    <button class="admin-tab" data-tab="menu">Menu Management (EL)</button>
+                    <button class="admin-tab" data-tab="menuEn">Menu Management (EN)</button>
                     <button class="admin-tab" data-tab="categories">Category Management</button>
                     <button class="admin-tab" data-tab="orders">Order Management</button>
                     <button class="admin-tab" data-tab="helpRequests">🆘 Help Requests</button>
@@ -610,14 +584,14 @@
                     <div class="admin-form-group"><label class="admin-label">Welcome Message</label><textarea class="admin-textarea" id="adminWelcomeMessage" placeholder="Welcome to our restaurant..."></textarea></div>
                     <button class="btn btn-primary" id="saveRestaurantSettings"><i class="fas fa-save"></i> Save Restaurant Settings</button>
                 </div>
-                <!-- Menu Management -->
+                <!-- Menu Management (Greek) -->
                 <div class="admin-content" id="menuTab">
-                    <div style="margin-bottom: 25px;"><button class="btn btn-success" id="addMenuItemBtn"><i class="fas fa-plus"></i> Add New Menu Item</button></div>
+                    <div style="margin-bottom: 25px;"><button class="btn btn-success" id="addMenuItemBtn"><i class="fas fa-plus"></i> Add New Menu Item (EL)</button></div>
                     <div class="admin-grid" id="menuItemsList"></div>
                     <div id="editMenuItemForm" style="display: none;">
-                        <h3 style="margin-bottom: 20px;">Edit Menu Item</h3>
-                        <div class="admin-form-group"><label class="admin-label">Item Name</label><input type="text" class="admin-input" id="editItemName"></div>
-                        <div class="admin-form-group"><label class="admin-label">Description</label><textarea class="admin-textarea" id="editItemDescription"></textarea></div>
+                        <h3 style="margin-bottom: 20px;">Edit Menu Item (Greek)</h3>
+                        <div class="admin-form-group"><label class="admin-label">Item Name (EL)</label><input type="text" class="admin-input" id="editItemName"></div>
+                        <div class="admin-form-group"><label class="admin-label">Description (EL)</label><textarea class="admin-textarea" id="editItemDescription"></textarea></div>
                         <div class="admin-form-group"><label class="admin-label">Price (with tax)</label><input type="number" class="admin-input" id="editItemPrice" step="0.01" min="0"></div>
                         <div class="admin-form-group"><label class="admin-label">Category</label><select class="admin-select" id="editItemCategory"></select></div>
                         <div class="image-upload-container">
@@ -629,10 +603,43 @@
                                 <button class="remove-image-btn" id="removeItemImageBtn"><i class="fas fa-trash"></i> Remove</button>
                             </div>
                         </div>
-                        <div class="admin-form-group"><label class="admin-label">Tags (separate with commas)</label><input type="text" class="admin-input" id="editItemTags" placeholder="Vegetarian, Popular, Spicy"></div>
+                        <div class="admin-form-group"><label class="admin-label">Tags (EL) (separate with commas)</label><input type="text" class="admin-input" id="editItemTags" placeholder="Vegetarian, Popular, Spicy"></div>
+                        <!-- Options will be inserted here via JavaScript -->
                         <div class="payment-actions">
                             <button class="btn btn-secondary" id="cancelEditBtn"><i class="fas fa-times"></i> Cancel</button>
                             <button class="btn btn-primary" id="saveMenuItemBtn"><i class="fas fa-save"></i> Save Changes</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Menu Management (English) - DUPLICATE -->
+                <div class="admin-content" id="menuEnTab">
+                    <div style="margin-bottom: 25px;"><button class="btn btn-success" id="addMenuItemEnBtn"><i class="fas fa-plus"></i> Add New Menu Item (EN)</button></div>
+                    <div class="admin-grid" id="menuItemsListEn"></div>
+                    <div id="editMenuItemFormEn" style="display: none;">
+                        <h3 style="margin-bottom: 20px;">Edit Menu Item (English)</h3>
+                        <div class="admin-form-group"><label class="admin-label">Item Name (EN)</label><input type="text" class="admin-input" id="editItemNameEn"></div>
+                        <div class="admin-form-group"><label class="admin-label">Description (EN)</label><textarea class="admin-textarea" id="editItemDescriptionEn"></textarea></div>
+                        <div class="admin-form-group"><label class="admin-label">Price (with tax) <span style="color: var(--gray);">(shared)</span></label><input type="number" class="admin-input" id="editItemPriceEn" step="0.01" min="0" disabled></div>
+                        <div class="admin-form-group"><label class="admin-label">Category <span style="color: var(--gray);">(shared)</span></label><select class="admin-select" id="editItemCategoryEn" disabled></select></div>
+                        <div class="image-upload-container">
+                            <label class="admin-label">Item Image <span style="color: var(--gray);">(shared)</span></label>
+                            <div class="image-preview" id="itemImagePreviewEn"><div class="image-preview-placeholder"><i class="fas fa-utensils"></i><p>No image uploaded</p></div></div>
+                            <div style="display: none;"> <!-- hide upload buttons, image is shared -->
+                                <input type="file" id="itemImageUploadEn" accept="image/*">
+                                <button class="btn btn-secondary upload-btn" id="uploadItemImageBtnEn">Upload</button>
+                                <button class="remove-image-btn" id="removeItemImageBtnEn">Remove</button>
+                            </div>
+                        </div>
+                        <div class="admin-form-group"><label class="admin-label">Tags (EN) (separate with commas)</label><input type="text" class="admin-input" id="editItemTagsEn" placeholder="Vegetarian, Popular, Spicy"></div>
+                        <!-- Options (English) -->
+                        <div id="adminOptionsSectionEn" class="admin-options-section">
+                            <h4 style="margin-bottom:15px;"><i class="fas fa-tasks"></i> Options / Subcategories (EN)</h4>
+                            <div id="optionsGroupsContainerEn"></div>
+                            <button type="button" class="btn btn-secondary" id="addOptionGroupBtnEn"><i class="fas fa-plus"></i> Add Option Group</button>
+                        </div>
+                        <div class="payment-actions">
+                            <button class="btn btn-secondary" id="cancelEditBtnEn"><i class="fas fa-times"></i> Cancel</button>
+                            <button class="btn btn-primary" id="saveMenuItemBtnEn"><i class="fas fa-save"></i> Save English Translations</button>
                         </div>
                     </div>
                 </div>
@@ -650,7 +657,7 @@
                         </div>
                     </div>
                 </div>
-                <!-- Order Management (with Delete by Table) -->
+                <!-- Order Management -->
                 <div class="admin-content" id="ordersTab">
                     <div class="admin-form-group"><label class="admin-label">Filter by Status</label><select class="admin-select" id="orderStatusFilter"><option value="all">All Orders</option><option value="pending">Pending</option><option value="preparing">Preparing</option><option value="ready">Ready</option><option value="served">Served</option><option value="cancelled">Cancelled</option></select></div>
                     <div id="adminOrdersList"><p style="text-align: center; color: var(--gray); padding: 40px;">No orders yet. Orders will appear here when customers place them.</p></div>
@@ -659,9 +666,7 @@
                         <div style="display: flex; gap: 10px; align-items: flex-end;">
                             <div style="flex: 1;">
                                 <label class="admin-label">Select Table</label>
-                                <select class="admin-select" id="tableSelectForDelete">
-                                    <option value="">-- No tables with orders --</option>
-                                </select>
+                                <select class="admin-select" id="tableSelectForDelete"><option value="">-- No tables with orders --</option></select>
                             </div>
                             <button class="btn btn-danger" id="deleteOrdersForTableBtn" style="flex: 0 0 auto;"><i class="fas fa-trash"></i> Delete Orders for Selected Table</button>
                         </div>
@@ -672,15 +677,9 @@
                 <div class="admin-content" id="helpRequestsTab">
                     <div class="admin-form-group">
                         <label class="admin-label">Filter by Status</label>
-                        <select class="admin-select" id="helpRequestStatusFilter">
-                            <option value="all">All Requests</option>
-                            <option value="pending">Pending</option>
-                            <option value="resolved">Resolved</option>
-                        </select>
+                        <select class="admin-select" id="helpRequestStatusFilter"><option value="all">All Requests</option><option value="pending">Pending</option><option value="resolved">Resolved</option></select>
                     </div>
-                    <div id="adminHelpRequestsList" style="margin-top: 20px;">
-                        <p style="text-align: center; color: var(--gray); padding: 40px;">No help requests yet.</p>
-                    </div>
+                    <div id="adminHelpRequestsList" style="margin-top: 20px;"><p style="text-align: center; color: var(--gray); padding: 40px;">No help requests yet.</p></div>
                     <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid var(--light-gray);">
                         <h4 style="margin-bottom: 15px;"><i class="fas fa-trash-alt"></i> Delete Old Requests</h4>
                         <button class="btn btn-danger" id="deleteAllResolvedHelpBtn"><i class="fas fa-trash"></i> Delete All Resolved</button>
@@ -746,17 +745,15 @@
                         <button class="btn btn-primary" id="saveCustomizationBtn"><i class="fas fa-save"></i> Save All Changes</button>
                     </div>
                 </div>
-                <!-- Sound Effects Settings – including Help Sound -->
+                <!-- Sound Effects Settings -->
                 <div class="admin-content" id="soundTab">
                     <h3 style="margin-bottom: 20px;"><i class="fas fa-music"></i> Sound Effects</h3>
                     <p style="margin-bottom: 25px; color: var(--gray);">Upload custom sounds that will play when customers add items to cart, confirm payment, or request help.</p>
-                    
                     <div style="margin-bottom: 30px;">
                         <label class="admin-label" style="display: flex; align-items: center; gap: 10px;">
                             <input type="checkbox" id="soundEffectsEnabled" checked> Enable all sound effects
                         </label>
                     </div>
-
                     <!-- Add to Cart Sound -->
                     <div class="sound-effect-card">
                         <div class="sound-effect-title"><i class="fas fa-cart-plus"></i> Add to Cart Sound</div>
@@ -770,7 +767,6 @@
                             </div>
                         </div>
                     </div>
-
                     <!-- Checkout Sound -->
                     <div class="sound-effect-card">
                         <div class="sound-effect-title"><i class="fas fa-credit-card"></i> Checkout / Payment Sound</div>
@@ -784,7 +780,6 @@
                             </div>
                         </div>
                     </div>
-
                     <!-- Help Request Sound -->
                     <div class="sound-effect-card">
                         <div class="sound-effect-title"><i class="fas fa-headset"></i> Help Request Sound</div>
@@ -798,7 +793,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="customization-actions">
                         <button class="btn btn-secondary" id="resetSoundDefaultsBtn"><i class="fas fa-undo"></i> Clear All Sounds</button>
                         <button class="btn btn-primary" id="saveSoundEffectsBtn"><i class="fas fa-save"></i> Save Sound Settings</button>
@@ -842,11 +836,12 @@ VIP Table</textarea>
             <h2 style="margin-bottom: 25px; color: var(--primary);"><i class="fas fa-lock"></i> Admin Control Panel</h2>
             <div class="admin-tabs">
                 <button class="admin-tab active" data-tab="restaurant">Restaurant Settings</button>
-                <button class="admin-tab" data-tab="menu">Menu Management</button>
-                <button class="admin-tab" data-tab="categories">Category Management</button>
-                <button class="admin-tab" data-tab="orders">Order Management</button>
-                <button class="admin-tab" data-tab="helpRequests">🆘 Help Requests</button>
-                <button class="admin-tab" data-tab="customization">Visual Customization</button>
+                <button class="admin-tab" data-tab="menu">Menu (EL)</button>
+                <button class="admin-tab" data-tab="menuEn">Menu (EN)</button>
+                <button class="admin-tab" data-tab="categories">Categories</button>
+                <button class="admin-tab" data-tab="orders">Orders</button>
+                <button class="admin-tab" data-tab="helpRequests">🆘 Help</button>
+                <button class="admin-tab" data-tab="customization">Visual</button>
                 <button class="admin-tab" data-tab="sound">🔊 Sound</button>
                 <button class="admin-tab" data-tab="qr">QR Codes</button>
                 <button class="admin-tab" data-tab="system">System</button>
@@ -868,10 +863,15 @@ VIP Table</textarea>
                 <div class="admin-form-group"><label class="admin-label">Welcome Message</label><textarea class="admin-textarea" id="adminWelcomeMessageModal" placeholder="Welcome to our restaurant..."></textarea></div>
                 <button class="btn btn-primary" id="saveRestaurantSettingsModal"><i class="fas fa-save"></i> Save Restaurant Settings</button>
             </div>
-            <!-- Menu Management Modal -->
+            <!-- Menu Management Modal (EL) -->
             <div class="admin-content" id="menuTabModal">
-                <div style="margin-bottom: 25px;"><button class="btn btn-success" id="addMenuItemBtnModal"><i class="fas fa-plus"></i> Add New Menu Item</button></div>
+                <div style="margin-bottom: 25px;"><button class="btn btn-success" id="addMenuItemBtnModal"><i class="fas fa-plus"></i> Add New Menu Item (EL)</button></div>
                 <div class="admin-grid" id="menuItemsListModal"></div>
+            </div>
+            <!-- Menu Management Modal (EN) -->
+            <div class="admin-content" id="menuEnTabModal">
+                <div style="margin-bottom: 25px;"><button class="btn btn-success" id="addMenuItemBtnModalEn"><i class="fas fa-plus"></i> Add New Menu Item (EN)</button></div>
+                <div class="admin-grid" id="menuItemsListModalEn"></div>
             </div>
             <!-- Category Management Modal -->
             <div class="admin-content" id="categoriesTabModal">
@@ -887,7 +887,7 @@ VIP Table</textarea>
                     </div>
                 </div>
             </div>
-            <!-- Order Management Modal + Delete by Table -->
+            <!-- Order Management Modal -->
             <div class="admin-content" id="ordersTabModal">
                 <div class="admin-form-group"><label class="admin-label">Filter by Status</label><select class="admin-select" id="orderStatusFilterModal"><option value="all">All Orders</option><option value="pending">Pending</option><option value="preparing">Preparing</option><option value="ready">Ready</option><option value="served">Served</option><option value="cancelled">Cancelled</option></select></div>
                 <div id="adminOrdersListModal"><p style="text-align: center; color: var(--gray); padding: 40px;">No orders yet.</p></div>
@@ -915,14 +915,14 @@ VIP Table</textarea>
                 </div>
                 <div id="adminHelpRequestsListModal" style="margin-top: 20px;"></div>
             </div>
-            <!-- Visual Customization Modal (simplified) -->
+            <!-- Visual Customization Modal -->
             <div class="admin-content" id="customizationTabModal">
                 <h3 style="margin-bottom: 20px;">Visual Customization</h3>
                 <div style="margin-bottom: 30px;"><div style="font-weight: 500; margin-bottom: 15px; color: var(--text);">Theme Selection</div><div class="theme-gallery" id="themeGalleryModal"></div></div>
                 <div style="margin-bottom: 30px;"><div style="font-weight: 500; margin-bottom: 15px; color: var(--text);">Font Selection</div><div class="font-options" id="fontOptionsModal"></div></div>
                 <div class="customization-actions"><button class="btn btn-secondary" id="resetCustomizationBtnModal"><i class="fas fa-undo"></i> Reset</button><button class="btn btn-primary" id="saveCustomizationBtnModal"><i class="fas fa-save"></i> Save</button></div>
             </div>
-            <!-- Sound Effects Modal (simplified) -->
+            <!-- Sound Effects Modal -->
             <div class="admin-content" id="soundTabModal">
                 <h3 style="margin-bottom: 20px;"><i class="fas fa-music"></i> Sound Effects</h3>
                 <div style="margin-bottom: 20px;">
@@ -1027,6 +1027,7 @@ VIP Table</textarea>
             selectedPaymentMethod: null,
             selectedPaymentTime: null,
             currentOrderNumber: null,
+            currentLanguage: 'el', // 'el' or 'en'
             restaurantInfo: {
                 name: "DineEasy",
                 taxRate: 8,
@@ -1079,20 +1080,20 @@ VIP Table</textarea>
             helpSoundInterval: null
         };
 
-        // ========== DEFAULT DATA – NOW WITH GREEK MENU ITEMS ==========
+        // ========== DEFAULT DATA – NOW WITH GREEK + ENGLISH FIELDS ==========
         const defaultMenuItems = [
-            { id: 1, name: "Πίτσα Μαργαρίτα", description: "Κλασική σάλτσα ντομάτας, φρέσκια μοτσαρέλα, βασιλικός", price: 14.99, category: "pizza", tags: ["Χορτοφαγική", "Δημοφιλής"], image: "", options: [] },
-            { id: 2, name: "Πίτσα Πεπερονί", description: "Σάλτσα ντομάτας, μοτσαρέλα, διπλό πεπερόνι", price: 16.99, category: "pizza", tags: ["Πικάντικη"], image: "", options: [] },
-            { id: 3, name: "Σαλάτα Καίσαρα", description: "Μαρούλι ρωμαϊκό, παρμεζάνα, κρουτόν, σάλτσα Καίσαρα", price: 9.99, category: "salads", tags: ["Χορτοφαγική"], image: "", options: [] },
-            { id: 4, name: "Χωριάτικη Σαλάτα", description: "Αγγούρι, ντομάτα, ελιές, φέτα, ρίγανη", price: 10.99, category: "salads", tags: ["Χορτοφαγική", "Υγιεινή"], image: "", options: [] },
-            { id: 5, name: "Σπαγγέτι Καρμπονάρα", description: "Αυγά, τυρί, πανσέτα, μαύρο πιπέρι", price: 13.99, category: "pasta", tags: ["Δημοφιλής"], image: "", options: [] },
-            { id: 6, name: "Λαζάνια", description: "Στρώσεις ζύμης, κιμάς, μπεσαμέλ, παρμεζάνα", price: 15.99, category: "pasta", tags: [], image: "", options: [] },
-            { id: 7, name: "Σολομός στη Σχάρα", description: "Φρέσκο φιλέτο σολομού, σάλτσα λεμονιού, λαχανικά", price: 19.99, category: "main", tags: ["Χωρίς γλουτένη"], image: "", options: [] },
-            { id: 8, name: "Μπριζόλα Ribeye", description: "300γρ. ribeye, συνοδεύεται από πατάτες και σαλάτα", price: 24.99, category: "main", tags: ["Δημοφιλής"], image: "", options: [] },
-            { id: 9, name: "Τιραμισού", description: "Μπισκότα Savoiardi εμποτισμένα με καφέ, κρέμα μασκαρπόνε, κακάο", price: 7.99, category: "desserts", tags: ["Χορτοφαγική"], image: "", options: [] },
-            { id: 10, name: "Τσιζκέικ", description: "Νεοϋορκέζικο, σάλτσα μούρων", price: 6.99, category: "desserts", tags: ["Χορτοφαγική"], image: "", options: [] },
-            { id: 11, name: "Coca-Cola", description: "Αναψυκτικό 330ml", price: 2.50, category: "beverages", tags: [], image: "", options: [] },
-            { id: 12, name: "Φρέσκος Χυμός Πορτοκάλι", description: "Φρεσκοστυμμένος", price: 3.50, category: "beverages", tags: ["Υγιεινή"], image: "", options: [] }
+            { id: 1, name: "Πίτσα Μαργαρίτα", nameEn: "", description: "Κλασική σάλτσα ντομάτας, φρέσκια μοτσαρέλα, βασιλικός", descriptionEn: "", price: 14.99, category: "pizza", tags: ["Χορτοφαγική", "Δημοφιλής"], tagsEn: [], image: "", options: [] },
+            { id: 2, name: "Πίτσα Πεπερονί", nameEn: "", description: "Σάλτσα ντομάτας, μοτσαρέλα, διπλό πεπερόνι", descriptionEn: "", price: 16.99, category: "pizza", tags: ["Πικάντικη"], tagsEn: [], image: "", options: [] },
+            { id: 3, name: "Σαλάτα Καίσαρα", nameEn: "", description: "Μαρούλι ρωμαϊκό, παρμεζάνα, κρουτόν, σάλτσα Καίσαρα", descriptionEn: "", price: 9.99, category: "salads", tags: ["Χορτοφαγική"], tagsEn: [], image: "", options: [] },
+            { id: 4, name: "Χωριάτικη Σαλάτα", nameEn: "", description: "Αγγούρι, ντομάτα, ελιές, φέτα, ρίγανη", descriptionEn: "", price: 10.99, category: "salads", tags: ["Χορτοφαγική", "Υγιεινή"], tagsEn: [], image: "", options: [] },
+            { id: 5, name: "Σπαγγέτι Καρμπονάρα", nameEn: "", description: "Αυγά, τυρί, πανσέτα, μαύρο πιπέρι", descriptionEn: "", price: 13.99, category: "pasta", tags: ["Δημοφιλής"], tagsEn: [], image: "", options: [] },
+            { id: 6, name: "Λαζάνια", nameEn: "", description: "Στρώσεις ζύμης, κιμάς, μπεσαμέλ, παρμεζάνα", descriptionEn: "", price: 15.99, category: "pasta", tags: [], tagsEn: [], image: "", options: [] },
+            { id: 7, name: "Σολομός στη Σχάρα", nameEn: "", description: "Φρέσκο φιλέτο σολομού, σάλτσα λεμονιού, λαχανικά", descriptionEn: "", price: 19.99, category: "main", tags: ["Χωρίς γλουτένη"], tagsEn: [], image: "", options: [] },
+            { id: 8, name: "Μπριζόλα Ribeye", nameEn: "", description: "300γρ. ribeye, συνοδεύεται από πατάτες και σαλάτα", descriptionEn: "", price: 24.99, category: "main", tags: ["Δημοφιλής"], tagsEn: [], image: "", options: [] },
+            { id: 9, name: "Τιραμισού", nameEn: "", description: "Μπισκότα Savoiardi εμποτισμένα με καφέ, κρέμα μασκαρπόνε, κακάο", descriptionEn: "", price: 7.99, category: "desserts", tags: ["Χορτοφαγική"], tagsEn: [], image: "", options: [] },
+            { id: 10, name: "Τσιζκέικ", nameEn: "", description: "Νεοϋορκέζικο, σάλτσα μούρων", descriptionEn: "", price: 6.99, category: "desserts", tags: ["Χορτοφαγική"], tagsEn: [], image: "", options: [] },
+            { id: 11, name: "Coca-Cola", nameEn: "", description: "Αναψυκτικό 330ml", descriptionEn: "", price: 2.50, category: "beverages", tags: [], tagsEn: [], image: "", options: [] },
+            { id: 12, name: "Φρέσκος Χυμός Πορτοκάλι", nameEn: "", description: "Φρεσκοστυμμένος", descriptionEn: "", price: 3.50, category: "beverages", tags: ["Υγιεινή"], tagsEn: [], image: "", options: [] }
         ];
 
         const defaultCategories = [
@@ -1104,8 +1105,8 @@ VIP Table</textarea>
             { id: "beverages", name: "beverages", displayName: "Ροφήματα", isDefault: true, displayOrder: 5 }
         ];
 
-        // ========== THEMES & FONTS ==========
-        const themes = { /* ... as before ... */
+        // ========== THEMES & FONTS (unchanged) ==========
+        const themes = {
             default: { name: "Classic Modern", category: "Modern", primary: "#e63946", secondary: "#457b9d", background: "#fefefe", text: "#212529", cardBg: "#ffffff", lightGray: "#e9ecef" },
             midnight: { name: "Midnight Elegance", category: "Modern", primary: "#6c63ff", secondary: "#4cc9f0", background: "#121212", text: "#f5f5f5", cardBg: "#1e1e1e", lightGray: "#2d2d2d" },
             autumn: { name: "Autumn Cozy", category: "Cozy", primary: "#e76f51", secondary: "#f4a261", background: "#fefae0", text: "#283618", cardBg: "#ffffff", lightGray: "#faedcd" },
@@ -1144,7 +1145,7 @@ VIP Table</textarea>
             { id: "lightGray", label: "Light Gray" }
         ];
 
-        // ========== DOM ELEMENTS ==========
+        // ========== DOM ELEMENTS (partial) ==========
         const scannerSection = document.getElementById('scannerSection');
         const menuSection = document.getElementById('menuSection');
         const cartSection = document.getElementById('cartSection');
@@ -1192,6 +1193,54 @@ VIP Table</textarea>
         const optionsModalContent = document.getElementById('optionsModalContent');
         const adminFloating = document.getElementById('adminFloating');
 
+        // ========== LANGUAGE HELPER FUNCTIONS ==========
+        function getItemName(item) {
+            if (state.currentLanguage === 'en' && item.nameEn && item.nameEn.trim() !== '') {
+                return item.nameEn;
+            }
+            return item.name;
+        }
+        function getItemDescription(item) {
+            if (state.currentLanguage === 'en' && item.descriptionEn && item.descriptionEn.trim() !== '') {
+                return item.descriptionEn;
+            }
+            return item.description;
+        }
+        function getItemTags(item) {
+            if (state.currentLanguage === 'en' && item.tagsEn && item.tagsEn.length > 0) {
+                return item.tagsEn;
+            }
+            return item.tags;
+        }
+        function getOptionGroupName(group) {
+            if (state.currentLanguage === 'en' && group.nameEn && group.nameEn.trim() !== '') {
+                return group.nameEn;
+            }
+            return group.name;
+        }
+        function getChoiceName(choice) {
+            if (state.currentLanguage === 'en' && choice.nameEn && choice.nameEn.trim() !== '') {
+                return choice.nameEn;
+            }
+            return choice.name;
+        }
+
+        // ========== LANGUAGE TOGGLE ==========
+        function toggleLanguage() {
+            state.currentLanguage = state.currentLanguage === 'el' ? 'en' : 'el';
+            document.getElementById('langToggleText').textContent = state.currentLanguage === 'el' ? 'EN' : 'EL';
+            if (document.querySelector('#menuSection.active-section')) {
+                const activeCat = document.querySelector('.category-tab.active')?.dataset?.category || 'all';
+                displayMenuItems(activeCat);
+            }
+            if (state.currentTable && !state.isAdminMode) {
+                menuSubtitle.textContent = state.cart.length === 0 
+                    ? `Επιλέξτε είδη για την παραγγελία σας για ${state.currentTable}` 
+                    : `Συνεχίστε να προσθέτετε είδη στην παραγγελία σας για ${state.currentTable}`;
+            }
+            showNotification(`Language switched to ${state.currentLanguage === 'el' ? 'Greek' : 'English'}`);
+        }
+
         // ========== FIRESTORE SAVE / LOAD ==========
         async function saveRestaurantInfo() { try { await db.collection('settings').doc('restaurantInfo').set(state.restaurantInfo); } catch (e) { console.error(e); } }
         async function saveMenuItem(item) { try { await db.collection('menuItems').doc(item.id.toString()).set(item); } catch (e) { console.error(e); } }
@@ -1225,6 +1274,19 @@ VIP Table</textarea>
                 } else {
                     state.menuItems = menuSnap.docs.map(doc => {
                         const d = doc.data();
+                        if (!d.nameEn) d.nameEn = '';
+                        if (!d.descriptionEn) d.descriptionEn = '';
+                        if (!d.tagsEn) d.tagsEn = [];
+                        if (d.options) {
+                            d.options.forEach(grp => {
+                                if (!grp.nameEn) grp.nameEn = '';
+                                if (grp.choices) {
+                                    grp.choices.forEach(ch => {
+                                        if (!ch.nameEn) ch.nameEn = '';
+                                    });
+                                }
+                            });
+                        }
                         d.displayOrder = d.displayOrder ?? Number(doc.id) ?? 999;
                         return { id: Number(doc.id), ...d, options: d.options || [] };
                     }).sort((a,b)=>(a.displayOrder||0)-(b.displayOrder||0));
@@ -1287,6 +1349,19 @@ VIP Table</textarea>
             db.collection('menuItems').onSnapshot(snap => {
                 const incoming = snap.docs.map(doc => {
                     const d = doc.data();
+                    if (!d.nameEn) d.nameEn = '';
+                    if (!d.descriptionEn) d.descriptionEn = '';
+                    if (!d.tagsEn) d.tagsEn = [];
+                    if (d.options) {
+                        d.options.forEach(grp => {
+                            if (!grp.nameEn) grp.nameEn = '';
+                            if (grp.choices) {
+                                grp.choices.forEach(ch => {
+                                    if (!ch.nameEn) ch.nameEn = '';
+                                });
+                            }
+                        });
+                    }
                     d.displayOrder = d.displayOrder ?? Number(doc.id) ?? 999;
                     return { id: Number(doc.id), ...d, options: d.options || [] };
                 }).sort((a,b)=>(a.displayOrder||0)-(b.displayOrder||0));
@@ -1298,8 +1373,12 @@ VIP Table</textarea>
                 if (state.isAdminMode && document.querySelector('#adminDashboardSection.active-section')) {
                     const activeTab = document.querySelector('#adminDashboardSection .admin-tab.active')?.dataset?.tab;
                     if (activeTab === 'menu') loadMenuItemsForAdmin();
+                    if (activeTab === 'menuEn') loadMenuItemsForAdminEn();
                 }
-                if (adminPanel.style.display === 'flex') loadMenuItemsForAdminModal();
+                if (adminPanel.style.display === 'flex') {
+                    loadMenuItemsForAdminModal();
+                    loadMenuItemsForAdminModalEn();
+                }
             });
             db.collection('settings').doc('categories').onSnapshot(doc => {
                 if (doc.exists) {
@@ -1309,7 +1388,7 @@ VIP Table</textarea>
                     state.categories.sort((a,b)=>(a.displayOrder||0)-(b.displayOrder||0));
                 }
                 updateCategoryTabs();
-                ['editItemCategory','editItemCategoryModal'].forEach(id => {
+                ['editItemCategory','editItemCategoryEn','editItemCategoryModal'].forEach(id => {
                     const sel = document.getElementById(id);
                     if (sel) {
                         const cur = sel.value;
@@ -1408,7 +1487,10 @@ VIP Table</textarea>
                 const imgStyle = item.image ? `background-image: url('${item.image}')` : 'background-color: var(--light-gray)';
                 let optInd = '';
                 if (item.options && item.options.length) optInd = `<div class="item-options-indicator"><i class="fas fa-sliders-h"></i> Με επιλογές</div>`;
-                el.innerHTML = `<div class="item-image" style="${imgStyle}"></div><div class="item-content"><div class="item-header"><div class="item-name">${item.name}</div><div class="item-price">$${item.price.toFixed(2)}</div></div><div class="item-description">${item.description}</div>${optInd}<div class="item-footer"><div class="item-tags">${item.tags.map(t=>`<span class="item-tag">${t}</span>`).join('')}</div><button class="add-to-cart" data-id="${item.id}"><i class="fas fa-plus"></i></button></div></div>`;
+                const itemName = getItemName(item);
+                const itemDesc = getItemDescription(item);
+                const itemTags = getItemTags(item);
+                el.innerHTML = `<div class="item-image" style="${imgStyle}"></div><div class="item-content"><div class="item-header"><div class="item-name">${itemName}</div><div class="item-price">$${item.price.toFixed(2)}</div></div><div class="item-description">${itemDesc}</div>${optInd}<div class="item-footer"><div class="item-tags">${itemTags.map(t=>`<span class="item-tag">${t}</span>`).join('')}</div><button class="add-to-cart" data-id="${item.id}"><i class="fas fa-plus"></i></button></div></div>`;
                 el.querySelector('.add-to-cart').addEventListener('click', ()=> addToCart(item.id));
                 menuGrid.appendChild(el);
             });
@@ -1427,8 +1509,17 @@ VIP Table</textarea>
             if (!menuItem) return;
             const itemPrice = menuItem.price + selectedOptions.reduce((sum,o)=>sum+(o.price||0),0);
             const cartItem = {
-                id: menuItem.id, name: menuItem.name, basePrice: menuItem.price, price: itemPrice, quantity: 1,
-                selectedOptions: selectedOptions.map(o=>({ groupName: o.groupName, choiceName: o.choiceName, price: o.price||0, isComment: o.isComment||false }))
+                id: menuItem.id,
+                name: getItemName(menuItem),
+                basePrice: menuItem.price,
+                price: itemPrice,
+                quantity: 1,
+                selectedOptions: selectedOptions.map(o=>({
+                    groupName: o.groupName,
+                    choiceName: o.choiceName,
+                    price: o.price||0,
+                    isComment: o.isComment||false
+                }))
             };
             const idx = state.cart.findIndex(i=> i.id===cartItem.id && JSON.stringify(i.selectedOptions.filter(x=>!x.isComment)) === JSON.stringify(cartItem.selectedOptions.filter(x=>!x.isComment)));
             if (idx !== -1) {
@@ -1437,22 +1528,23 @@ VIP Table</textarea>
                 else state.cart.push(cartItem);
             } else state.cart.push(cartItem);
             updateCart();
-            showNotification(`Το ${menuItem.name} προστέθηκε στο καλάθι`);
+            showNotification(`Το ${getItemName(menuItem)} προστέθηκε στο καλάθι`);
             playSound(state.soundEffects.addToCartSound);
         }
         function openOptionsModal(item) {
-            let html = `<h3 class="options-modal-title">${item.name}</h3><div class="options-modal-price">$${item.price.toFixed(2)}</div><div class="item-description" style="margin-bottom:20px;">${item.description}</div>`;
+            let html = `<h3 class="options-modal-title">${getItemName(item)}</h3><div class="options-modal-price">$${item.price.toFixed(2)}</div><div class="item-description" style="margin-bottom:20px;">${getItemDescription(item)}</div>`;
             item.options.forEach((g, gi) => {
                 if (g.type === 'text') {
-                    html += `<div class="option-group"><div class="option-group-title"><i class="fas fa-comment"></i> ${g.name}</div><div class="comment-field"><textarea class="admin-textarea" placeholder="Εισάγετε το σχόλιό σας εδώ..." id="comment_${g.id||gi}"></textarea></div></div>`;
+                    html += `<div class="option-group"><div class="option-group-title"><i class="fas fa-comment"></i> ${getOptionGroupName(g)}</div><div class="comment-field"><textarea class="admin-textarea" placeholder="Εισάγετε το σχόλιό σας εδώ..." id="comment_${g.id||gi}"></textarea></div></div>`;
                 } else {
-                    html += `<div class="option-group"><div class="option-group-title"><i class="fas fa-tag"></i> ${g.name} ${g.type==='radio'?'<span style="font-size:12px; color:var(--gray);">(επιλέξτε ένα)</span>':'<span style="font-size:12px; color:var(--gray);">(επιλέξτε οποιοδήποτε)</span>'}</div><div class="${g.type==='radio'?'option-group-radio':'option-group-checkbox'}">`;
+                    html += `<div class="option-group"><div class="option-group-title"><i class="fas fa-tag"></i> ${getOptionGroupName(g)} ${g.type==='radio'?'<span style="font-size:12px; color:var(--gray);">(επιλέξτε ένα)</span>':'<span style="font-size:12px; color:var(--gray);">(επιλέξτε οποιοδήποτε)</span>'}</div><div class="${g.type==='radio'?'option-group-radio':'option-group-checkbox'}">`;
                     g.choices.forEach((c, ci) => {
                         let priceText = ''; let priceClass = '';
                         if (c.price>0) { priceText = `+$${c.price.toFixed(2)}`; priceClass = 'choice-price-positive'; }
                         else if (c.price<0) { priceText = `-$${Math.abs(c.price).toFixed(2)}`; priceClass = 'choice-price-negative'; }
-                        if (g.type==='radio') html += `<div class="choice-item"><label class="choice-label"><input type="radio" name="group_${g.id||gi}" value="${c.name}" data-price="${c.price}" data-group-name="${g.name}" data-choice-name="${c.name}"> <span class="choice-name">${c.name}</span></label><span class="choice-price ${priceClass}">${priceText}</span></div>`;
-                        else html += `<div class="choice-item"><label class="choice-label"><input type="checkbox" name="group_${g.id||gi}" value="${c.name}" data-price="${c.price}" data-group-name="${g.name}" data-choice-name="${c.name}"> <span class="choice-name">${c.name}</span></label><span class="choice-price ${priceClass}">${priceText}</span></div>`;
+                        const choiceName = getChoiceName(c);
+                        if (g.type==='radio') html += `<div class="choice-item"><label class="choice-label"><input type="radio" name="group_${g.id||gi}" value="${c.name}" data-price="${c.price}" data-group-name="${g.name}" data-choice-name="${choiceName}"> <span class="choice-name">${choiceName}</span></label><span class="choice-price ${priceClass}">${priceText}</span></div>`;
+                        else html += `<div class="choice-item"><label class="choice-label"><input type="checkbox" name="group_${g.id||gi}" value="${c.name}" data-price="${c.price}" data-group-name="${g.name}" data-choice-name="${choiceName}"> <span class="choice-name">${choiceName}</span></label><span class="choice-price ${priceClass}">${priceText}</span></div>`;
                     });
                     html += `</div></div>`;
                 }
@@ -1598,7 +1690,7 @@ VIP Table</textarea>
             myOrdersSubtitle.textContent = `Έχετε ${tableOrders.length} παραγγελ${tableOrders.length!==1?'ίες':'ία'} για ${state.currentTable}`;
         }
 
-        // ========== SELECT TABLE – AUTO CONNECT TO TABLE 1 IF NO QR ==========
+        // ========== SELECT TABLE ==========
         function selectTable(name, isAutoLogin = false) {
             state.currentTable = name;
             tableInfo.innerHTML = `<i class="fas fa-chair"></i> ${name}`;
@@ -1611,14 +1703,12 @@ VIP Table</textarea>
             displayMenuItems('all');
             myOrdersButton.style.display = 'flex';
             showSection('menuSection');
-            
             if (name.toLowerCase() === "admin") {
                 adminFloating.style.display = 'flex';
             } else {
                 adminFloating.style.display = 'none';
             }
         }
-
         function autoLoginFromUrl() {
             const urlParams = new URLSearchParams(window.location.search);
             const tableParam = urlParams.get('table');
@@ -1637,7 +1727,6 @@ VIP Table</textarea>
                 return;
             }
             playSound(state.soundEffects.helpRequestSound);
-            
             const requestId = 'help_' + Date.now() + '_' + Math.random().toString(36).substring(2);
             const helpRequest = {
                 id: requestId,
@@ -1649,29 +1738,21 @@ VIP Table</textarea>
             await saveHelpRequest(helpRequest);
             showNotification(`Αίτημα βοήθειας για ${state.currentTable}. Ένας σερβιτόρος θα σας εξυπηρετήσει σύντομα.`);
         }
-
         function showHelpNotification() { 
-            if (state.currentTable) {
-                requestHelp();
-            } else {
-                showNotification('Ένας σερβιτόρος θα σας εξυπηρετήσει σύντομα.');
-            }
+            if (state.currentTable) { requestHelp(); } 
+            else { showNotification('Ένας σερβιτόρος θα σας εξυπηρετήσει σύντομα.'); }
         }
 
         // ========== ADMIN MODE ==========
         function showAdminCodePrompt() { adminCodePrompt.style.display = 'flex'; adminCodeInput.focus(); }
         function showAdminChangePrompt(action) { state.pendingAdminAction = action; adminChangePrompt.style.display = 'flex'; adminChangeCodeInput.focus(); }
-        
         function startHelpSoundInterval() {
             if (state.helpSoundInterval) clearInterval(state.helpSoundInterval);
             state.helpSoundInterval = setInterval(() => {
                 const hasPending = state.helpRequests.some(r => r.status === 'pending');
-                if (hasPending) {
-                    playSound(state.soundEffects.helpRequestSound);
-                }
+                if (hasPending) { playSound(state.soundEffects.helpRequestSound); }
             }, 60000);
         }
-        
         function enterAdminMode() {
             state.isAdminMode = true; state.currentTable = "Admin";
             document.body.classList.add('admin-mode');
@@ -1684,28 +1765,24 @@ VIP Table</textarea>
             localStorage.setItem('dineEasyAdminMode', 'true');
             playSound(state.soundEffects.helpRequestSound);
             showNotification("Admin mode activated. Full administrative access granted.");
-            
             startHelpSoundInterval();
         }
         function exitAdminMode() {
             state.isAdminMode = false; state.currentTable = null;
             document.body.classList.remove('admin-mode');
-            document.querySelector('.header-center').innerHTML = '<button class="help-button" id="headerHelpButton"><i class="fas fa-headset"></i> Χρειάζεστε βοήθεια?</button>';
+            document.querySelector('.header-center').innerHTML = '<button class="help-button" id="headerHelpButton"><i class="fas fa-headset"></i> Χρειάζεστε βοήθεια?</button><button class="language-toggle" id="languageToggleBtn"><i class="fas fa-language"></i> <span id="langToggleText">EN</span></button>';
             document.querySelector('.header-right').innerHTML = '<button class="my-orders-button" id="myOrdersButton" style="display: none;"><i class="fas fa-clipboard-list"></i> Οι Παραγγελίες μου</button><div class="table-info" id="tableInfo"><i class="fas fa-qrcode"></i> Σαρώστε QR για έναρξη</div>';
             document.getElementById('headerHelpButton').addEventListener('click', showHelpNotification);
+            document.getElementById('languageToggleBtn').addEventListener('click', toggleLanguage);
             cartFloating.style.display = 'flex';
             showSection('scannerSection');
             localStorage.removeItem('dineEasyAdminMode');
             adminFloating.style.display = 'none';
             showNotification("Logged out of admin mode.");
-            
-            if (state.helpSoundInterval) {
-                clearInterval(state.helpSoundInterval);
-                state.helpSoundInterval = null;
-            }
+            if (state.helpSoundInterval) { clearInterval(state.helpSoundInterval); state.helpSoundInterval = null; }
         }
 
-        // ========== DRAG AND DROP (unchanged) ==========
+        // ========== DRAG AND DROP ==========
         async function makeAdminGridDraggable(gridId) {
             const grid = document.getElementById(gridId); if (!grid) return;
             let dragged = null;
@@ -1724,7 +1801,6 @@ VIP Table</textarea>
                 if (dragIdx===-1 || targetIdx===-1) return;
                 if (dragIdx<targetIdx) grid.insertBefore(dragged, target.nextSibling);
                 else grid.insertBefore(dragged, target);
-                
                 const updated = Array.from(grid.children).filter(c=>c.classList.contains('admin-card'));
                 updated.forEach((c, idx) => {
                     const id = parseInt(c.dataset.itemId);
@@ -1732,10 +1808,10 @@ VIP Table</textarea>
                     if (mi) mi.displayOrder = idx;
                 });
                 state.menuItems.sort((a,b) => (a.displayOrder||0) - (b.displayOrder||0));
-                
                 await Promise.all(state.menuItems.map(item => saveMenuItem(item)));
                 showNotification("Menu order updated");
                 loadMenuItemsForAdmin();
+                loadMenuItemsForAdminEn();
                 displayMenuItems(document.querySelector('.category-tab.active')?.dataset?.category || 'all');
             });
         }
@@ -1804,11 +1880,7 @@ VIP Table</textarea>
                 return;
             }
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({
-                orientation: 'portrait',
-                unit: 'mm',
-                format: 'a4'
-            });
+            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
             const baseUrl = window.location.origin + window.location.pathname;
             const pageWidth = doc.internal.pageSize.getWidth();
             const pageHeight = doc.internal.pageSize.getHeight();
@@ -1818,17 +1890,13 @@ VIP Table</textarea>
             const rowsPerPage = 3;
             const cellWidth = (pageWidth - 2 * margin) / cols;
             const cellHeight = (pageHeight - 2 * margin) / rowsPerPage;
-            
             let index = 0;
             tableNamesArray.forEach((tableName, i) => {
-                if (i > 0 && i % (cols * rowsPerPage) === 0) {
-                    doc.addPage();
-                }
+                if (i > 0 && i % (cols * rowsPerPage) === 0) { doc.addPage(); }
                 const col = i % cols;
                 const row = Math.floor((i % (cols * rowsPerPage)) / cols);
                 const x = margin + col * cellWidth;
                 const y = margin + row * cellHeight;
-                
                 const qr = qrcode(0, 'M');
                 qr.addData(baseUrl + '?table=' + encodeURIComponent(tableName));
                 qr.make();
@@ -1841,13 +1909,10 @@ VIP Table</textarea>
                 ctx.fillStyle = '#000000';
                 for (let r = 0; r < qr.getModuleCount(); r++) {
                     for (let c = 0; c < qr.getModuleCount(); c++) {
-                        if (qr.isDark(r, c)) {
-                            ctx.fillRect(c * 5, r * 5, 5, 5);
-                        }
+                        if (qr.isDark(r, c)) { ctx.fillRect(c * 5, r * 5, 5, 5); }
                     }
                 }
                 const qrDataURL = qrCanvas.toDataURL('image/png');
-                
                 doc.addImage(qrDataURL, 'PNG', x, y, qrSize, qrSize);
                 doc.setFontSize(12);
                 doc.setTextColor(0, 0, 0);
@@ -1868,11 +1933,12 @@ VIP Table</textarea>
             document.getElementById('adminWelcomeMessage').value = state.restaurantInfo.welcomeMessage || '';
             updateLogoPreview();
             loadMenuItemsForAdmin();
+            loadMenuItemsForAdminEn();
             loadCategoriesForAdmin();
             loadOrdersForAdmin();
             loadSystemStats();
             loadCustomizationSettings();
-            loadSoundSettingsUI(); 
+            loadSoundSettingsUI();
             loadHelpRequestsForAdmin();
 
             document.querySelectorAll('#adminDashboardSection .admin-tab').forEach(tab => {
@@ -1887,6 +1953,7 @@ VIP Table</textarea>
                     if (tid==='orders') { loadOrdersForAdmin(); populateTableSelect('tableSelectForDelete'); }
                     if (tid==='helpRequests') { loadHelpRequestsForAdmin(); }
                     if (tid==='sound') setTimeout(loadSoundSettingsUI,50);
+                    if (tid==='menuEn') setTimeout(()=>{ loadMenuItemsForAdminEn(); makeAdminGridDraggable('menuItemsListEn'); },50);
                 });
             });
             document.getElementById('uploadLogoBtn').addEventListener('click', ()=>document.getElementById('logoUpload').click());
@@ -1894,6 +1961,7 @@ VIP Table</textarea>
             document.getElementById('removeLogoBtn').addEventListener('click', removeLogo);
             document.getElementById('saveRestaurantSettings').addEventListener('click', ()=> showAdminChangePrompt(saveRestaurantSettingsOptimistic));
             document.getElementById('addMenuItemBtn').addEventListener('click', ()=> openEditMenuItemForm(null));
+            document.getElementById('addMenuItemEnBtn').addEventListener('click', ()=> openEditMenuItemFormEn(null));
             document.getElementById('addCategoryBtn').addEventListener('click', ()=> showAdminChangePrompt(addCategoryOptimistic));
             document.getElementById('orderStatusFilter').addEventListener('change', loadOrdersForAdmin);
             document.getElementById('clearOrdersBtn').addEventListener('click', ()=> showAdminChangePrompt(clearAllOrdersOptimistic));
@@ -1901,7 +1969,8 @@ VIP Table</textarea>
                 if (confirm("Reset menu to default?")) { 
                     state.menuItems = JSON.parse(JSON.stringify(defaultMenuItems)); 
                     await Promise.all(state.menuItems.map(i=>saveMenuItem(i))); 
-                    loadMenuItemsForAdmin(); 
+                    loadMenuItemsForAdmin();
+                    loadMenuItemsForAdminEn();
                     displayMenuItems('all'); 
                     showNotification("Menu reset."); 
                 } 
@@ -1942,7 +2011,12 @@ VIP Table</textarea>
                     updateHelpRequestStatus(requestId, 'resolved');
                 }
             });
-            setTimeout(()=>{ makeAdminGridDraggable('menuItemsList'); makeCategoriesDraggable('categoriesListContainer'); populateTableSelect('tableSelectForDelete'); },500);
+            setTimeout(()=>{ 
+                makeAdminGridDraggable('menuItemsList'); 
+                makeAdminGridDraggable('menuItemsListEn');
+                makeCategoriesDraggable('categoriesListContainer'); 
+                populateTableSelect('tableSelectForDelete'); 
+            },500);
         }
         function updateLogoPreview() {
             const p = document.getElementById('logoPreview'); const p2 = document.getElementById('logoPreviewModal');
@@ -1965,7 +2039,8 @@ VIP Table</textarea>
             showNotification("Restaurant settings saved.");
             await saveRestaurantInfo();
         }
-        // --- MENU ADMIN ---
+
+        // --- MENU ADMIN (Greek) ---
         function loadMenuItemsForAdmin() {
             const list = document.getElementById('menuItemsList'); list.innerHTML = '';
             if (state.menuItems.length===0) { list.innerHTML = '<p style="text-align: center; color: var(--gray);">No menu items found.</p>'; return; }
@@ -1989,7 +2064,9 @@ VIP Table</textarea>
             const newItem = { ...orig, id: newId, name: `${orig.name} (copy)`, displayOrder: maxOrder+1 };
             state.menuItems.push(newItem);
             state.menuItems.sort((a,b)=>(a.displayOrder||0)-(b.displayOrder||0));
-            loadMenuItemsForAdmin(); displayMenuItems('all');
+            loadMenuItemsForAdmin();
+            loadMenuItemsForAdminEn();
+            displayMenuItems('all');
             showNotification(`"${newItem.name}" duplicated.`);
             await saveMenuItem(newItem);
         }
@@ -2030,7 +2107,7 @@ VIP Table</textarea>
         function buildOptionsAdminUI(options) {
             const form = document.getElementById('editMenuItemForm');
             const sec = document.createElement('div'); sec.id = 'adminOptionsSection'; sec.className = 'admin-options-section';
-            sec.innerHTML = `<h4 style="margin-bottom:15px;"><i class="fas fa-tasks"></i> Options / Subcategories</h4><div id="optionsGroupsContainer"></div><button type="button" class="btn btn-secondary" id="addOptionGroupBtn"><i class="fas fa-plus"></i> Add Option Group</button>`;
+            sec.innerHTML = `<h4 style="margin-bottom:15px;"><i class="fas fa-tasks"></i> Options / Subcategories (EL)</h4><div id="optionsGroupsContainer"></div><button type="button" class="btn btn-secondary" id="addOptionGroupBtn"><i class="fas fa-plus"></i> Add Option Group</button>`;
             const tagsGrp = document.querySelector('.admin-form-group:has(#editItemTags)');
             if (tagsGrp) tagsGrp.parentNode.insertBefore(sec, tagsGrp.nextSibling);
             else form.appendChild(sec);
@@ -2115,6 +2192,7 @@ VIP Table</textarea>
             document.getElementById('menuItemsList').style.display = 'block';
             state.currentImageUpload = null;
             loadMenuItemsForAdmin();
+            loadMenuItemsForAdminEn();
             displayMenuItems('all');
             showNotification(id ? "Menu item updated." : "Menu item added.");
             if (id) { const it = state.menuItems.find(i=>i.id===parseInt(id)); if (it) await saveMenuItem(it); }
@@ -2125,10 +2203,260 @@ VIP Table</textarea>
             const item = state.menuItems.find(i=>i.id===id);
             state.menuItems = state.menuItems.filter(i=>i.id!==id);
             loadMenuItemsForAdmin();
+            loadMenuItemsForAdminEn();
             displayMenuItems('all');
             showNotification(`"${item?.name}" deleted.`);
             await deleteMenuItemFirestore(id);
         }
+
+        // --- MENU ADMIN (English) ---
+        function loadMenuItemsForAdminEn() {
+            const list = document.getElementById('menuItemsListEn'); if (!list) return;
+            list.innerHTML = '';
+            if (state.menuItems.length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: var(--gray);">No menu items found.</p>';
+                return;
+            }
+            const sorted = [...state.menuItems].sort((a,b)=>(a.displayOrder||0)-(b.displayOrder||0));
+            sorted.forEach(item => {
+                const card = document.createElement('div'); card.className = 'admin-card'; card.setAttribute('draggable','true'); card.dataset.itemId = item.id;
+                const img = item.image ? `<div style="height:120px; background-image:url('${item.image}'); background-size:cover; background-position:center; border-radius:8px; margin-bottom:10px;"></div>` : `<div style="height:120px; background-color:var(--light-gray); border-radius:8px; margin-bottom:10px; display:flex; align-items:center; justify-content:center; color:var(--gray);"><i class="fas fa-utensils"></i></div>`;
+                card.innerHTML = `<div style="display:flex; align-items:center; margin-bottom:5px;"><i class="fas fa-grip-vertical drag-handle"></i></div>${img}<div class="admin-card-header"><div class="admin-card-title">${item.nameEn || '(no English name)'}</div><div class="admin-card-actions"><button class="admin-small-btn btn-primary edit-item-en" data-id="${item.id}"><i class="fas fa-edit"></i></button><button class="admin-small-btn btn-secondary duplicate-item-en" data-id="${item.id}"><i class="fas fa-copy"></i></button><button class="admin-small-btn btn-danger delete-item-en" data-id="${item.id}"><i class="fas fa-trash"></i></button></div></div><p style="margin-bottom:10px; font-size:14px;">${item.descriptionEn || ''}</p><div style="display:flex; justify-content:space-between; align-items:center;"><span style="font-weight:600; color:var(--primary);">$${item.price.toFixed(2)}</span><span style="font-size:12px; color:var(--gray);">${getCategoryDisplayName(item.category)}</span></div><div class="tag-display">${(item.tagsEn || []).map(t=>`<span class="tag-item">${t}</span>`).join('')}</div>`;
+                if (item.options?.length) card.innerHTML += `<div style="margin-top:10px; font-size:12px; color:var(--secondary);"><i class="fas fa-tasks"></i> ${item.options.length} option group(s)</div>`;
+                list.appendChild(card);
+            });
+            document.querySelectorAll('.edit-item-en').forEach(b => b.addEventListener('click', function() { openEditMenuItemFormEn(parseInt(this.dataset.id)); }));
+            document.querySelectorAll('.duplicate-item-en').forEach(b => b.addEventListener('click', function() { duplicateMenuItemOptimisticEn(parseInt(this.dataset.id)); }));
+            document.querySelectorAll('.delete-item-en').forEach(b => b.addEventListener('click', function() { const id = parseInt(this.dataset.id); showAdminChangePrompt(()=>deleteMenuItemOptimisticEn(id)); }));
+            makeAdminGridDraggable('menuItemsListEn');
+        }
+        function openEditMenuItemFormEn(id) {
+            const form = document.getElementById('editMenuItemFormEn');
+            const list = document.getElementById('menuItemsListEn');
+            const catSel = document.getElementById('editItemCategoryEn');
+            catSel.innerHTML = '';
+            state.categories.sort((a,b)=>(a.displayOrder||0)-(b.displayOrder||0)).forEach(c => {
+                const o = document.createElement('option');
+                o.value = c.id;
+                o.textContent = c.displayName;
+                catSel.appendChild(o);
+            });
+            if (id) {
+                const item = state.menuItems.find(i => i.id === id);
+                if (item) {
+                    document.getElementById('editItemNameEn').value = item.nameEn || '';
+                    document.getElementById('editItemDescriptionEn').value = item.descriptionEn || '';
+                    document.getElementById('editItemPriceEn').value = item.price;
+                    document.getElementById('editItemCategoryEn').value = item.category;
+                    document.getElementById('editItemTagsEn').value = (item.tagsEn || []).join(', ');
+                    updateItemImagePreviewEn(item.image || '');
+                    form.dataset.itemId = id;
+                    buildOptionsAdminUIEn(item.options || []);
+                }
+            } else {
+                document.getElementById('editItemNameEn').value = '';
+                document.getElementById('editItemDescriptionEn').value = '';
+                document.getElementById('editItemPriceEn').value = '0.00';
+                catSel.value = state.categories[0]?.id || '';
+                document.getElementById('editItemTagsEn').value = '';
+                updateItemImagePreviewEn('');
+                form.dataset.itemId = '';
+                buildOptionsAdminUIEn([]);
+            }
+            list.style.display = 'none';
+            form.style.display = 'block';
+            document.getElementById('cancelEditBtnEn').onclick = function() {
+                form.style.display = 'none';
+                list.style.display = 'block';
+            };
+            document.getElementById('saveMenuItemBtnEn').onclick = function() {
+                showAdminChangePrompt(saveMenuItemOptimisticEn);
+            };
+        }
+        function updateItemImagePreviewEn(src) {
+            const pv = document.getElementById('itemImagePreviewEn');
+            if (src) { pv.innerHTML = `<img src="${src}" alt="Menu Item Image">`; }
+            else { pv.innerHTML = '<div class="image-preview-placeholder"><i class="fas fa-utensils"></i><p>No image uploaded</p></div>'; }
+        }
+        function buildOptionsAdminUIEn(options) {
+            const container = document.getElementById('optionsGroupsContainerEn');
+            if (!container) return;
+            container.innerHTML = '';
+            function render() {
+                container.innerHTML = '';
+                options.forEach((g, gi) => {
+                    const grp = document.createElement('div'); grp.className = 'admin-option-group';
+                    grp.innerHTML = `
+                        <div class="admin-option-group-header">
+                            <div class="admin-option-group-title">
+                                <i class="fas fa-layer-group"></i> 
+                                <input type="text" class="admin-input" style="width:150px;" placeholder="Group name (EN)" value="${g.nameEn || ''}" id="group_name_en_${gi}">
+                                <select class="admin-select" style="width:140px;" id="group_type_en_${gi}" disabled>
+                                    <option value="radio" ${g.type==='radio'?'selected':''}>Single choice</option>
+                                    <option value="checkbox" ${g.type==='checkbox'?'selected':''}>Multiple choice</option>
+                                    <option value="text" ${g.type==='text'?'selected':''}>Comment field</option>
+                                </select>
+                            </div>
+                            <button class="admin-small-btn btn-danger remove-group-en" data-index="${gi}"><i class="fas fa-trash"></i></button>
+                        </div>
+                        <div id="choices_en_${gi}" class="choices-container"></div>
+                        ${g.type!=='text' ? '<button class="btn btn-secondary add-choice-btn-en" data-group-index="'+gi+'"><i class="fas fa-plus"></i> Add Choice</button>' : ''}
+                    `;
+                    container.appendChild(grp);
+                    if (g.type !== 'text') {
+                        const chc = document.getElementById(`choices_en_${gi}`);
+                        g.choices.forEach((c, ci) => {
+                            const row = document.createElement('div'); row.className = 'admin-choice-item';
+                            row.innerHTML = `
+                                <input type="text" class="admin-input admin-choice-input" placeholder="Choice name (EN)" value="${c.nameEn || ''}" id="choice_name_en_${gi}_${ci}">
+                                <input type="number" class="admin-input admin-choice-price" placeholder="Price adj." step="0.01" value="${c.price || 0}" id="choice_price_en_${gi}_${ci}" disabled>
+                                <button class="admin-small-btn btn-danger remove-choice-en" data-group="${gi}" data-choice="${ci}"><i class="fas fa-times"></i></button>
+                            `;
+                            chc.appendChild(row);
+                            row.querySelector(`#choice_name_en_${gi}_${ci}`).addEventListener('input', e => {
+                                if (!options[gi].choices[ci]) options[gi].choices[ci] = {};
+                                options[gi].choices[ci].nameEn = e.target.value;
+                            });
+                            row.querySelector('.remove-choice-en').addEventListener('click', () => {
+                                options[gi].choices.splice(ci, 1);
+                                render();
+                            });
+                        });
+                        grp.querySelector('.add-choice-btn-en').addEventListener('click', () => {
+                            options[gi].choices.push({ name: '', nameEn: '', price: 0 });
+                            render();
+                        });
+                    }
+                    grp.querySelector('.remove-group-en').addEventListener('click', () => {
+                        options.splice(gi, 1);
+                        render();
+                    });
+                    grp.querySelector(`#group_name_en_${gi}`).addEventListener('input', e => {
+                        options[gi].nameEn = e.target.value;
+                    });
+                });
+            }
+            render();
+            document.getElementById('addOptionGroupBtnEn').addEventListener('click', () => {
+                options.push({ id: 'opt_'+Date.now()+'_'+Math.random(), name: '', nameEn: '', type: 'radio', choices: [] });
+                render();
+            });
+        }
+        async function saveMenuItemOptimisticEn() {
+            const form = document.getElementById('editMenuItemFormEn');
+            const id = form.dataset.itemId;
+            const nameEn = document.getElementById('editItemNameEn').value.trim();
+            const descriptionEn = document.getElementById('editItemDescriptionEn').value.trim();
+            const tagsEn = document.getElementById('editItemTagsEn').value.split(',').map(t=>t.trim()).filter(t=>t);
+            let options = [];
+            const optSec = document.getElementById('adminOptionsSectionEn');
+            if (optSec) {
+                const grps = optSec.querySelectorAll('.admin-option-group');
+                grps.forEach((g, gi) => {
+                    const nameEnVal = g.querySelector(`#group_name_en_${gi}`)?.value;
+                    if (!nameEnVal) return;
+                    const type = g.querySelector(`#group_type_en_${gi}`)?.value;
+                    const choices = [];
+                    if (type !== 'text') {
+                        const rows = g.querySelectorAll('.admin-choice-item');
+                        rows.forEach((r, ci) => {
+                            const n = r.querySelector(`#choice_name_en_${gi}_${ci}`)?.value?.trim();
+                            if (n) choices.push({ name: '', nameEn: n, price: 0 });
+                        });
+                    }
+                    options.push({
+                        id: 'opt_' + Date.now() + '_' + gi,
+                        name: '',
+                        nameEn: nameEnVal,
+                        type: type,
+                        choices: choices
+                    });
+                });
+            }
+            if (id) {
+                const idx = state.menuItems.findIndex(i => i.id === parseInt(id));
+                if (idx !== -1) {
+                    state.menuItems[idx].nameEn = nameEn;
+                    state.menuItems[idx].descriptionEn = descriptionEn;
+                    state.menuItems[idx].tagsEn = tagsEn;
+                    if (state.menuItems[idx].options) {
+                        options.forEach((newGrp, gi) => {
+                            if (state.menuItems[idx].options[gi]) {
+                                state.menuItems[idx].options[gi].nameEn = newGrp.nameEn;
+                                newGrp.choices.forEach((newCh, ci) => {
+                                    if (state.menuItems[idx].options[gi].choices[ci]) {
+                                        state.menuItems[idx].options[gi].choices[ci].nameEn = newCh.nameEn;
+                                    }
+                                });
+                            }
+                        });
+                    }
+                    await saveMenuItem(state.menuItems[idx]);
+                }
+            } else {
+                const newId = state.menuItems.length ? Math.max(...state.menuItems.map(i=>i.id)) + 1 : 1;
+                const maxOrder = state.menuItems.reduce((m,i)=>Math.max(m,i.displayOrder||0),0);
+                const newItem = {
+                    id: newId,
+                    name: '',
+                    nameEn: nameEn,
+                    description: '',
+                    descriptionEn: descriptionEn,
+                    price: parseFloat(document.getElementById('editItemPriceEn').value) || 0,
+                    category: document.getElementById('editItemCategoryEn').value,
+                    image: '',
+                    tags: [],
+                    tagsEn: tagsEn,
+                    options: options.map(grp => ({
+                        id: grp.id,
+                        name: '',
+                        nameEn: grp.nameEn,
+                        type: grp.type,
+                        choices: grp.choices.map(ch => ({ name: '', nameEn: ch.nameEn, price: 0 }))
+                    })),
+                    displayOrder: maxOrder + 1
+                };
+                state.menuItems.push(newItem);
+                state.menuItems.sort((a,b)=>(a.displayOrder||0)-(b.displayOrder||0));
+                await saveMenuItem(newItem);
+            }
+            form.style.display = 'none';
+            document.getElementById('menuItemsListEn').style.display = 'block';
+            loadMenuItemsForAdmin();
+            loadMenuItemsForAdminEn();
+            showNotification(id ? "English menu item updated." : "New English menu item created.");
+        }
+        async function duplicateMenuItemOptimisticEn(id) {
+            const orig = state.menuItems.find(i => i.id === id);
+            if (!orig) return;
+            const newId = state.menuItems.length ? Math.max(...state.menuItems.map(i=>i.id)) + 1 : 1;
+            const maxOrder = state.menuItems.reduce((m,i)=>Math.max(m,i.displayOrder||0),0);
+            const newItem = { 
+                ...orig, 
+                id: newId, 
+                name: orig.name + ' (αντίγραφο)',
+                nameEn: orig.nameEn ? orig.nameEn + ' (copy)' : '',
+                displayOrder: maxOrder + 1 
+            };
+            state.menuItems.push(newItem);
+            state.menuItems.sort((a,b)=>(a.displayOrder||0)-(b.displayOrder||0));
+            loadMenuItemsForAdmin();
+            loadMenuItemsForAdminEn();
+            displayMenuItems('all');
+            showNotification(`"${newItem.name}" duplicated.`);
+            await saveMenuItem(newItem);
+        }
+        async function deleteMenuItemOptimisticEn(id) {
+            if (!confirm("Delete this menu item? This will also delete the Greek version.")) return;
+            const item = state.menuItems.find(i => i.id === id);
+            state.menuItems = state.menuItems.filter(i => i.id !== id);
+            loadMenuItemsForAdmin();
+            loadMenuItemsForAdminEn();
+            displayMenuItems('all');
+            showNotification(`"${item?.name || item?.nameEn}" deleted.`);
+            await deleteMenuItemFirestore(id);
+        }
+
         // --- CATEGORY ADMIN ---
         function loadCategoriesForAdmin() {
             const con = document.getElementById('categoriesListContainer'); con.innerHTML = '';
@@ -2217,7 +2545,7 @@ VIP Table</textarea>
             await Promise.all(toDelete.map(o=>deleteOrderFirestore(o.orderNumber)));
         }
 
-        // ===== HELP REQUESTS ADMIN =====
+        // --- HELP REQUESTS ADMIN ---
         function loadHelpRequestsForAdmin() {
             const list = document.getElementById('adminHelpRequestsList');
             const filter = document.getElementById('helpRequestStatusFilter').value;
@@ -2271,6 +2599,7 @@ VIP Table</textarea>
                 showNotification(`Help request marked as ${newStatus}.`);
             }
         }
+
         // --- SYSTEM ---
         function loadSystemStats() {
             const stats = document.getElementById('systemStats');
@@ -2311,7 +2640,7 @@ VIP Table</textarea>
                         await saveSoundEffects();
                         await Promise.all(state.helpRequests.map(r=>saveHelpRequest(r)));
                         updateRestaurantUI(); displayMenuItems('all'); updateCategoryTabs(); applyCustomization();
-                        loadMenuItemsForAdmin(); loadCategoriesForAdmin(); loadOrdersForAdmin(); loadSystemStats(); loadHelpRequestsForAdmin();
+                        loadMenuItemsForAdmin(); loadMenuItemsForAdminEn(); loadCategoriesForAdmin(); loadOrdersForAdmin(); loadSystemStats(); loadHelpRequestsForAdmin();
                         showNotification("Data imported successfully.");
                     }
                 } catch { showNotification("Error importing data. Invalid file format."); }
@@ -2377,15 +2706,13 @@ VIP Table</textarea>
         function darkenColor(c,p) { const n = parseInt(c.replace("#",""),16); const a = Math.round(2.55*p); const r = (n>>16)-a, g = (n>>8&0x00FF)-a, b = (n&0x0000FF)-a; return "#" + (0x1000000 + (r<255?r<1?0:r:255)*0x10000 + (g<255?g<1?0:g:255)*0x100 + (b<255?b<1?0:b:255)).toString(16).slice(1); }
         function getContrastColor(h) { const r=parseInt(h.substr(1,2),16), g=parseInt(h.substr(3,2),16), b=parseInt(h.substr(5,2),16), yiq=((r*299)+(g*587)+(b*114))/1000; return yiq>=128?'#000000':'#ffffff'; }
 
-        // ========== SOUND EFFECTS ADMIN UI ==========
+        // --- SOUND EFFECTS ADMIN UI ---
         function loadSoundSettingsUI() {
             const enabledCheck = document.getElementById('soundEffectsEnabled');
             if (enabledCheck) enabledCheck.checked = state.soundEffects.enabled;
-
             const cartPreview = document.getElementById('cartSoundPreview');
             const checkoutPreview = document.getElementById('checkoutSoundPreview');
             const helpPreview = document.getElementById('helpSoundPreview');
-            
             if (state.soundEffects.addToCartSound) {
                 cartPreview.innerHTML = `<audio controls src="${state.soundEffects.addToCartSound}" style="width:100%;"></audio>`;
             } else {
@@ -2401,7 +2728,6 @@ VIP Table</textarea>
             } else {
                 helpPreview.innerHTML = '<div class="image-preview-placeholder"><i class="fas fa-music"></i><p>No sound uploaded</p></div>';
             }
-
             ['Cart','Checkout','Help'].forEach(type => {
                 const uploadBtn = document.getElementById(`upload${type}SoundBtn`);
                 const removeBtn = document.getElementById(`remove${type}SoundBtn`);
@@ -2452,7 +2778,6 @@ VIP Table</textarea>
                     });
                 }
             });
-
             document.getElementById('resetSoundDefaultsBtn').addEventListener('click', () => {
                 if (confirm("Clear all uploaded sounds?")) {
                     state.soundEffects.addToCartSound = null;
@@ -2462,13 +2787,11 @@ VIP Table</textarea>
                     showNotification("All sounds cleared. Save to persist.");
                 }
             });
-
             document.getElementById('saveSoundEffectsBtn').addEventListener('click', ()=> showAdminChangePrompt(async function() {
                 state.soundEffects.enabled = document.getElementById('soundEffectsEnabled').checked;
                 await saveSoundEffects();
                 showNotification("Sound effects saved.");
             }));
-
             const modalEnabled = document.getElementById('soundEffectsEnabledModal');
             if (modalEnabled) {
                 modalEnabled.checked = state.soundEffects.enabled;
@@ -2494,6 +2817,7 @@ VIP Table</textarea>
                     document.getElementById(tid+'TabModal').classList.add('active');
                     if (tid==='customization') setTimeout(initializeModalCustomizationTab,100);
                     if (tid==='menu') setTimeout(()=>makeAdminGridDraggable('menuItemsListModal'),500);
+                    if (tid==='menuEn') setTimeout(()=>{ loadMenuItemsForAdminModalEn(); makeAdminGridDraggable('menuItemsListModalEn'); },500);
                     if (tid==='categories') setTimeout(()=>makeCategoriesDraggable('categoriesListContainerModal'),200);
                     if (tid==='orders') { loadOrdersForAdminModal(); populateTableSelect('tableSelectForDeleteModal'); }
                     if (tid==='helpRequests') { loadHelpRequestsForAdminModal(); }
@@ -2509,6 +2833,7 @@ VIP Table</textarea>
             document.getElementById('adminWelcomeMessageModal').value = state.restaurantInfo.welcomeMessage || '';
             updateLogoPreview();
             loadMenuItemsForAdminModal();
+            loadMenuItemsForAdminModalEn();
             loadCategoriesForAdminModal();
             document.getElementById('generateQRPDFBtnModal').addEventListener('click', function() {
                 const textarea = document.getElementById('tableNamesForQRModal');
@@ -2529,15 +2854,34 @@ VIP Table</textarea>
             const sorted = [...state.menuItems].sort((a,b)=>(a.displayOrder||0)-(b.displayOrder||0));
             sorted.forEach(item => {
                 const card = document.createElement('div'); card.className = 'admin-card'; card.setAttribute('draggable','true'); card.dataset.itemId = item.id;
-                const img = item.image ? `<div style="height:120px; background-image:url('${item.image}'); background-size:cover; background-position:center; border-radius:8px; margin-bottom:10px;"></div>` : `<div style="height:120px; background-color:var(--light-gray); border-radius:8px; margin-bottom:10px; display:flex; align-items:center; justify-content:center; color:var(--gray);"><i class="fas fa-utensils"></i></div>`;
-                card.innerHTML = `<div style="display:flex; align-items:center; margin-bottom:5px;"><i class="fas fa-grip-vertical drag-handle"></i></div>${img}<div class="admin-card-header"><div class="admin-card-title">${item.name}</div><div class="admin-card-actions"><button class="admin-small-btn btn-primary edit-item-modal" data-id="${item.id}"><i class="fas fa-edit"></i></button><button class="admin-small-btn btn-secondary duplicate-item-modal" data-id="${item.id}"><i class="fas fa-copy"></i></button><button class="admin-small-btn btn-danger delete-item-modal" data-id="${item.id}"><i class="fas fa-trash"></i></button></div></div><p style="margin-bottom:10px; font-size:14px;">${item.description}</p><div style="display:flex; justify-content:space-between; align-items:center;"><span style="font-weight:600; color:var(--primary);">$${item.price.toFixed(2)}</span><span style="font-size:12px; color:var(--gray);">${getCategoryDisplayName(item.category)}</span></div><div class="tag-display">${item.tags.map(t=>`<span class="tag-item">${t}</span>`).join('')}</div>`;
-                if (item.options?.length) card.innerHTML += `<div style="margin-top:10px; font-size:12px; color:var(--secondary);"><i class="fas fa-tasks"></i> ${item.options.length} option group(s)</div>`;
+                const img = item.image ? `<div style="height:120px; background-image:url('${item.image}'); ..."></div>` : `<div style="height:120px; background-color:var(--light-gray); ..."><i class="fas fa-utensils"></i></div>`;
+                card.innerHTML = `<div style="display:flex; align-items:center; margin-bottom:5px;"><i class="fas fa-grip-vertical drag-handle"></i></div>${img}<div class="admin-card-header"><div class="admin-card-title">${item.name}</div><div class="admin-card-actions"><button class="admin-small-btn btn-primary edit-item-modal" data-id="${item.id}"><i class="fas fa-edit"></i></button><button class="admin-small-btn btn-secondary duplicate-item-modal" data-id="${item.id}"><i class="fas fa-copy"></i></button><button class="admin-small-btn btn-danger delete-item-modal" data-id="${item.id}"><i class="fas fa-trash"></i></button></div></div><p style="margin-bottom:10px; font-size:14px;">${item.description}</p> ...`;
                 list.appendChild(card);
             });
             document.querySelectorAll('.edit-item-modal').forEach(b=> b.addEventListener('click', function() { const id = parseInt(this.dataset.id); openEditMenuItemForm(id); adminPanel.style.display = 'none'; }));
             document.querySelectorAll('.duplicate-item-modal').forEach(b=> b.addEventListener('click', function() { duplicateMenuItemOptimistic(parseInt(this.dataset.id)); }));
             document.querySelectorAll('.delete-item-modal').forEach(b=> b.addEventListener('click', function() { const id = parseInt(this.dataset.id); showAdminChangePrompt(()=>deleteMenuItemOptimistic(id)); }));
             makeAdminGridDraggable('menuItemsListModal');
+        }
+        function loadMenuItemsForAdminModalEn() {
+            const list = document.getElementById('menuItemsListModalEn'); if (!list) return;
+            list.innerHTML = '';
+            if (state.menuItems.length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: var(--gray);">No menu items found.</p>';
+                return;
+            }
+            const sorted = [...state.menuItems].sort((a,b)=>(a.displayOrder||0)-(b.displayOrder||0));
+            sorted.forEach(item => {
+                const card = document.createElement('div'); card.className = 'admin-card'; card.setAttribute('draggable','true'); card.dataset.itemId = item.id;
+                const img = item.image ? `<div style="height:120px; background-image:url('${item.image}'); background-size:cover; background-position:center; border-radius:8px; margin-bottom:10px;"></div>` : `<div style="height:120px; background-color:var(--light-gray); border-radius:8px; margin-bottom:10px; display:flex; align-items:center; justify-content:center; color:var(--gray);"><i class="fas fa-utensils"></i></div>`;
+                card.innerHTML = `<div style="display:flex; align-items:center; margin-bottom:5px;"><i class="fas fa-grip-vertical drag-handle"></i></div>${img}<div class="admin-card-header"><div class="admin-card-title">${item.nameEn || '(no English name)'}</div><div class="admin-card-actions"><button class="admin-small-btn btn-primary edit-item-modal-en" data-id="${item.id}"><i class="fas fa-edit"></i></button><button class="admin-small-btn btn-secondary duplicate-item-modal-en" data-id="${item.id}"><i class="fas fa-copy"></i></button><button class="admin-small-btn btn-danger delete-item-modal-en" data-id="${item.id}"><i class="fas fa-trash"></i></button></div></div><p style="margin-bottom:10px; font-size:14px;">${item.descriptionEn || ''}</p><div style="display:flex; justify-content:space-between; align-items:center;"><span style="font-weight:600; color:var(--primary);">$${item.price.toFixed(2)}</span><span style="font-size:12px; color:var(--gray);">${getCategoryDisplayName(item.category)}</span></div><div class="tag-display">${(item.tagsEn || []).map(t=>`<span class="tag-item">${t}</span>`).join('')}</div>`;
+                if (item.options?.length) card.innerHTML += `<div style="margin-top:10px; font-size:12px; color:var(--secondary);"><i class="fas fa-tasks"></i> ${item.options.length} option group(s)</div>`;
+                list.appendChild(card);
+            });
+            document.querySelectorAll('.edit-item-modal-en').forEach(b=> b.addEventListener('click', function() { const id = parseInt(this.dataset.id); openEditMenuItemFormEn(id); adminPanel.style.display = 'none'; }));
+            document.querySelectorAll('.duplicate-item-modal-en').forEach(b=> b.addEventListener('click', function() { duplicateMenuItemOptimisticEn(parseInt(this.dataset.id)); }));
+            document.querySelectorAll('.delete-item-modal-en').forEach(b=> b.addEventListener('click', function() { const id = parseInt(this.dataset.id); showAdminChangePrompt(()=>deleteMenuItemOptimisticEn(id)); }));
+            makeAdminGridDraggable('menuItemsListModalEn');
         }
         function loadCategoriesForAdminModal() {
             const con = document.getElementById('categoriesListContainerModal'); if (!con) return;
@@ -2656,16 +3000,13 @@ VIP Table</textarea>
         async function initApp() {
             await loadInitialData();
             setupListeners();
-            
             autoLoginFromUrl();
-
+            document.getElementById('languageToggleBtn').addEventListener('click', toggleLanguage);
             document.querySelectorAll('.table-btn').forEach(btn => btn.addEventListener('click', function() { selectTable(this.dataset.table, false); }));
-
             cartFloating.addEventListener('click', function() { if (!state.isAdminMode) showSection('cartSection'); });
             document.getElementById('backToMenuBtn').addEventListener('click', ()=> showSection('menuSection'));
             document.getElementById('proceedToPaymentBtn').addEventListener('click', function() { if (state.cart.length===0) { showNotification('Παρακαλώ προσθέστε είδη στο καλάθι σας πριν προχωρήσετε στην πληρωμή'); return; } updatePaymentSummary(); showSection('paymentSection'); });
             document.getElementById('backToCartBtn').addEventListener('click', ()=> showSection('cartSection'));
-
             document.querySelectorAll('.option-card[data-payment]').forEach(card => {
                 card.addEventListener('click', function() { document.querySelectorAll('.option-card[data-payment]').forEach(c=>c.classList.remove('selected')); this.classList.add('selected'); state.selectedPaymentMethod = this.dataset.payment; });
             });
@@ -2673,7 +3014,6 @@ VIP Table</textarea>
                 card.addEventListener('click', function() { document.querySelectorAll('.option-card[data-time]').forEach(c=>c.classList.remove('selected')); this.classList.add('selected'); state.selectedPaymentTime = this.dataset.time; });
             });
             document.getElementById('confirmPaymentBtn').addEventListener('click', placeOrderOptimistic);
-
             document.getElementById('newOrderBtn').addEventListener('click', function() { resetOrder(); showSection('scannerSection'); });
             document.getElementById('viewMyOrdersBtn').addEventListener('click', function() { loadMyOrders(); showSection('myOrdersSection'); });
             document.getElementById('viewMenuBtn').addEventListener('click', function() { resetCart(); state.selectedPaymentMethod = null; state.selectedPaymentTime = null; document.querySelectorAll('.option-card').forEach(c=>c.classList.remove('selected')); if (state.currentTable) menuSubtitle.textContent = `Ξεκινήστε μια νέα παραγγελία για ${state.currentTable}`; showSection('menuSection'); showNotification('Έτοιμοι για νέα παραγγελία!'); });
@@ -2682,7 +3022,6 @@ VIP Table</textarea>
             myOrdersButton.addEventListener('click', function() { loadMyOrders(); showSection('myOrdersSection'); });
             document.getElementById('backToMenuFromOrdersBtn').addEventListener('click', ()=> showSection('menuSection'));
             document.getElementById('placeNewOrderBtn').addEventListener('click', function() { resetCart(); showSection('menuSection'); });
-
             adminFloating.addEventListener('click', function() {
                 if (!state.currentTable || state.currentTable.toLowerCase() !== "admin") {
                     showNotification('Η πρόσβαση διαχειριστή είναι διαθέσιμη μόνο μέσω QR του τραπεζιού Admin.');
@@ -2694,7 +3033,6 @@ VIP Table</textarea>
                 }
                 showAdminCodePrompt();
             });
-
             submitAdminCodeBtn.addEventListener('click', function() { 
                 if (adminCodeInput.value === state.adminAccessCode) { 
                     adminCodePrompt.style.display = 'none'; 
@@ -2722,11 +3060,9 @@ VIP Table</textarea>
                 } 
             });
             cancelChangeBtn.addEventListener('click', function() { adminChangePrompt.style.display = 'none'; adminChangeCodeInput.value = ''; state.pendingAdminAction = null; showNotification("Οι αλλαγές ακυρώθηκαν."); });
-
             setupAdminPanel();
         }
 
-        // Override placeOrderOptimistic to include checkout sound
         window.placeOrderOptimistic = async function() {
             if (!state.selectedPaymentMethod || !state.selectedPaymentTime) { showNotification('Παρακαλώ επιλέξτε τρόπο και χρόνο πληρωμής'); return; }
             if (state.cart.length === 0) { showNotification('Το καλάθι είναι άδειο'); return; }
@@ -2754,9 +3090,7 @@ VIP Table</textarea>
             const overlay = document.getElementById('loadingOverlay');
             if (overlay) {
                 overlay.style.opacity = '0';
-                setTimeout(() => {
-                    overlay.style.display = 'none';
-                }, 500);
+                setTimeout(() => { overlay.style.display = 'none'; }, 500);
             }
         }, 7000);
     </script>
