@@ -1002,6 +1002,7 @@ VIP Table</textarea>
             menuItems: [],
             orders: [],
             helpRequests: [],
+            seenHelpRequests: new Set(), // NEW: track seen help request IDs
             adminAccessCode: "3232",
             adminChangeCode: "6262",
             categories: [],
@@ -1182,7 +1183,7 @@ VIP Table</textarea>
                 if (restDoc.exists) state.restaurantInfo = restDoc.data();
                 else await db.collection('settings').doc('restaurantInfo').set(state.restaurantInfo);
                 
-                // ========== FIX: LOAD DEFAULT MENU ITEMS IF EMPTY ==========
+                // ========== LOAD DEFAULT MENU ITEMS IF EMPTY ==========
                 if (menuSnap.empty) {
                     state.menuItems = JSON.parse(JSON.stringify(defaultMenuItems));
                     await Promise.all(state.menuItems.map(i => saveMenuItem(i)));
@@ -1211,7 +1212,12 @@ VIP Table</textarea>
                 if (soundDoc.exists) state.soundEffects = soundDoc.data();
                 else await db.collection('settings').doc('soundEffects').set(state.soundEffects);
                 
-                state.helpRequests = helpSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                // Load help requests and populate seen set
+                state.helpRequests = helpSnap.docs.map(doc => {
+                    const req = { id: doc.id, ...doc.data() };
+                    state.seenHelpRequests.add(req.id);
+                    return req;
+                });
                 
                 determineCurrentTheme();
                 determineCurrentFont();
@@ -1288,8 +1294,23 @@ VIP Table</textarea>
                 }
                 if (adminPanel.style.display === 'flex') loadCategoriesForAdminModal();
             });
+            // ========== HELP REQUESTS LISTENER – WITH ADMIN SOUND ==========
             db.collection('helpRequests').onSnapshot(snap => {
+                // Process changes to detect new pending requests
+                snap.docChanges().forEach(change => {
+                    if (change.type === 'added') {
+                        const req = { id: change.doc.id, ...change.doc.data() };
+                        // If it's pending and not seen before, and admin mode is active, play sound
+                        if (req.status === 'pending' && !state.seenHelpRequests.has(req.id) && state.isAdminMode) {
+                            playSound(state.soundEffects.helpRequestSound);
+                        }
+                        state.seenHelpRequests.add(req.id);
+                    }
+                });
+                
+                // Update state
                 state.helpRequests = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                
                 if (state.isAdminMode) {
                     if (document.querySelector('#adminDashboardSection.active-section')) {
                         const activeTab = document.querySelector('#adminDashboardSection .admin-tab.active')?.dataset?.tab;
