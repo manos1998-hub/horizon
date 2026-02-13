@@ -745,10 +745,10 @@
                         <button class="btn btn-primary" id="saveCustomizationBtn"><i class="fas fa-save"></i> Save All Changes</button>
                     </div>
                 </div>
-                <!-- Sound Effects Settings -->
+                <!-- Sound Effects Settings (updated with New Order Sound) -->
                 <div class="admin-content" id="soundTab">
                     <h3 style="margin-bottom: 20px;"><i class="fas fa-music"></i> Sound Effects</h3>
-                    <p style="margin-bottom: 25px; color: var(--gray);">Upload custom sounds that will play when customers add items to cart, confirm payment, or request help.</p>
+                    <p style="margin-bottom: 25px; color: var(--gray);">Upload custom sounds that will play when customers add items to cart, confirm payment, request help, or when a new order arrives (admin only).</p>
                     <div style="margin-bottom: 30px;">
                         <label class="admin-label" style="display: flex; align-items: center; gap: 10px;">
                             <input type="checkbox" id="soundEffectsEnabled" checked> Enable all sound effects
@@ -790,6 +790,19 @@
                                 <button class="btn btn-secondary upload-btn" id="uploadHelpSoundBtn"><i class="fas fa-upload"></i> Upload Sound</button>
                                 <button class="remove-image-btn" id="removeHelpSoundBtn"><i class="fas fa-trash"></i> Remove</button>
                                 <button class="btn btn-primary" id="testHelpSoundBtn"><i class="fas fa-play"></i> Test</button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- New Order Sound (Admin) -->
+                    <div class="sound-effect-card">
+                        <div class="sound-effect-title"><i class="fas fa-bell"></i> New Order Sound (admin)</div>
+                        <div class="image-upload-container">
+                            <div class="audio-preview" id="newOrderSoundPreview"></div>
+                            <div class="upload-actions">
+                                <input type="file" id="newOrderSoundUpload" accept="audio/*" style="display: none;">
+                                <button class="btn btn-secondary upload-btn" id="uploadNewOrderSoundBtn"><i class="fas fa-upload"></i> Upload Sound</button>
+                                <button class="remove-image-btn" id="removeNewOrderSoundBtn"><i class="fas fa-trash"></i> Remove</button>
+                                <button class="btn btn-primary" id="testNewOrderSoundBtn"><i class="fas fa-play"></i> Test</button>
                             </div>
                         </div>
                     </div>
@@ -1154,7 +1167,7 @@ VIP Table</textarea>
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // ========== STATE ==========
+        // ========== STATE (updated with newOrderSound) ==========
         const state = {
             currentTable: null,
             cart: [],
@@ -1209,7 +1222,8 @@ VIP Table</textarea>
                 enabled: true,
                 addToCartSound: null,
                 checkoutSound: null,
-                helpRequestSound: null
+                helpRequestSound: null,
+                newOrderSound: null   // New sound for admin when order arrives
             },
             helpSoundInterval: null
         };
@@ -1459,8 +1473,13 @@ VIP Table</textarea>
                 if (customDoc.exists) state.customization = customDoc.data();
                 else await db.collection('settings').doc('customization').set(state.customization);
                 
-                if (soundDoc.exists) state.soundEffects = soundDoc.data();
-                else await db.collection('settings').doc('soundEffects').set(state.soundEffects);
+                if (soundDoc.exists) {
+                    state.soundEffects = soundDoc.data();
+                    // Ensure newOrderSound field exists (for backward compatibility)
+                    if (state.soundEffects.newOrderSound === undefined) state.soundEffects.newOrderSound = null;
+                } else {
+                    await db.collection('settings').doc('soundEffects').set(state.soundEffects);
+                }
                 
                 state.helpRequests = helpSnap.docs.map(doc => {
                     const req = { id: doc.id, ...doc.data() };
@@ -1488,9 +1507,16 @@ VIP Table</textarea>
             } catch(e) { console.error('Sound error:', e); }
         }
 
-        // ========== REAL‑TIME LISTENERS ==========
+        // ========== REAL‑TIME LISTENERS (updated to play newOrderSound for admin) ==========
         function setupListeners() {
             db.collection('orders').onSnapshot(snap => {
+                // Detect new orders added
+                snap.docChanges().forEach(change => {
+                    if (change.type === 'added' && state.isAdminMode) {
+                        // Play new order sound if admin mode is active
+                        playSound(state.soundEffects.newOrderSound);
+                    }
+                });
                 state.orders = snap.docs.map(d => ({ ...d.data(), orderNumber: d.id }));
                 if (!state.isAdminMode && document.querySelector('#myOrdersSection.active-section')) loadMyOrders();
                 if (state.isAdminMode && document.querySelector('#adminDashboardSection.active-section')) {
@@ -1585,7 +1611,7 @@ VIP Table</textarea>
             });
         }
 
-        // ========== UI HELPERS ==========
+        // ========== UI HELPERS (unchanged) ==========
         function determineCurrentTheme() {
             for (const [id, t] of Object.entries(themes)) {
                 if (state.customization.primary === t.primary && state.customization.secondary === t.secondary && state.customization.background === t.background) {
@@ -2089,7 +2115,7 @@ VIP Table</textarea>
             showNotification(`PDF generated with ${tableNamesArray.length} QR code(s).`);
         }
 
-        // ========== ADMIN DASHBOARD ==========
+        // ========== ADMIN DASHBOARD (updated with newOrderSound UI) ==========
         function loadAdminDashboardData() {
             document.getElementById('adminRestaurantName').value = state.restaurantInfo.name;
             document.getElementById('adminTaxRate').value = state.restaurantInfo.taxRate;
@@ -2102,7 +2128,7 @@ VIP Table</textarea>
             loadOrdersForAdmin();
             loadSystemStats();
             loadCustomizationSettings();
-            loadSoundSettingsUI();
+            loadSoundSettingsUI(); // updated to include new order sound
             loadHelpRequestsForAdmin();
 
             document.querySelectorAll('#adminDashboardSection .admin-tab').forEach(tab => {
@@ -2870,13 +2896,14 @@ VIP Table</textarea>
         function darkenColor(c,p) { const n = parseInt(c.replace("#",""),16); const a = Math.round(2.55*p); const r = (n>>16)-a, g = (n>>8&0x00FF)-a, b = (n&0x0000FF)-a; return "#" + (0x1000000 + (r<255?r<1?0:r:255)*0x10000 + (g<255?g<1?0:g:255)*0x100 + (b<255?b<1?0:b:255)).toString(16).slice(1); }
         function getContrastColor(h) { const r=parseInt(h.substr(1,2),16), g=parseInt(h.substr(3,2),16), b=parseInt(h.substr(5,2),16), yiq=((r*299)+(g*587)+(b*114))/1000; return yiq>=128?'#000000':'#ffffff'; }
 
-        // --- SOUND EFFECTS ADMIN UI ---
+        // --- SOUND EFFECTS ADMIN UI (updated with newOrderSound) ---
         function loadSoundSettingsUI() {
             const enabledCheck = document.getElementById('soundEffectsEnabled');
             if (enabledCheck) enabledCheck.checked = state.soundEffects.enabled;
             const cartPreview = document.getElementById('cartSoundPreview');
             const checkoutPreview = document.getElementById('checkoutSoundPreview');
             const helpPreview = document.getElementById('helpSoundPreview');
+            const newOrderPreview = document.getElementById('newOrderSoundPreview');
             if (state.soundEffects.addToCartSound) {
                 cartPreview.innerHTML = `<audio controls src="${state.soundEffects.addToCartSound}" style="width:100%;"></audio>`;
             } else {
@@ -2892,7 +2919,12 @@ VIP Table</textarea>
             } else {
                 helpPreview.innerHTML = '<div class="image-preview-placeholder"><i class="fas fa-music"></i><p>No sound uploaded</p></div>';
             }
-            ['Cart','Checkout','Help'].forEach(type => {
+            if (state.soundEffects.newOrderSound) {
+                newOrderPreview.innerHTML = `<audio controls src="${state.soundEffects.newOrderSound}" style="width:100%;"></audio>`;
+            } else {
+                newOrderPreview.innerHTML = '<div class="image-preview-placeholder"><i class="fas fa-music"></i><p>No sound uploaded</p></div>';
+            }
+            ['Cart','Checkout','Help','NewOrder'].forEach(type => {
                 const uploadBtn = document.getElementById(`upload${type}SoundBtn`);
                 const removeBtn = document.getElementById(`remove${type}SoundBtn`);
                 const testBtn = document.getElementById(`test${type}SoundBtn`);
@@ -2909,6 +2941,7 @@ VIP Table</textarea>
                         if (type === 'Cart') state.soundEffects.addToCartSound = null;
                         else if (type === 'Checkout') state.soundEffects.checkoutSound = null;
                         else if (type === 'Help') state.soundEffects.helpRequestSound = null;
+                        else if (type === 'NewOrder') state.soundEffects.newOrderSound = null;
                         loadSoundSettingsUI();
                         showNotification(`${type} sound removed.`);
                     });
@@ -2921,6 +2954,7 @@ VIP Table</textarea>
                         if (type === 'Cart') sound = state.soundEffects.addToCartSound;
                         else if (type === 'Checkout') sound = state.soundEffects.checkoutSound;
                         else if (type === 'Help') sound = state.soundEffects.helpRequestSound;
+                        else if (type === 'NewOrder') sound = state.soundEffects.newOrderSound;
                         playSound(sound);
                     });
                 }
@@ -2935,6 +2969,7 @@ VIP Table</textarea>
                             if (type === 'Cart') state.soundEffects.addToCartSound = ev.target.result;
                             else if (type === 'Checkout') state.soundEffects.checkoutSound = ev.target.result;
                             else if (type === 'Help') state.soundEffects.helpRequestSound = ev.target.result;
+                            else if (type === 'NewOrder') state.soundEffects.newOrderSound = ev.target.result;
                             loadSoundSettingsUI();
                             showNotification(`${type} sound loaded. Don't forget to save.`);
                         };
@@ -2947,6 +2982,7 @@ VIP Table</textarea>
                     state.soundEffects.addToCartSound = null;
                     state.soundEffects.checkoutSound = null;
                     state.soundEffects.helpRequestSound = null;
+                    state.soundEffects.newOrderSound = null;
                     loadSoundSettingsUI();
                     showNotification("All sounds cleared. Save to persist.");
                 }
