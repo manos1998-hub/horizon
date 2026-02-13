@@ -2896,7 +2896,7 @@ VIP Table</textarea>
         function darkenColor(c,p) { const n = parseInt(c.replace("#",""),16); const a = Math.round(2.55*p); const r = (n>>16)-a, g = (n>>8&0x00FF)-a, b = (n&0x0000FF)-a; return "#" + (0x1000000 + (r<255?r<1?0:r:255)*0x10000 + (g<255?g<1?0:g:255)*0x100 + (b<255?b<1?0:b:255)).toString(16).slice(1); }
         function getContrastColor(h) { const r=parseInt(h.substr(1,2),16), g=parseInt(h.substr(3,2),16), b=parseInt(h.substr(5,2),16), yiq=((r*299)+(g*587)+(b*114))/1000; return yiq>=128?'#000000':'#ffffff'; }
 
-        // --- SOUND EFFECTS ADMIN UI (updated with newOrderSound) ---
+        // --- SOUND EFFECTS ADMIN UI (updated with newOrderSound, fixed ID mapping) ---
         function loadSoundSettingsUI() {
             const enabledCheck = document.getElementById('soundEffectsEnabled');
             if (enabledCheck) enabledCheck.checked = state.soundEffects.enabled;
@@ -2924,11 +2924,34 @@ VIP Table</textarea>
             } else {
                 newOrderPreview.innerHTML = '<div class="image-preview-placeholder"><i class="fas fa-music"></i><p>No sound uploaded</p></div>';
             }
+
+            // Helper to get correct element IDs
+            function getSoundIds(type) {
+                if (type === 'NewOrder') {
+                    return {
+                        upload: 'uploadNewOrderSoundBtn',
+                        remove: 'removeNewOrderSoundBtn',
+                        test: 'testNewOrderSoundBtn',
+                        file: 'newOrderSoundUpload'
+                    };
+                } else {
+                    const lower = type.toLowerCase();
+                    return {
+                        upload: `upload${type}SoundBtn`,
+                        remove: `remove${type}SoundBtn`,
+                        test: `test${type}SoundBtn`,
+                        file: `${lower}SoundUpload`
+                    };
+                }
+            }
+
             ['Cart','Checkout','Help','NewOrder'].forEach(type => {
-                const uploadBtn = document.getElementById(`upload${type}SoundBtn`);
-                const removeBtn = document.getElementById(`remove${type}SoundBtn`);
-                const testBtn = document.getElementById(`test${type}SoundBtn`);
-                const fileInput = document.getElementById(`${type.toLowerCase()}SoundUpload`);
+                const ids = getSoundIds(type);
+                const uploadBtn = document.getElementById(ids.upload);
+                const removeBtn = document.getElementById(ids.remove);
+                const testBtn = document.getElementById(ids.test);
+                const fileInput = document.getElementById(ids.file);
+
                 if (uploadBtn) {
                     const newBtn = uploadBtn.cloneNode(true);
                     uploadBtn.parentNode.replaceChild(newBtn, uploadBtn);
@@ -2977,6 +3000,7 @@ VIP Table</textarea>
                     });
                 }
             });
+
             document.getElementById('resetSoundDefaultsBtn').addEventListener('click', () => {
                 if (confirm("Clear all uploaded sounds?")) {
                     state.soundEffects.addToCartSound = null;
