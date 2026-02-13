@@ -2237,7 +2237,7 @@ VIP Table</textarea>
 
         // ========== NEW FUNCTION: OPEN VERTICAL ORDERS VIEW IN SEPARATE WINDOW ==========
         function openOrdersVerticalView() {
-            // Build a simple HTML string for the new window – using safe string concatenation
+            // Build a simple HTML string for the new window – now with status controls
             const winHtml = '<!DOCTYPE html>' +
             '<html>' +
             '<head>' +
@@ -2272,6 +2272,10 @@ VIP Table</textarea>
                     '.order-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e9ecef; padding-top: 15px; font-weight: 600; }' +
                     '.order-total { font-size: 18px; color: #e63946; }' +
                     '.payment-info { font-size: 14px; color: #6c757d; }' +
+                    '.order-actions { margin-top: 15px; display: flex; gap: 10px; align-items: center; }' +
+                    '.order-actions select { padding: 8px; border-radius: 6px; border: 1px solid #ced4da; flex: 1; }' +
+                    '.order-actions button { background: #457b9d; }' +
+                    '.order-actions button:hover { background: #2c5a7a; }' +
                     '.no-orders { text-align: center; padding: 60px 20px; color: #6c757d; }' +
                     '.no-orders i { font-size: 60px; margin-bottom: 20px; opacity: 0.5; }' +
                 '</style>' +
@@ -2304,6 +2308,15 @@ VIP Table</textarea>
                     'function formatDate(iso) {' +
                         'const d = new Date(iso);' +
                         'return d.toLocaleString();' +
+                    '}' +
+                    '' +
+                    'async function updateOrderStatus(orderId, newStatus) {' +
+                        'try {' +
+                            'await db.collection("orders").doc(orderId).update({ status: newStatus });' +
+                        '} catch (err) {' +
+                            'console.error("Error updating order:", err);' +
+                            'alert("Failed to update order status.");' +
+                        '}' +
                     '}' +
                     '' +
                     'function renderOrders(orders) {' +
@@ -2347,6 +2360,15 @@ VIP Table</textarea>
                                 '+ "<div class=\\"order-header\\"><div><span class=\\"order-title\\">Order #" + o.orderNumber + "</span> <span class=\\"order-time\\">" + formatDate(o.timestamp) + "</span></div><span class=\\"status-badge " + badgeClass + "\\">" + badgeText.charAt(0).toUpperCase() + badgeText.slice(1) + "</span></div>"' +
                                 '+ "<div class=\\"order-body\\"><div><strong>Table:</strong> " + o.table + "</div><div class=\\"order-items\\">" + itemsHtml + "</div></div>"' +
                                 '+ "<div class=\\"order-footer\\"><div class=\\"payment-info\\">" + (o.paymentMethod === "card" ? "Card" : "Cash") + " • " + (o.paymentTime === "now" ? "Pay Now" : "Pay Later") + "</div><div class=\\"order-total\\">Total: $" + o.total.toFixed(2) + "</div></div>"' +
+                                '+ "<div class=\\"order-actions\\"><select id=\\"status-" + o.orderNumber + "\\">"' +
+                                    '+ "<option value=\\"pending\\"" + (o.status === "pending" ? " selected" : "") + ">Pending</option>"' +
+                                    '+ "<option value=\\"preparing\\"" + (o.status === "preparing" ? " selected" : "") + ">Preparing</option>"' +
+                                    '+ "<option value=\\"ready\\"" + (o.status === "ready" ? " selected" : "") + ">Ready</option>"' +
+                                    '+ "<option value=\\"served\\"" + (o.status === "served" ? " selected" : "") + ">Served</option>"' +
+                                    '+ "<option value=\\"cancelled\\"" + (o.status === "cancelled" ? " selected" : "") + ">Cancelled</option>"' +
+                                '+ "</select>"' +
+                                '+ "<button onclick=\\"updateOrderStatus(\'" + o.orderNumber + "\', document.getElementById(\'status-" + o.orderNumber + "\').value)\\"><i class=\\"fas fa-save\\"></i> Update</button>"' +
+                            '+ "</div>"' +
                             '+ "</div>";' +
                         '});' +
                         'list.innerHTML = html;' +
