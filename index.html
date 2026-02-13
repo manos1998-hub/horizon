@@ -376,6 +376,9 @@
             .my-orders-button { padding: 8px 15px; font-size: 14px; } 
             .theme-previews { grid-template-columns: 1fr; } 
         }
+        /* Pending badges */
+        .pending-badge { display: none; color: red; margin-left: 5px; }
+        .admin-tab.active .pending-badge { color: red; } /* keep red even when active */
     </style>
 </head>
 <body>
@@ -560,8 +563,8 @@
                     <button class="admin-tab" data-tab="menu">Menu Management (EL)</button>
                     <button class="admin-tab" data-tab="menuEn">Menu Management (EN)</button>
                     <button class="admin-tab" data-tab="categories">Category Management</button>
-                    <button class="admin-tab" data-tab="orders">Order Management</button>
-                    <button class="admin-tab" data-tab="helpRequests">🆘 Help Requests</button>
+                    <button class="admin-tab" data-tab="orders">Order Management <span class="pending-badge" id="orderPendingBadge"><i class="fas fa-exclamation-circle"></i></span></button>
+                    <button class="admin-tab" data-tab="helpRequests">🆘 Help Requests <span class="pending-badge" id="helpPendingBadge"><i class="fas fa-exclamation-circle"></i></span></button>
                     <button class="admin-tab" data-tab="customization">Visual Customization</button>
                     <button class="admin-tab" data-tab="sound">🔊 Sound Effects</button>
                     <button class="admin-tab" data-tab="qr">Table QR Codes</button>
@@ -852,8 +855,8 @@ VIP Table</textarea>
                 <button class="admin-tab" data-tab="menu">Menu (EL)</button>
                 <button class="admin-tab" data-tab="menuEn">Menu (EN)</button>
                 <button class="admin-tab" data-tab="categories">Categories</button>
-                <button class="admin-tab" data-tab="orders">Orders</button>
-                <button class="admin-tab" data-tab="helpRequests">🆘 Help</button>
+                <button class="admin-tab" data-tab="orders">Orders <span class="pending-badge" id="orderPendingBadgeModal"><i class="fas fa-exclamation-circle"></i></span></button>
+                <button class="admin-tab" data-tab="helpRequests">🆘 Help <span class="pending-badge" id="helpPendingBadgeModal"><i class="fas fa-exclamation-circle"></i></span></button>
                 <button class="admin-tab" data-tab="customization">Visual</button>
                 <button class="admin-tab" data-tab="sound">🔊 Sound</button>
                 <button class="admin-tab" data-tab="qr">QR Codes</button>
@@ -1003,9 +1006,9 @@ VIP Table</textarea>
         </div>
     </div>
 
-    <!-- ========== CART FLOATING BUTTON ========== -->
+    <!-- ========== CART FLOATING BUTTON – CHANGED TO WAITER ICON ========== -->
     <div class="cart-floating" id="cartFloating">
-        <i class="fas fa-shopping-cart"></i>
+        <i class="fas fa-concierge-bell"></i>
         <div class="cart-count" id="cartCount">0</div>
     </div>
 
@@ -1187,7 +1190,7 @@ VIP Table</textarea>
             helpRequests: [],
             seenHelpRequests: new Set(),
             adminAccessCode: "3232",
-            adminChangeCode: "6262",
+            adminChangeCode: "3232",  // Changed from 6262 to 3232
             categories: [],
             isAdminMode: false,
             pendingAdminAction: null,
@@ -1499,6 +1502,8 @@ VIP Table</textarea>
                 updateCategoryTabs();
                 displayMenuItems('all');
                 applyTranslations(); // Initial translation
+                // Update pending badges after initial load
+                updatePendingBadges();
             } catch (e) { console.error("loadInitialData", e); }
         }
 
@@ -1512,6 +1517,22 @@ VIP Table</textarea>
             } catch(e) { console.error('Sound error:', e); }
         }
 
+        // ========== UPDATE PENDING BADGES ==========
+        function updatePendingBadges() {
+            const hasPendingOrders = state.orders.some(o => o.status === 'pending');
+            const hasPendingHelp = state.helpRequests.some(r => r.status === 'pending');
+            
+            const orderBadge = document.getElementById('orderPendingBadge');
+            const helpBadge = document.getElementById('helpPendingBadge');
+            const orderBadgeModal = document.getElementById('orderPendingBadgeModal');
+            const helpBadgeModal = document.getElementById('helpPendingBadgeModal');
+            
+            if (orderBadge) orderBadge.style.display = hasPendingOrders ? 'inline' : 'none';
+            if (helpBadge) helpBadge.style.display = hasPendingHelp ? 'inline' : 'none';
+            if (orderBadgeModal) orderBadgeModal.style.display = hasPendingOrders ? 'inline' : 'none';
+            if (helpBadgeModal) helpBadgeModal.style.display = hasPendingHelp ? 'inline' : 'none';
+        }
+
         // ========== REAL‑TIME LISTENERS (updated to play newOrderSound for admin) ==========
         function setupListeners() {
             db.collection('orders').onSnapshot(snap => {
@@ -1523,6 +1544,7 @@ VIP Table</textarea>
                     }
                 });
                 state.orders = snap.docs.map(d => ({ ...d.data(), orderNumber: d.id }));
+                updatePendingBadges(); // Update badges
                 if (!state.isAdminMode && document.querySelector('#myOrdersSection.active-section')) loadMyOrders();
                 if (state.isAdminMode && document.querySelector('#adminDashboardSection.active-section')) {
                     loadOrdersForAdmin();
@@ -1604,6 +1626,7 @@ VIP Table</textarea>
                     }
                 });
                 state.helpRequests = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                updatePendingBadges(); // Update badges
                 if (state.isAdminMode) {
                     if (document.querySelector('#adminDashboardSection.active-section')) {
                         const activeTab = document.querySelector('#adminDashboardSection .admin-tab.active')?.dataset?.tab;
@@ -2066,6 +2089,7 @@ VIP Table</textarea>
             if (!confirm(`Delete ALL orders for table "${tableName}"?`)) return;
             // Remove from state.orders but do NOT update cumulativeStats
             state.orders = state.orders.filter(o=>o.table!==tableName);
+            updatePendingBadges(); // Update badges after deletion
             // Update UI without reloading stats
             loadOrdersForAdmin();
             if (adminPanel.style.display === 'flex') loadOrdersForAdminModal();
@@ -2198,6 +2222,7 @@ VIP Table</textarea>
                 await Promise.all(resolved.map(r => deleteHelpRequestFirestore(r.id)));
                 loadHelpRequestsForAdmin();
                 showNotification('All resolved help requests deleted.');
+                updatePendingBadges();
             });
 
             adminDashboardSection.addEventListener('click', e => {
@@ -2731,6 +2756,7 @@ VIP Table</textarea>
             const idx = state.orders.findIndex(o=>o.orderNumber===orderId);
             if (idx!==-1) {
                 state.orders[idx].status = newStatus;
+                updatePendingBadges(); // Update badges
                 loadOrdersForAdmin();
                 if (state.currentTable === state.orders[idx].table) loadMyOrders();
                 showNotification(`Order #${orderId} status updated.`);
@@ -2744,6 +2770,7 @@ VIP Table</textarea>
             // Reset cumulative stats
             state.cumulativeStats = { totalOrders: 0, totalRevenue: 0 };
             await saveCumulativeStats();
+            updatePendingBadges(); // Update badges
             loadOrdersForAdmin(); loadMyOrders();
             loadSystemStats(); // refresh stats display
             populateTableSelect('tableSelectForDelete'); populateTableSelect('tableSelectForDeleteModal');
@@ -2793,6 +2820,7 @@ VIP Table</textarea>
                     await deleteHelpRequestFirestore(id);
                     loadHelpRequestsForAdmin();
                     showNotification('Help request deleted.');
+                    updatePendingBadges();
                 });
             });
         }
@@ -2803,6 +2831,7 @@ VIP Table</textarea>
                 await saveHelpRequest(state.helpRequests[idx]);
                 loadHelpRequestsForAdmin();
                 showNotification(`Help request marked as ${newStatus}.`);
+                updatePendingBadges();
             }
         }
 
@@ -3209,6 +3238,7 @@ VIP Table</textarea>
                     await deleteHelpRequestFirestore(id);
                     loadHelpRequestsForAdminModal();
                     showNotification('Help request deleted.');
+                    updatePendingBadges();
                 });
             });
         }
