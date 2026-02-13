@@ -1167,7 +1167,7 @@ VIP Table</textarea>
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // ========== STATE (updated with newOrderSound) ==========
+        // ========== STATE (updated with cumulativeStats) ==========
         const state = {
             currentTable: null,
             cart: [],
@@ -1223,9 +1223,10 @@ VIP Table</textarea>
                 addToCartSound: null,
                 checkoutSound: null,
                 helpRequestSound: null,
-                newOrderSound: null   // New sound for admin when order arrives
+                newOrderSound: null
             },
-            helpSoundInterval: null
+            helpSoundInterval: null,
+            cumulativeStats: { totalOrders: 0, totalRevenue: 0 }  // New cumulative stats
         };
 
         // ========== DEFAULT DATA – NOW WITH GREEK + ENGLISH FIELDS ==========
@@ -1408,7 +1409,7 @@ VIP Table</textarea>
             showNotification(`Language switched to ${state.currentLanguage === 'el' ? 'Greek' : 'English'}`);
         }
 
-        // ========== FIRESTORE SAVE / LOAD ==========
+        // ========== FIRESTORE SAVE / LOAD (including cumulativeStats) ==========
         async function saveRestaurantInfo() { try { await db.collection('settings').doc('restaurantInfo').set(state.restaurantInfo); } catch (e) { console.error(e); } }
         async function saveMenuItem(item) { try { await db.collection('menuItems').doc(item.id.toString()).set(item); } catch (e) { console.error(e); } }
         async function deleteMenuItemFirestore(id) { try { await db.collection('menuItems').doc(id.toString()).delete(); } catch (e) { console.error(e); } }
@@ -1419,18 +1420,20 @@ VIP Table</textarea>
         async function saveSoundEffects() { try { await db.collection('settings').doc('soundEffects').set(state.soundEffects); } catch (e) { console.error(e); } }
         async function saveHelpRequest(request) { try { await db.collection('helpRequests').doc(request.id).set(request); } catch (e) { console.error(e); } }
         async function deleteHelpRequestFirestore(id) { try { await db.collection('helpRequests').doc(id).delete(); } catch (e) { console.error(e); } }
+        async function saveCumulativeStats() { try { await db.collection('settings').doc('cumulativeStats').set(state.cumulativeStats); } catch (e) { console.error(e); } }
 
         // ========== INITIAL LOAD ==========
         async function loadInitialData() {
             try {
-                const [restDoc, menuSnap, ordersSnap, catDoc, customDoc, soundDoc, helpSnap] = await Promise.all([
+                const [restDoc, menuSnap, ordersSnap, catDoc, customDoc, soundDoc, helpSnap, statsDoc] = await Promise.all([
                     db.collection('settings').doc('restaurantInfo').get(),
                     db.collection('menuItems').get(),
                     db.collection('orders').get(),
                     db.collection('settings').doc('categories').get(),
                     db.collection('settings').doc('customization').get(),
                     db.collection('settings').doc('soundEffects').get(),
-                    db.collection('helpRequests').get()
+                    db.collection('helpRequests').get(),
+                    db.collection('settings').doc('cumulativeStats').get()
                 ]);
                 if (restDoc.exists) state.restaurantInfo = restDoc.data();
                 else await db.collection('settings').doc('restaurantInfo').set(state.restaurantInfo);
@@ -1475,11 +1478,13 @@ VIP Table</textarea>
                 
                 if (soundDoc.exists) {
                     state.soundEffects = soundDoc.data();
-                    // Ensure newOrderSound field exists (for backward compatibility)
                     if (state.soundEffects.newOrderSound === undefined) state.soundEffects.newOrderSound = null;
                 } else {
                     await db.collection('settings').doc('soundEffects').set(state.soundEffects);
                 }
+                
+                if (statsDoc.exists) state.cumulativeStats = statsDoc.data();
+                else await db.collection('settings').doc('cumulativeStats').set(state.cumulativeStats);
                 
                 state.helpRequests = helpSnap.docs.map(doc => {
                     const req = { id: doc.id, ...doc.data() };
@@ -1521,7 +1526,8 @@ VIP Table</textarea>
                 if (!state.isAdminMode && document.querySelector('#myOrdersSection.active-section')) loadMyOrders();
                 if (state.isAdminMode && document.querySelector('#adminDashboardSection.active-section')) {
                     loadOrdersForAdmin();
-                    loadSystemStats();
+                    // Do not call loadSystemStats here because we want cumulative stats to remain unchanged
+                    // loadSystemStats();
                     populateTableSelect('tableSelectForDelete');
                     if (adminPanel.style.display === 'flex') populateTableSelect('tableSelectForDeleteModal');
                 }
@@ -1608,6 +1614,10 @@ VIP Table</textarea>
                         if (modalActive === 'helpRequests') loadHelpRequestsForAdminModal();
                     }
                 }
+            });
+            // Listener for cumulative stats (optional, not used elsewhere)
+            db.collection('settings').doc('cumulativeStats').onSnapshot(doc => {
+                if (doc.exists) state.cumulativeStats = doc.data();
             });
         }
 
@@ -2035,7 +2045,7 @@ VIP Table</textarea>
             });
         }
 
-        // ========== DELETE ORDERS BY TABLE ==========
+        // ========== DELETE ORDERS BY TABLE (does not affect cumulativeStats) ==========
         function populateTableSelect(selectId) {
             const sel = document.getElementById(selectId); if (!sel) return;
             const tables = [...new Set(state.orders.filter(o=>o.table&&o.table.toLowerCase()!=='admin').map(o=>o.table))].sort();
@@ -2054,12 +2064,14 @@ VIP Table</textarea>
             const toDelete = state.orders.filter(o=>o.table===tableName);
             if (toDelete.length===0) { showNotification(`No orders for table "${tableName}".`); return; }
             if (!confirm(`Delete ALL orders for table "${tableName}"?`)) return;
+            // Remove from state.orders but do NOT update cumulativeStats
             state.orders = state.orders.filter(o=>o.table!==tableName);
+            // Update UI without reloading stats
             loadOrdersForAdmin();
             if (adminPanel.style.display === 'flex') loadOrdersForAdminModal();
             populateTableSelect('tableSelectForDelete');
             populateTableSelect('tableSelectForDeleteModal');
-            showNotification(`Deleted ${toDelete.length} orders.`);
+            showNotification(`Deleted ${toDelete.length} orders. Stats remain unchanged.`);
             await Promise.all(toDelete.map(o=>deleteOrderFirestore(o.orderNumber)));
         }
 
@@ -2115,7 +2127,7 @@ VIP Table</textarea>
             showNotification(`PDF generated with ${tableNamesArray.length} QR code(s).`);
         }
 
-        // ========== ADMIN DASHBOARD (updated with newOrderSound UI) ==========
+        // ========== ADMIN DASHBOARD (updated with cumulativeStats) ==========
         function loadAdminDashboardData() {
             document.getElementById('adminRestaurantName').value = state.restaurantInfo.name;
             document.getElementById('adminTaxRate').value = state.restaurantInfo.taxRate;
@@ -2126,7 +2138,7 @@ VIP Table</textarea>
             loadMenuItemsForAdminEn();
             loadCategoriesForAdmin();
             loadOrdersForAdmin();
-            loadSystemStats();
+            loadSystemStats(); // uses cumulativeStats
             loadCustomizationSettings();
             loadSoundSettingsUI(); // updated to include new order sound
             loadHelpRequestsForAdmin();
@@ -2726,12 +2738,16 @@ VIP Table</textarea>
             }
         }
         async function clearAllOrdersOptimistic() {
-            if (!confirm("Clear ALL orders? This cannot be undone.")) return;
+            if (!confirm("Clear ALL orders? This will also reset cumulative statistics.")) return;
             const toDelete = [...state.orders];
             state.orders = [];
+            // Reset cumulative stats
+            state.cumulativeStats = { totalOrders: 0, totalRevenue: 0 };
+            await saveCumulativeStats();
             loadOrdersForAdmin(); loadMyOrders();
+            loadSystemStats(); // refresh stats display
             populateTableSelect('tableSelectForDelete'); populateTableSelect('tableSelectForDeleteModal');
-            showNotification("All orders cleared.");
+            showNotification("All orders cleared and statistics reset.");
             await Promise.all(toDelete.map(o=>deleteOrderFirestore(o.orderNumber)));
         }
 
@@ -2790,21 +2806,21 @@ VIP Table</textarea>
             }
         }
 
-        // --- SYSTEM ---
+        // --- SYSTEM STATS (using cumulativeStats) ---
         function loadSystemStats() {
             const stats = document.getElementById('systemStats');
-            const total = state.orders.length;
-            const revenue = state.orders.reduce((s,o)=>s+o.total,0);
+            const total = state.cumulativeStats.totalOrders;
+            const revenue = state.cumulativeStats.totalRevenue;
             const avg = total>0 ? revenue/total : 0;
             const pending = state.orders.filter(o=>o.status==='pending').length;
             const prep = state.orders.filter(o=>o.status==='preparing').length;
             const ready = state.orders.filter(o=>o.status==='ready').length;
             const served = state.orders.filter(o=>o.status==='served').length;
             const cancelled = state.orders.filter(o=>o.status==='cancelled').length;
-            stats.innerHTML = `<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px,1fr)); gap:15px;"><div style="background-color:var(--light); padding:15px; border-radius:8px;"><div style="font-size:24px; font-weight:600; color:var(--primary);">${total}</div><div style="font-size:14px; color:var(--gray);">Total Orders</div></div><div style="background-color:var(--light); padding:15px; border-radius:8px;"><div style="font-size:24px; font-weight:600; color:var(--primary);">$${revenue.toFixed(2)}</div><div style="font-size:14px; color:var(--gray);">Total Revenue</div></div><div style="background-color:var(--light); padding:15px; border-radius:8px;"><div style="font-size:24px; font-weight:600; color:var(--primary);">$${avg.toFixed(2)}</div><div style="font-size:14px; color:var(--gray);">Average Order</div></div><div style="background-color:var(--light); padding:15px; border-radius:8px;"><div style="font-size:24px; font-weight:600; color:var(--primary);">${state.menuItems.length}</div><div style="font-size:14px; color:var(--gray);">Menu Items</div></div><div style="background-color:var(--light); padding:15px; border-radius:8px;"><div style="font-size:24px; font-weight:600; color:var(--primary);">${state.categories.length}</div><div style="font-size:14px; color:var(--gray);">Categories</div></div></div><div style="margin-top:20px;"><h5 style="margin-bottom:10px;">Order Status Distribution</h5><div style="display:flex; gap:10px; flex-wrap:wrap;"><div style="display:flex; align-items:center; gap:5px;"><div style="width:12px; height:12px; background-color:#fff3cd; border-radius:2px;"></div><span>Pending: ${pending}</span></div><div style="display:flex; align-items:center; gap:5px;"><div style="width:12px; height:12px; background-color:#d1ecf1; border-radius:2px;"></div><span>Preparing: ${prep}</span></div><div style="display:flex; align-items:center; gap:5px;"><div style="width:12px; height:12px; background-color:#d4edda; border-radius:2px;"></div><span>Ready: ${ready}</span></div><div style="display:flex; align-items:center; gap:5px;"><div style="width:12px; height:12px; background-color:#cce5ff; border-radius:2px;"></div><span>Served: ${served}</span></div><div style="display:flex; align-items:center; gap:5px;"><div style="width:12px; height:12px; background-color:#f8d7da; border-radius:2px;"></div><span>Cancelled: ${cancelled}</span></div></div></div>`;
+            stats.innerHTML = `<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px,1fr)); gap:15px;"><div style="background-color:var(--light); padding:15px; border-radius:8px;"><div style="font-size:24px; font-weight:600; color:var(--primary);">${total}</div><div style="font-size:14px; color:var(--gray);">Total Orders (Lifetime)</div></div><div style="background-color:var(--light); padding:15px; border-radius:8px;"><div style="font-size:24px; font-weight:600; color:var(--primary);">$${revenue.toFixed(2)}</div><div style="font-size:14px; color:var(--gray);">Total Revenue (Lifetime)</div></div><div style="background-color:var(--light); padding:15px; border-radius:8px;"><div style="font-size:24px; font-weight:600; color:var(--primary);">$${avg.toFixed(2)}</div><div style="font-size:14px; color:var(--gray);">Average Order</div></div><div style="background-color:var(--light); padding:15px; border-radius:8px;"><div style="font-size:24px; font-weight:600; color:var(--primary);">${state.menuItems.length}</div><div style="font-size:14px; color:var(--gray);">Menu Items</div></div><div style="background-color:var(--light); padding:15px; border-radius:8px;"><div style="font-size:24px; font-weight:600; color:var(--primary);">${state.categories.length}</div><div style="font-size:14px; color:var(--gray);">Categories</div></div></div><div style="margin-top:20px;"><h5 style="margin-bottom:10px;">Order Status Distribution (Current Orders)</h5><div style="display:flex; gap:10px; flex-wrap:wrap;"><div style="display:flex; align-items:center; gap:5px;"><div style="width:12px; height:12px; background-color:#fff3cd; border-radius:2px;"></div><span>Pending: ${pending}</span></div><div style="display:flex; align-items:center; gap:5px;"><div style="width:12px; height:12px; background-color:#d1ecf1; border-radius:2px;"></div><span>Preparing: ${prep}</span></div><div style="display:flex; align-items:center; gap:5px;"><div style="width:12px; height:12px; background-color:#d4edda; border-radius:2px;"></div><span>Ready: ${ready}</span></div><div style="display:flex; align-items:center; gap:5px;"><div style="width:12px; height:12px; background-color:#cce5ff; border-radius:2px;"></div><span>Served: ${served}</span></div><div style="display:flex; align-items:center; gap:5px;"><div style="width:12px; height:12px; background-color:#f8d7da; border-radius:2px;"></div><span>Cancelled: ${cancelled}</span></div></div></div>`;
         }
         function exportData() {
-            const data = { restaurantInfo: state.restaurantInfo, menuItems: state.menuItems, orders: state.orders, categories: state.categories, customization: state.customization, soundEffects: state.soundEffects, helpRequests: state.helpRequests, exportDate: new Date().toISOString() };
+            const data = { restaurantInfo: state.restaurantInfo, menuItems: state.menuItems, orders: state.orders, categories: state.categories, customization: state.customization, soundEffects: state.soundEffects, helpRequests: state.helpRequests, cumulativeStats: state.cumulativeStats, exportDate: new Date().toISOString() };
             const str = JSON.stringify(data,null,2); const uri = 'data:application/json;charset=utf-8,'+encodeURIComponent(str);
             const a = document.createElement('a'); a.href = uri; a.download = `dineeasy-backup-${new Date().toISOString().split('T')[0]}.json`; a.click(); showNotification("Data exported successfully.");
         }
@@ -2822,6 +2838,7 @@ VIP Table</textarea>
                         if (d.customization) state.customization = d.customization;
                         if (d.soundEffects) state.soundEffects = d.soundEffects;
                         if (d.helpRequests) state.helpRequests = d.helpRequests;
+                        if (d.cumulativeStats) state.cumulativeStats = d.cumulativeStats;
                         await Promise.all(state.menuItems.map(i=>saveMenuItem(i)));
                         await saveCategories();
                         await Promise.all(state.orders.map(o=>saveOrder(o)));
@@ -2829,6 +2846,7 @@ VIP Table</textarea>
                         await saveCustomization();
                         await saveSoundEffects();
                         await Promise.all(state.helpRequests.map(r=>saveHelpRequest(r)));
+                        await saveCumulativeStats();
                         updateRestaurantUI(); displayMenuItems('all'); updateCategoryTabs(); applyCustomization();
                         loadMenuItemsForAdmin(); loadMenuItemsForAdminEn(); loadCategoriesForAdmin(); loadOrdersForAdmin(); loadSystemStats(); loadHelpRequestsForAdmin();
                         showNotification("Data imported successfully.");
@@ -3299,6 +3317,10 @@ VIP Table</textarea>
                 status: 'pending', timestamp: new Date().toISOString(), customerNotes: ""
             };
             state.orders.push(order);
+            // Update cumulative stats
+            state.cumulativeStats.totalOrders++;
+            state.cumulativeStats.totalRevenue += order.total;
+            await saveCumulativeStats();
             showOrderConfirmation(order);
             showSection('confirmationSection');
             resetCart();
