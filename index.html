@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Εφαρμογή Εστιατορίου - PERFECT + SOUNDS</title>
+    <title data-i18n="appTitle">Εφαρμογή Εστιατορίου - PERFECT + SOUNDS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
     <!-- Firebase SDK -->
@@ -382,7 +382,7 @@
     <!-- ========== FAKE LOADING OVERLAY ========== -->
     <div id="loadingOverlay">
         <div class="spinner"></div>
-        <h2 style="color: var(--primary); margin-top:20px;">Φόρτωση μενού...</h2>
+        <h2 style="color: var(--primary); margin-top:20px;" data-i18n="loading">Φόρτωση μενού...</h2>
     </div>
 
     <!-- ========== HEADER ========== -->
@@ -395,7 +395,7 @@
             </div>
             <div class="header-center">
                 <button class="help-button" id="headerHelpButton">
-                    <i class="fas fa-headset"></i> Χρειάζεστε βοήθεια?
+                    <i class="fas fa-headset"></i> <span data-i18n="helpButton">Χρειάζεστε βοήθεια?</span>
                 </button>
                 <button class="language-toggle" id="languageToggleBtn">
                     <i class="fas fa-language"></i> <span id="langToggleText">EN</span>
@@ -403,10 +403,10 @@
             </div>
             <div class="header-right">
                 <button class="my-orders-button" id="myOrdersButton" style="display: none;">
-                    <i class="fas fa-clipboard-list"></i> Οι Παραγγελίες μου
+                    <i class="fas fa-clipboard-list"></i> <span data-i18n="myOrdersButton">Οι Παραγγελίες μου</span>
                 </button>
                 <div class="table-info" id="tableInfo">
-                    <i class="fas fa-qrcode"></i> Σαρώστε QR για έναρξη
+                    <i class="fas fa-qrcode"></i> <span data-i18n="tableInfo">Σαρώστε QR για έναρξη</span>
                 </div>
             </div>
         </div>
@@ -416,23 +416,23 @@
     <section id="scannerSection" class="app-section active-section">
         <div class="container scanner-section">
             <div class="scanner-container">
-                <h2 class="section-title">Σαρώστε το QR του τραπεζιού</h2>
-                <p class="section-subtitle">Στρέψτε την κάμερα στο QR του τραπεζιού σας για να ξεκινήσετε</p>
+                <h2 class="section-title" data-i18n="scannerTitle">Σαρώστε το QR του τραπεζιού</h2>
+                <p class="section-subtitle" data-i18n="scannerSubtitle">Στρέψτε την κάμερα στο QR του τραπεζιού σας για να ξεκινήσετε</p>
                 <div class="qr-placeholder">
                     <i class="fas fa-qrcode"></i>
-                    <span>Περιοχή Σάρωσης QR</span>
+                    <span data-i18n="qrPlaceholder">Περιοχή Σάρωσης QR</span>
                 </div>
-                <p style="margin: 20px 0; color: var(--gray);">Για δοκιμή, επιλέξτε ένα τραπέζι:</p>
+                <p style="margin: 20px 0; color: var(--gray);" data-i18n="demoTablesInstruction">Για δοκιμή, επιλέξτε ένα τραπέζι:</p>
                 <div class="demo-tables">
-                    <button class="table-btn" data-table="Table 1">Τραπέζι 1</button>
-                    <button class="table-btn" data-table="Table 2">Τραπέζι 2</button>
-                    <button class="table-btn" data-table="Table 3">Τραπέζι 3</button>
-                    <button class="table-btn" data-table="Table 4">Τραπέζι 4</button>
-                    <button class="table-btn" data-table="Table 5">Τραπέζι 5</button>
-                    <button class="table-btn" data-table="VIP Table">Τραπέζι VIP</button>
+                    <button class="table-btn" data-table="Table 1" data-i18n="table1">Τραπέζι 1</button>
+                    <button class="table-btn" data-table="Table 2" data-i18n="table2">Τραπέζι 2</button>
+                    <button class="table-btn" data-table="Table 3" data-i18n="table3">Τραπέζι 3</button>
+                    <button class="table-btn" data-table="Table 4" data-i18n="table4">Τραπέζι 4</button>
+                    <button class="table-btn" data-table="Table 5" data-i18n="table5">Τραπέζι 5</button>
+                    <button class="table-btn" data-table="VIP Table" data-i18n="vipTable">Τραπέζι VIP</button>
                 </div>
-                <p style="margin-top: 30px; font-size: 14px; color: var(--gray);"><i class="fas fa-info-circle"></i> Μόλις σαρώσετε, θα μπορείτε να δείτε το μενού και να κάνετε την παραγγελία σας.</p>
-                <p style="margin-top: 10px; font-size: 14px; color: var(--warning);"><i class="fas fa-shield-alt"></i> Πρόσβαση διαχειριστή μόνο μέσω QR του τραπεζιού Admin.</p>
+                <p style="margin-top: 30px; font-size: 14px; color: var(--gray);" data-i18n="scannerNote"><i class="fas fa-info-circle"></i> Μόλις σαρώσετε, θα μπορείτε να δείτε το μενού και να κάνετε την παραγγελία σας.</p>
+                <p style="margin-top: 10px; font-size: 14px; color: var(--warning);" data-i18n="adminAccessNote"><i class="fas fa-shield-alt"></i> Πρόσβαση διαχειριστή μόνο μέσω QR του τραπεζιού Admin.</p>
             </div>
         </div>
     </section>
@@ -440,8 +440,8 @@
     <!-- ========== MENU SECTION ========== -->
     <section id="menuSection" class="app-section">
         <div class="container">
-            <h2 class="section-title" id="menuTitle">Το Μενού μας</h2>
-            <p class="section-subtitle" id="menuSubtitle">Επιλέξτε είδη για να προσθέσετε στην παραγγελία σας</p>
+            <h2 class="section-title" id="menuTitle" data-i18n="menuTitle">Το Μενού μας</h2>
+            <p class="section-subtitle" id="menuSubtitle" data-i18n="menuSubtitle">Επιλέξτε είδη για να προσθέσετε στην παραγγελία σας</p>
             <div class="category-tabs" id="categoryTabs"></div>
             <div class="menu-grid" id="menuGrid"></div>
         </div>
@@ -450,21 +450,21 @@
     <!-- ========== CART SECTION ========== -->
     <section id="cartSection" class="app-section">
         <div class="container">
-            <h2 class="section-title">Η Παραγγελία σας</h2>
-            <p class="section-subtitle" id="cartSubtitle">Ελέγξτε την παραγγελία σας πριν την πληρωμή</p>
+            <h2 class="section-title" data-i18n="cartTitle">Η Παραγγελία σας</h2>
+            <p class="section-subtitle" id="cartSubtitle" data-i18n="cartSubtitle">Ελέγξτε την παραγγελία σας πριν την πληρωμή</p>
             <div class="cart-container">
                 <div class="cart-items" id="cartItems">
                     <div class="empty-cart" style="text-align: center; padding: 40px; color: var(--gray);">
                         <i class="fas fa-shopping-cart" style="font-size: 50px; margin-bottom: 15px; opacity: 0.5;"></i>
-                        <p>Το καλάθι σας είναι άδειο</p>
+                        <p data-i18n="emptyCart">Το καλάθι σας είναι άδειο</p>
                     </div>
                 </div>
                 <div class="cart-summary">
-                    <div class="summary-row"><span>Υποσύνολο (με φόρους)</span><span id="subtotal">$0.00</span></div>
-                    <div class="summary-row summary-total"><span>Σύνολο</span><span class="amount" id="total">$0.00</span></div>
+                    <div class="summary-row"><span data-i18n="subtotal">Υποσύνολο (με φόρους)</span><span id="subtotal">$0.00</span></div>
+                    <div class="summary-row summary-total"><span data-i18n="total">Σύνολο</span><span class="amount" id="total">$0.00</span></div>
                     <div class="payment-actions">
-                        <button class="btn btn-secondary" id="backToMenuBtn"><i class="fas fa-arrow-left"></i> Πίσω στο Μενού</button>
-                        <button class="btn btn-primary" id="proceedToPaymentBtn">Συνέχεια στην Πληρωμή <i class="fas fa-arrow-right"></i></button>
+                        <button class="btn btn-secondary" id="backToMenuBtn"><i class="fas fa-arrow-left"></i> <span data-i18n="backToMenu">Πίσω στο Μενού</span></button>
+                        <button class="btn btn-primary" id="proceedToPaymentBtn"><span data-i18n="proceedToPayment">Συνέχεια στην Πληρωμή</span> <i class="fas fa-arrow-right"></i></button>
                     </div>
                 </div>
             </div>
@@ -474,31 +474,31 @@
     <!-- ========== PAYMENT SECTION ========== -->
     <section id="paymentSection" class="app-section">
         <div class="container">
-            <h2 class="section-title">Πληρωμή</h2>
-            <p class="section-subtitle">Ολοκληρώστε την παραγγελία σας με πληρωμή</p>
+            <h2 class="section-title" data-i18n="paymentTitle">Πληρωμή</h2>
+            <p class="section-subtitle" data-i18n="paymentSubtitle">Ολοκληρώστε την παραγγελία σας με πληρωμή</p>
             <div class="payment-container">
                 <div class="payment-options">
                     <div class="option-group">
-                        <div class="option-title">Τρόπος Πληρωμής</div>
+                        <div class="option-title" data-i18n="paymentMethod">Τρόπος Πληρωμής</div>
                         <div class="option-cards">
-                            <div class="option-card" data-payment="card"><div class="option-icon"><i class="fas fa-credit-card"></i></div><div class="option-name">Πιστωτική/Χρεωστική Κάρτα</div><div class="option-desc">Πληρώστε με κάρτα</div></div>
-                            <div class="option-card" data-payment="cash"><div class="option-icon"><i class="fas fa-money-bill-wave"></i></div><div class="option-name">Μετρητά</div><div class="option-desc">Πληρώστε με μετρητά</div></div>
+                            <div class="option-card" data-payment="card"><div class="option-icon"><i class="fas fa-credit-card"></i></div><div class="option-name" data-i18n="paymentCard">Πιστωτική/Χρεωστική Κάρτα</div><div class="option-desc" data-i18n="paymentCardDesc">Πληρώστε με κάρτα</div></div>
+                            <div class="option-card" data-payment="cash"><div class="option-icon"><i class="fas fa-money-bill-wave"></i></div><div class="option-name" data-i18n="paymentCash">Μετρητά</div><div class="option-desc" data-i18n="paymentCashDesc">Πληρώστε με μετρητά</div></div>
                         </div>
                     </div>
                     <div class="option-group">
-                        <div class="option-title">Χρόνος Πληρωμής</div>
+                        <div class="option-title" data-i18n="paymentTime">Χρόνος Πληρωμής</div>
                         <div class="option-cards">
-                            <div class="option-card" data-time="now"><div class="option-icon"><i class="fas fa-bolt"></i></div><div class="option-name">Πληρωμή Τώρα</div><div class="option-desc">Ολοκληρώστε την πληρωμή άμεσα</div></div>
-                            <div class="option-card" data-time="later"><div class="option-icon"><i class="fas fa-clock"></i></div><div class="option-name">Πληρωμή Αργότερα</div><div class="option-desc">Πληρώστε στο ταμείο όταν φεύγετε</div></div>
+                            <div class="option-card" data-time="now"><div class="option-icon"><i class="fas fa-bolt"></i></div><div class="option-name" data-i18n="payNow">Πληρωμή Τώρα</div><div class="option-desc" data-i18n="payNowDesc">Ολοκληρώστε την πληρωμή άμεσα</div></div>
+                            <div class="option-card" data-time="later"><div class="option-icon"><i class="fas fa-clock"></i></div><div class="option-name" data-i18n="payLater">Πληρωμή Αργότερα</div><div class="option-desc" data-i18n="payLaterDesc">Πληρώστε στο ταμείο όταν φεύγετε</div></div>
                         </div>
                     </div>
                 </div>
                 <div class="cart-summary">
-                    <div class="summary-row"><span>Υποσύνολο (με φόρους)</span><span id="paymentSubtotal">$0.00</span></div>
-                    <div class="summary-row summary-total"><span>Σύνολο</span><span class="amount" id="paymentTotal">$0.00</span></div>
+                    <div class="summary-row"><span data-i18n="subtotal">Υποσύνολο (με φόρους)</span><span id="paymentSubtotal">$0.00</span></div>
+                    <div class="summary-row summary-total"><span data-i18n="total">Σύνολο</span><span class="amount" id="paymentTotal">$0.00</span></div>
                     <div class="payment-actions">
-                        <button class="btn btn-secondary" id="backToCartBtn"><i class="fas fa-arrow-left"></i> Πίσω στο Καλάθι</button>
-                        <button class="btn btn-primary" id="confirmPaymentBtn"><i class="fas fa-check"></i> Επιβεβαίωση Πληρωμής</button>
+                        <button class="btn btn-secondary" id="backToCartBtn"><i class="fas fa-arrow-left"></i> <span data-i18n="backToCart">Πίσω στο Καλάθι</span></button>
+                        <button class="btn btn-primary" id="confirmPaymentBtn"><i class="fas fa-check"></i> <span data-i18n="confirmPayment">Επιβεβαίωση Πληρωμής</span></button>
                     </div>
                 </div>
             </div>
@@ -508,12 +508,12 @@
     <!-- ========== MY ORDERS SECTION ========== -->
     <section id="myOrdersSection" class="app-section">
         <div class="container my-orders-container">
-            <h2 class="section-title">Οι Παραγγελίες μου</h2>
-            <p class="section-subtitle" id="myOrdersSubtitle">Δείτε όλες τις τρέχουσες και παλιές παραγγελίες σας</p>
+            <h2 class="section-title" data-i18n="myOrdersTitle">Οι Παραγγελίες μου</h2>
+            <p class="section-subtitle" id="myOrdersSubtitle" data-i18n="myOrdersSubtitle">Δείτε όλες τις τρέχουσες και παλιές παραγγελίες σας</p>
             <div class="orders-list" id="ordersList"></div>
             <div class="payment-actions">
-                <button class="btn btn-secondary" id="backToMenuFromOrdersBtn"><i class="fas fa-arrow-left"></i> Πίσω στο Μενού</button>
-                <button class="btn btn-primary" id="placeNewOrderBtn"><i class="fas fa-plus"></i> Νέα Παραγγελία</button>
+                <button class="btn btn-secondary" id="backToMenuFromOrdersBtn"><i class="fas fa-arrow-left"></i> <span data-i18n="backToMenu">Πίσω στο Μενού</span></button>
+                <button class="btn btn-primary" id="placeNewOrderBtn"><i class="fas fa-plus"></i> <span data-i18n="newOrder">Νέα Παραγγελία</span></button>
             </div>
         </div>
     </section>
@@ -523,29 +523,29 @@
         <div class="container confirmation-container">
             <div class="confirmation-card">
                 <div class="confirmation-icon"><i class="fas fa-check"></i></div>
-                <h2 class="section-title">Η Παραγγελία Επιβεβαιώθηκε!</h2>
+                <h2 class="section-title" data-i18n="confirmationTitle">Η Παραγγελία Επιβεβαιώθηκε!</h2>
                 <div class="order-number">Παραγγελία #<span id="orderNumberDisplay">0000</span></div>
-                <p class="order-message">Ευχαριστούμε για την παραγγελία σας. Το φαγητό σας θα ετοιμαστεί σύντομα.</p>
+                <p class="order-message" data-i18n="confirmationMessage">Ευχαριστούμε για την παραγγελία σας. Το φαγητό σας θα ετοιμαστεί σύντομα.</p>
                 <div class="payment-actions" style="justify-content: center; gap: 15px;">
-                    <button class="btn btn-success" id="newOrderBtn"><i class="fas fa-utensils"></i> Νέα Παραγγελία</button>
-                    <button class="btn btn-secondary" id="viewMyOrdersBtn"><i class="fas fa-clipboard-list"></i> Προβολή των Παραγγελιών μου</button>
+                    <button class="btn btn-success" id="newOrderBtn"><i class="fas fa-utensils"></i> <span data-i18n="newOrder">Νέα Παραγγελία</span></button>
+                    <button class="btn btn-secondary" id="viewMyOrdersBtn"><i class="fas fa-clipboard-list"></i> <span data-i18n="viewMyOrders">Προβολή των Παραγγελιών μου</span></button>
                 </div>
             </div>
             <div class="order-details">
-                <div class="details-header"><div class="details-title">Λεπτομέρειες Παραγγελίας</div><div class="details-table" id="confirmationTable">Τραπέζι: -</div></div>
+                <div class="details-header"><div class="details-title" data-i18n="orderDetails">Λεπτομέρειες Παραγγελίας</div><div class="details-table" id="confirmationTable">Τραπέζι: -</div></div>
                 <div class="order-items" id="confirmationItems"></div>
-                <div class="order-total"><span>Συνολικό Ποσό (με φόρους)</span><span class="amount" id="confirmationTotal">$0.00</span></div>
+                <div class="order-total"><span data-i18n="totalWithTax">Συνολικό Ποσό (με φόρους)</span><span class="amount" id="confirmationTotal">$0.00</span></div>
                 <div class="payment-details">
-                    <div class="payment-details-title">Πληροφορίες Πληρωμής</div>
-                    <div class="payment-info"><div class="info-label">Τρόπος Πληρωμής:</div><div class="info-value" id="confirmationPaymentMethod">-</div></div>
-                    <div class="payment-info"><div class="info-label">Χρόνος Πληρωμής:</div><div class="info-value" id="confirmationPaymentTime">-</div></div>
-                    <div class="payment-info"><div class="info-label">Κατάσταση Παραγγελίας:</div><div class="info-value" id="confirmationOrderStatus" style="color: var(--success);">Επιβεβαιώθηκε</div></div>
+                    <div class="payment-details-title" data-i18n="paymentInfo">Πληροφορίες Πληρωμής</div>
+                    <div class="payment-info"><div class="info-label" data-i18n="paymentMethodLabel">Τρόπος Πληρωμής:</div><div class="info-value" id="confirmationPaymentMethod">-</div></div>
+                    <div class="payment-info"><div class="info-label" data-i18n="paymentTimeLabel">Χρόνος Πληρωμής:</div><div class="info-value" id="confirmationPaymentTime">-</div></div>
+                    <div class="payment-info"><div class="info-label" data-i18n="orderStatusLabel">Κατάσταση Παραγγελίας:</div><div class="info-value" id="confirmationOrderStatus" style="color: var(--success);">Επιβεβαιώθηκε</div></div>
                 </div>
-                <div class="estimated-time"><div class="time-icon"><i class="fas fa-clock"></i></div><div class="time-text"><strong>Εκτιμώμενος χρόνος προετοιμασίας:</strong> <span id="estimatedTime">15-25</span> λεπτά</div></div>
+                <div class="estimated-time"><div class="time-icon"><i class="fas fa-clock"></i></div><div class="time-text"><strong data-i18n="estimatedTimeLabel">Εκτιμώμενος χρόνος προετοιμασίας:</strong> <span id="estimatedTime">15-25</span> <span data-i18n="minutes">λεπτά</span></div></div>
             </div>
             <div class="payment-actions">
-                <button class="btn btn-secondary" id="viewMenuBtn"><i class="fas fa-book-open"></i> Προβολή Πλήρους Μενού</button>
-                <button class="btn btn-primary" id="needHelpBtn"><i class="fas fa-headset"></i> Χρειάζεστε βοήθεια?</button>
+                <button class="btn btn-secondary" id="viewMenuBtn"><i class="fas fa-book-open"></i> <span data-i18n="viewFullMenu">Προβολή Πλήρους Μενού</span></button>
+                <button class="btn btn-primary" id="needHelpBtn"><i class="fas fa-headset"></i> <span data-i18n="needHelp">Χρειάζεστε βοήθεια?</span></button>
             </div>
         </div>
     </section>
@@ -959,12 +959,12 @@ VIP Table</textarea>
     <div class="admin-code-prompt" id="adminCodePrompt">
         <div class="admin-code-container">
             <div class="admin-code-icon"><i class="fas fa-lock"></i></div>
-            <h3 class="admin-code-title">Απαιτείται Πρόσβαση Διαχειριστή</h3>
-            <p class="admin-code-subtitle">Παρακαλώ εισάγετε τον κωδικό διαχειριστή για να συνεχίσετε</p>
+            <h3 class="admin-code-title" data-i18n="adminCodeTitle">Απαιτείται Πρόσβαση Διαχειριστή</h3>
+            <p class="admin-code-subtitle" data-i18n="adminCodeSubtitle">Παρακαλώ εισάγετε τον κωδικό διαχειριστή για να συνεχίσετε</p>
             <input type="password" class="admin-code-input" id="adminCodeInput" placeholder="Εισάγετε 4ψήφιο κωδικό" maxlength="4" autocomplete="off">
             <div style="display: flex; gap: 10px;">
-                <button class="btn btn-secondary" id="cancelAdminCodeBtn" style="flex: 1;">Ακύρωση</button>
-                <button class="btn btn-primary" id="submitAdminCodeBtn" style="flex: 1;">Υποβολή</button>
+                <button class="btn btn-secondary" id="cancelAdminCodeBtn" style="flex: 1;" data-i18n="cancel">Ακύρωση</button>
+                <button class="btn btn-primary" id="submitAdminCodeBtn" style="flex: 1;" data-i18n="submit">Υποβολή</button>
             </div>
         </div>
     </div>
@@ -973,12 +973,12 @@ VIP Table</textarea>
     <div class="admin-code-prompt" id="adminChangePrompt">
         <div class="admin-code-container">
             <div class="admin-code-icon"><i class="fas fa-shield-alt"></i></div>
-            <h3 class="admin-code-title">Επιβεβαίωση Αλλαγών</h3>
-            <p class="admin-code-subtitle">Παρακαλώ εισάγετε τον κωδικό επιβεβαίωσης για να αποθηκεύσετε τις αλλαγές</p>
+            <h3 class="admin-code-title" data-i18n="adminChangeTitle">Επιβεβαίωση Αλλαγών</h3>
+            <p class="admin-code-subtitle" data-i18n="adminChangeSubtitle">Παρακαλώ εισάγετε τον κωδικό επιβεβαίωσης για να αποθηκεύσετε τις αλλαγές</p>
             <input type="password" class="admin-code-input" id="adminChangeCodeInput" placeholder="Εισάγετε 4ψήφιο κωδικό" maxlength="4" autocomplete="off">
             <div style="display: flex; gap: 10px;">
-                <button class="btn btn-secondary" id="cancelChangeBtn" style="flex: 1;">Ακύρωση</button>
-                <button class="btn btn-primary" id="submitChangeCodeBtn" style="flex: 1;">Επιβεβαίωση</button>
+                <button class="btn btn-secondary" id="cancelChangeBtn" style="flex: 1;" data-i18n="cancel">Ακύρωση</button>
+                <button class="btn btn-primary" id="submitChangeCodeBtn" style="flex: 1;" data-i18n="confirm">Επιβεβαίωση</button>
             </div>
         </div>
     </div>
@@ -1008,6 +1008,140 @@ VIP Table</textarea>
     </div>
 
     <script>
+        // ========== TRANSLATIONS OBJECT ==========
+        const translations = {
+            el: {
+                appTitle: "Εφαρμογή Εστιατορίου - PERFECT + SOUNDS",
+                loading: "Φόρτωση μενού...",
+                helpButton: "Χρειάζεστε βοήθεια?",
+                myOrdersButton: "Οι Παραγγελίες μου",
+                tableInfo: "Σαρώστε QR για έναρξη",
+                scannerTitle: "Σαρώστε το QR του τραπεζιού",
+                scannerSubtitle: "Στρέψτε την κάμερα στο QR του τραπεζιού σας για να ξεκινήσετε",
+                qrPlaceholder: "Περιοχή Σάρωσης QR",
+                demoTablesInstruction: "Για δοκιμή, επιλέξτε ένα τραπέζι:",
+                table1: "Τραπέζι 1",
+                table2: "Τραπέζι 2",
+                table3: "Τραπέζι 3",
+                table4: "Τραπέζι 4",
+                table5: "Τραπέζι 5",
+                vipTable: "Τραπέζι VIP",
+                scannerNote: "Μόλις σαρώσετε, θα μπορείτε να δείτε το μενού και να κάνετε την παραγγελία σας.",
+                adminAccessNote: "Πρόσβαση διαχειριστή μόνο μέσω QR του τραπεζιού Admin.",
+                menuTitle: "Το Μενού μας",
+                menuSubtitle: "Επιλέξτε είδη για να προσθέσετε στην παραγγελία σας",
+                cartTitle: "Η Παραγγελία σας",
+                cartSubtitle: "Ελέγξτε την παραγγελία σας πριν την πληρωμή",
+                emptyCart: "Το καλάθι σας είναι άδειο",
+                subtotal: "Υποσύνολο (με φόρους)",
+                total: "Σύνολο",
+                backToMenu: "Πίσω στο Μενού",
+                proceedToPayment: "Συνέχεια στην Πληρωμή",
+                paymentTitle: "Πληρωμή",
+                paymentSubtitle: "Ολοκληρώστε την παραγγελία σας με πληρωμή",
+                paymentMethod: "Τρόπος Πληρωμής",
+                paymentCard: "Πιστωτική/Χρεωστική Κάρτα",
+                paymentCardDesc: "Πληρώστε με κάρτα",
+                paymentCash: "Μετρητά",
+                paymentCashDesc: "Πληρώστε με μετρητά",
+                paymentTime: "Χρόνος Πληρωμής",
+                payNow: "Πληρωμή Τώρα",
+                payNowDesc: "Ολοκληρώστε την πληρωμή άμεσα",
+                payLater: "Πληρωμή Αργότερα",
+                payLaterDesc: "Πληρώστε στο ταμείο όταν φεύγετε",
+                backToCart: "Πίσω στο Καλάθι",
+                confirmPayment: "Επιβεβαίωση Πληρωμής",
+                myOrdersTitle: "Οι Παραγγελίες μου",
+                myOrdersSubtitle: "Δείτε όλες τις τρέχουσες και παλιές παραγγελίες σας",
+                newOrder: "Νέα Παραγγελία",
+                confirmationTitle: "Η Παραγγελία Επιβεβαιώθηκε!",
+                confirmationMessage: "Ευχαριστούμε για την παραγγελία σας. Το φαγητό σας θα ετοιμαστεί σύντομα.",
+                viewMyOrders: "Προβολή των Παραγγελιών μου",
+                orderDetails: "Λεπτομέρειες Παραγγελίας",
+                totalWithTax: "Συνολικό Ποσό (με φόρους)",
+                paymentInfo: "Πληροφορίες Πληρωμής",
+                paymentMethodLabel: "Τρόπος Πληρωμής:",
+                paymentTimeLabel: "Χρόνος Πληρωμής:",
+                orderStatusLabel: "Κατάσταση Παραγγελίας:",
+                estimatedTimeLabel: "Εκτιμώμενος χρόνος προετοιμασίας:",
+                minutes: "λεπτά",
+                viewFullMenu: "Προβολή Πλήρους Μενού",
+                needHelp: "Χρειάζεστε βοήθεια?",
+                adminCodeTitle: "Απαιτείται Πρόσβαση Διαχειριστή",
+                adminCodeSubtitle: "Παρακαλώ εισάγετε τον κωδικό διαχειριστή για να συνεχίσετε",
+                adminChangeTitle: "Επιβεβαίωση Αλλαγών",
+                adminChangeSubtitle: "Παρακαλώ εισάγετε τον κωδικό επιβεβαίωσης για να αποθηκεύσετε τις αλλαγές",
+                cancel: "Ακύρωση",
+                submit: "Υποβολή",
+                confirm: "Επιβεβαίωση"
+            },
+            en: {
+                appTitle: "Restaurant App - PERFECT + SOUNDS",
+                loading: "Loading menu...",
+                helpButton: "Need help?",
+                myOrdersButton: "My Orders",
+                tableInfo: "Scan QR to start",
+                scannerTitle: "Scan Table QR",
+                scannerSubtitle: "Point your camera at the table QR to begin",
+                qrPlaceholder: "QR Scan Area",
+                demoTablesInstruction: "For testing, select a table:",
+                table1: "Table 1",
+                table2: "Table 2",
+                table3: "Table 3",
+                table4: "Table 4",
+                table5: "Table 5",
+                vipTable: "VIP Table",
+                scannerNote: "Once scanned, you can view the menu and place your order.",
+                adminAccessNote: "Admin access only via Admin table QR.",
+                menuTitle: "Our Menu",
+                menuSubtitle: "Select items to add to your order",
+                cartTitle: "Your Order",
+                cartSubtitle: "Review your order before payment",
+                emptyCart: "Your cart is empty",
+                subtotal: "Subtotal (incl. tax)",
+                total: "Total",
+                backToMenu: "Back to Menu",
+                proceedToPayment: "Proceed to Payment",
+                paymentTitle: "Payment",
+                paymentSubtitle: "Complete your order with payment",
+                paymentMethod: "Payment Method",
+                paymentCard: "Credit/Debit Card",
+                paymentCardDesc: "Pay with card",
+                paymentCash: "Cash",
+                paymentCashDesc: "Pay with cash",
+                paymentTime: "Payment Time",
+                payNow: "Pay Now",
+                payNowDesc: "Complete payment immediately",
+                payLater: "Pay Later",
+                payLaterDesc: "Pay at the counter when you leave",
+                backToCart: "Back to Cart",
+                confirmPayment: "Confirm Payment",
+                myOrdersTitle: "My Orders",
+                myOrdersSubtitle: "View all your current and past orders",
+                newOrder: "New Order",
+                confirmationTitle: "Order Confirmed!",
+                confirmationMessage: "Thank you for your order. Your food will be prepared shortly.",
+                viewMyOrders: "View My Orders",
+                orderDetails: "Order Details",
+                totalWithTax: "Total Amount (incl. tax)",
+                paymentInfo: "Payment Information",
+                paymentMethodLabel: "Payment Method:",
+                paymentTimeLabel: "Payment Time:",
+                orderStatusLabel: "Order Status:",
+                estimatedTimeLabel: "Estimated preparation time:",
+                minutes: "minutes",
+                viewFullMenu: "View Full Menu",
+                needHelp: "Need help?",
+                adminCodeTitle: "Administrator Access Required",
+                adminCodeSubtitle: "Please enter the administrator code to continue",
+                adminChangeTitle: "Confirm Changes",
+                adminChangeSubtitle: "Please enter the confirmation code to save changes",
+                cancel: "Cancel",
+                submit: "Submit",
+                confirm: "Confirm"
+            }
+        };
+
         // ========== FIREBASE INITIALIZATION ==========
         const firebaseConfig = {
             apiKey: "AIzaSyCtO20G2Ssl9cvB6CP1xfCh2Ldf4GMdGUg",
@@ -1082,18 +1216,18 @@ VIP Table</textarea>
 
         // ========== DEFAULT DATA – NOW WITH GREEK + ENGLISH FIELDS ==========
         const defaultMenuItems = [
-            { id: 1, name: "Πίτσα Μαργαρίτα", nameEn: "", description: "Κλασική σάλτσα ντομάτας, φρέσκια μοτσαρέλα, βασιλικός", descriptionEn: "", price: 14.99, category: "pizza", tags: ["Χορτοφαγική", "Δημοφιλής"], tagsEn: [], image: "", options: [] },
-            { id: 2, name: "Πίτσα Πεπερονί", nameEn: "", description: "Σάλτσα ντομάτας, μοτσαρέλα, διπλό πεπερόνι", descriptionEn: "", price: 16.99, category: "pizza", tags: ["Πικάντικη"], tagsEn: [], image: "", options: [] },
-            { id: 3, name: "Σαλάτα Καίσαρα", nameEn: "", description: "Μαρούλι ρωμαϊκό, παρμεζάνα, κρουτόν, σάλτσα Καίσαρα", descriptionEn: "", price: 9.99, category: "salads", tags: ["Χορτοφαγική"], tagsEn: [], image: "", options: [] },
-            { id: 4, name: "Χωριάτικη Σαλάτα", nameEn: "", description: "Αγγούρι, ντομάτα, ελιές, φέτα, ρίγανη", descriptionEn: "", price: 10.99, category: "salads", tags: ["Χορτοφαγική", "Υγιεινή"], tagsEn: [], image: "", options: [] },
-            { id: 5, name: "Σπαγγέτι Καρμπονάρα", nameEn: "", description: "Αυγά, τυρί, πανσέτα, μαύρο πιπέρι", descriptionEn: "", price: 13.99, category: "pasta", tags: ["Δημοφιλής"], tagsEn: [], image: "", options: [] },
-            { id: 6, name: "Λαζάνια", nameEn: "", description: "Στρώσεις ζύμης, κιμάς, μπεσαμέλ, παρμεζάνα", descriptionEn: "", price: 15.99, category: "pasta", tags: [], tagsEn: [], image: "", options: [] },
-            { id: 7, name: "Σολομός στη Σχάρα", nameEn: "", description: "Φρέσκο φιλέτο σολομού, σάλτσα λεμονιού, λαχανικά", descriptionEn: "", price: 19.99, category: "main", tags: ["Χωρίς γλουτένη"], tagsEn: [], image: "", options: [] },
-            { id: 8, name: "Μπριζόλα Ribeye", nameEn: "", description: "300γρ. ribeye, συνοδεύεται από πατάτες και σαλάτα", descriptionEn: "", price: 24.99, category: "main", tags: ["Δημοφιλής"], tagsEn: [], image: "", options: [] },
-            { id: 9, name: "Τιραμισού", nameEn: "", description: "Μπισκότα Savoiardi εμποτισμένα με καφέ, κρέμα μασκαρπόνε, κακάο", descriptionEn: "", price: 7.99, category: "desserts", tags: ["Χορτοφαγική"], tagsEn: [], image: "", options: [] },
-            { id: 10, name: "Τσιζκέικ", nameEn: "", description: "Νεοϋορκέζικο, σάλτσα μούρων", descriptionEn: "", price: 6.99, category: "desserts", tags: ["Χορτοφαγική"], tagsEn: [], image: "", options: [] },
-            { id: 11, name: "Coca-Cola", nameEn: "", description: "Αναψυκτικό 330ml", descriptionEn: "", price: 2.50, category: "beverages", tags: [], tagsEn: [], image: "", options: [] },
-            { id: 12, name: "Φρέσκος Χυμός Πορτοκάλι", nameEn: "", description: "Φρεσκοστυμμένος", descriptionEn: "", price: 3.50, category: "beverages", tags: ["Υγιεινή"], tagsEn: [], image: "", options: [] }
+            { id: 1, name: "Πίτσα Μαργαρίτα", nameEn: "Margherita Pizza", description: "Κλασική σάλτσα ντομάτας, φρέσκια μοτσαρέλα, βασιλικός", descriptionEn: "Classic tomato sauce, fresh mozzarella, basil", price: 14.99, category: "pizza", tags: ["Χορτοφαγική", "Δημοφιλής"], tagsEn: ["Vegetarian", "Popular"], image: "", options: [] },
+            { id: 2, name: "Πίτσα Πεπερονί", nameEn: "Pepperoni Pizza", description: "Σάλτσα ντομάτας, μοτσαρέλα, διπλό πεπερόνι", descriptionEn: "Tomato sauce, mozzarella, double pepperoni", price: 16.99, category: "pizza", tags: ["Πικάντικη"], tagsEn: ["Spicy"], image: "", options: [] },
+            { id: 3, name: "Σαλάτα Καίσαρα", nameEn: "Caesar Salad", description: "Μαρούλι ρωμαϊκό, παρμεζάνα, κρουτόν, σάλτσα Καίσαρα", descriptionEn: "Romaine lettuce, parmesan, croutons, Caesar dressing", price: 9.99, category: "salads", tags: ["Χορτοφαγική"], tagsEn: ["Vegetarian"], image: "", options: [] },
+            { id: 4, name: "Χωριάτικη Σαλάτα", nameEn: "Greek Salad", description: "Αγγούρι, ντομάτα, ελιές, φέτα, ρίγανη", descriptionEn: "Cucumber, tomato, olives, feta, oregano", price: 10.99, category: "salads", tags: ["Χορτοφαγική", "Υγιεινή"], tagsEn: ["Vegetarian", "Healthy"], image: "", options: [] },
+            { id: 5, name: "Σπαγγέτι Καρμπονάρα", nameEn: "Spaghetti Carbonara", description: "Αυγά, τυρί, πανσέτα, μαύρο πιπέρι", descriptionEn: "Eggs, cheese, pancetta, black pepper", price: 13.99, category: "pasta", tags: ["Δημοφιλής"], tagsEn: ["Popular"], image: "", options: [] },
+            { id: 6, name: "Λαζάνια", nameEn: "Lasagna", description: "Στρώσεις ζύμης, κιμάς, μπεσαμέλ, παρμεζάνα", descriptionEn: "Layered pasta, minced meat, béchamel, parmesan", price: 15.99, category: "pasta", tags: [], tagsEn: [], image: "", options: [] },
+            { id: 7, name: "Σολομός στη Σχάρα", nameEn: "Grilled Salmon", description: "Φρέσκο φιλέτο σολομού, σάλτσα λεμονιού, λαχανικά", descriptionEn: "Fresh salmon fillet, lemon sauce, vegetables", price: 19.99, category: "main", tags: ["Χωρίς γλουτένη"], tagsEn: ["Gluten-free"], image: "", options: [] },
+            { id: 8, name: "Μπριζόλα Ribeye", nameEn: "Ribeye Steak", description: "300γρ. ribeye, συνοδεύεται από πατάτες και σαλάτα", descriptionEn: "300g ribeye, served with potatoes and salad", price: 24.99, category: "main", tags: ["Δημοφιλής"], tagsEn: ["Popular"], image: "", options: [] },
+            { id: 9, name: "Τιραμισού", nameEn: "Tiramisu", description: "Μπισκότα Savoiardi εμποτισμένα με καφέ, κρέμα μασκαρπόνε, κακάο", descriptionEn: "Savoiardi biscuits soaked in coffee, mascarpone cream, cocoa", price: 7.99, category: "desserts", tags: ["Χορτοφαγική"], tagsEn: ["Vegetarian"], image: "", options: [] },
+            { id: 10, name: "Τσιζκέικ", nameEn: "Cheesecake", description: "Νεοϋορκέζικο, σάλτσα μούρων", descriptionEn: "New York style, berry sauce", price: 6.99, category: "desserts", tags: ["Χορτοφαγική"], tagsEn: ["Vegetarian"], image: "", options: [] },
+            { id: 11, name: "Coca-Cola", nameEn: "Coca-Cola", description: "Αναψυκτικό 330ml", descriptionEn: "Soft drink 330ml", price: 2.50, category: "beverages", tags: [], tagsEn: [], image: "", options: [] },
+            { id: 12, name: "Φρέσκος Χυμός Πορτοκάλι", nameEn: "Fresh Orange Juice", description: "Φρεσκοστυμμένος", descriptionEn: "Freshly squeezed", price: 3.50, category: "beverages", tags: ["Υγιεινή"], tagsEn: ["Healthy"], image: "", options: [] }
         ];
 
         const defaultCategories = [
@@ -1225,18 +1359,37 @@ VIP Table</textarea>
             return choice.name;
         }
 
+        // ========== TRANSLATION FUNCTION ==========
+        function applyTranslations() {
+            const lang = state.currentLanguage;
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang] && translations[lang][key]) {
+                    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                        el.setAttribute('placeholder', translations[lang][key]);
+                    } else {
+                        el.textContent = translations[lang][key];
+                    }
+                }
+            });
+            // Update dynamic texts that are not in data-i18n
+            if (state.currentTable && !state.isAdminMode) {
+                menuSubtitle.textContent = state.cart.length === 0 
+                    ? (lang === 'el' ? `Επιλέξτε είδη για την παραγγελία σας για ${state.currentTable}` : `Select items for your order for ${state.currentTable}`)
+                    : (lang === 'el' ? `Συνεχίστε να προσθέτετε είδη στην παραγγελία σας για ${state.currentTable}` : `Continue adding items to your order for ${state.currentTable}`);
+                cartSubtitle.textContent = lang === 'el' ? `Η παραγγελία σας για ${state.currentTable}` : `Your order for ${state.currentTable}`;
+            }
+            // Update language toggle button text
+            document.getElementById('langToggleText').textContent = lang === 'el' ? 'EN' : 'EL';
+        }
+
         // ========== LANGUAGE TOGGLE ==========
         function toggleLanguage() {
             state.currentLanguage = state.currentLanguage === 'el' ? 'en' : 'el';
-            document.getElementById('langToggleText').textContent = state.currentLanguage === 'el' ? 'EN' : 'EL';
+            applyTranslations();
             if (document.querySelector('#menuSection.active-section')) {
                 const activeCat = document.querySelector('.category-tab.active')?.dataset?.category || 'all';
                 displayMenuItems(activeCat);
-            }
-            if (state.currentTable && !state.isAdminMode) {
-                menuSubtitle.textContent = state.cart.length === 0 
-                    ? `Επιλέξτε είδη για την παραγγελία σας για ${state.currentTable}` 
-                    : `Συνεχίστε να προσθέτετε είδη στην παραγγελία σας για ${state.currentTable}`;
             }
             showNotification(`Language switched to ${state.currentLanguage === 'el' ? 'Greek' : 'English'}`);
         }
@@ -1321,6 +1474,7 @@ VIP Table</textarea>
                 updateRestaurantUI();
                 updateCategoryTabs();
                 displayMenuItems('all');
+                applyTranslations(); // Initial translation
             } catch (e) { console.error("loadInitialData", e); }
         }
 
@@ -1481,12 +1635,15 @@ VIP Table</textarea>
             if (!menuGrid) return;
             menuGrid.innerHTML = '';
             const filtered = category === 'all' ? [...state.menuItems].sort((a,b)=>(a.displayOrder||0)-(b.displayOrder||0)) : state.menuItems.filter(i=>i.category===category).sort((a,b)=>(a.displayOrder||0)-(b.displayOrder||0));
-            if (filtered.length === 0) { menuGrid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--gray);"><i class="fas fa-utensils" style="font-size:50px; margin-bottom:15px; opacity:0.5;"></i><p>Δεν υπάρχουν είδη σε αυτή την κατηγορία ακόμα.</p></div>'; return; }
+            if (filtered.length === 0) { 
+                menuGrid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--gray);"><i class="fas fa-utensils" style="font-size:50px; margin-bottom:15px; opacity:0.5;"></i><p>${state.currentLanguage === 'el' ? 'Δεν υπάρχουν είδη σε αυτή την κατηγορία ακόμα.' : 'No items in this category yet.'}</p></div>`; 
+                return; 
+            }
             filtered.forEach(item => {
                 const el = document.createElement('div'); el.className = 'menu-item';
                 const imgStyle = item.image ? `background-image: url('${item.image}')` : 'background-color: var(--light-gray)';
                 let optInd = '';
-                if (item.options && item.options.length) optInd = `<div class="item-options-indicator"><i class="fas fa-sliders-h"></i> Με επιλογές</div>`;
+                if (item.options && item.options.length) optInd = `<div class="item-options-indicator"><i class="fas fa-sliders-h"></i> ${state.currentLanguage === 'el' ? 'Με επιλογές' : 'With options'}</div>`;
                 const itemName = getItemName(item);
                 const itemDesc = getItemDescription(item);
                 const itemTags = getItemTags(item);
@@ -1528,16 +1685,16 @@ VIP Table</textarea>
                 else state.cart.push(cartItem);
             } else state.cart.push(cartItem);
             updateCart();
-            showNotification(`Το ${getItemName(menuItem)} προστέθηκε στο καλάθι`);
+            showNotification(state.currentLanguage === 'el' ? `Το ${getItemName(menuItem)} προστέθηκε στο καλάθι` : `${getItemName(menuItem)} added to cart`);
             playSound(state.soundEffects.addToCartSound);
         }
         function openOptionsModal(item) {
             let html = `<h3 class="options-modal-title">${getItemName(item)}</h3><div class="options-modal-price">$${item.price.toFixed(2)}</div><div class="item-description" style="margin-bottom:20px;">${getItemDescription(item)}</div>`;
             item.options.forEach((g, gi) => {
                 if (g.type === 'text') {
-                    html += `<div class="option-group"><div class="option-group-title"><i class="fas fa-comment"></i> ${getOptionGroupName(g)}</div><div class="comment-field"><textarea class="admin-textarea" placeholder="Εισάγετε το σχόλιό σας εδώ..." id="comment_${g.id||gi}"></textarea></div></div>`;
+                    html += `<div class="option-group"><div class="option-group-title"><i class="fas fa-comment"></i> ${getOptionGroupName(g)}</div><div class="comment-field"><textarea class="admin-textarea" placeholder="${state.currentLanguage === 'el' ? 'Εισάγετε το σχόλιό σας εδώ...' : 'Enter your comment here...'}" id="comment_${g.id||gi}"></textarea></div></div>`;
                 } else {
-                    html += `<div class="option-group"><div class="option-group-title"><i class="fas fa-tag"></i> ${getOptionGroupName(g)} ${g.type==='radio'?'<span style="font-size:12px; color:var(--gray);">(επιλέξτε ένα)</span>':'<span style="font-size:12px; color:var(--gray);">(επιλέξτε οποιοδήποτε)</span>'}</div><div class="${g.type==='radio'?'option-group-radio':'option-group-checkbox'}">`;
+                    html += `<div class="option-group"><div class="option-group-title"><i class="fas fa-tag"></i> ${getOptionGroupName(g)} ${g.type==='radio'?`<span style="font-size:12px; color:var(--gray);">(${state.currentLanguage === 'el' ? 'επιλέξτε ένα' : 'choose one'})</span>`:`<span style="font-size:12px; color:var(--gray);">(${state.currentLanguage === 'el' ? 'επιλέξτε οποιοδήποτε' : 'choose any'})</span>`}</div><div class="${g.type==='radio'?'option-group-radio':'option-group-checkbox'}">`;
                     g.choices.forEach((c, ci) => {
                         let priceText = ''; let priceClass = '';
                         if (c.price>0) { priceText = `+$${c.price.toFixed(2)}`; priceClass = 'choice-price-positive'; }
@@ -1549,7 +1706,7 @@ VIP Table</textarea>
                     html += `</div></div>`;
                 }
             });
-            html += `<div class="options-total"><span>Σύνολο:</span><span class="options-total-amount" id="optionsTotalAmount">$${item.price.toFixed(2)}</span></div><div class="options-modal-actions"><button class="btn btn-secondary" id="cancelOptionsBtn"><i class="fas fa-times"></i> Ακύρωση</button><button class="btn btn-primary" id="confirmOptionsBtn"><i class="fas fa-check"></i> Προσθήκη στο Καλάθι</button></div>`;
+            html += `<div class="options-total"><span>${state.currentLanguage === 'el' ? 'Σύνολο:' : 'Total:'}</span><span class="options-total-amount" id="optionsTotalAmount">$${item.price.toFixed(2)}</span></div><div class="options-modal-actions"><button class="btn btn-secondary" id="cancelOptionsBtn"><i class="fas fa-times"></i> ${state.currentLanguage === 'el' ? 'Ακύρωση' : 'Cancel'}</button><button class="btn btn-primary" id="confirmOptionsBtn"><i class="fas fa-check"></i> ${state.currentLanguage === 'el' ? 'Προσθήκη στο Καλάθι' : 'Add to Cart'}</button></div>`;
             optionsModalContent.innerHTML = html;
             optionsModal.style.display = 'flex';
             const inputs = optionsModal.querySelectorAll('input[type="radio"], input[type="checkbox"]');
@@ -1577,7 +1734,7 @@ VIP Table</textarea>
             if (state.isAdminMode) return;
             const totalItems = state.cart.reduce((s,i)=>s+i.quantity,0);
             cartCount.textContent = totalItems;
-            if (state.cart.length === 0) cartItems.innerHTML = '<div class="empty-cart" style="text-align: center; padding: 40px; color: var(--gray);"><i class="fas fa-shopping-cart" style="font-size: 50px; margin-bottom: 15px; opacity: 0.5;"></i><p>Το καλάθι σας είναι άδειο</p></div>';
+            if (state.cart.length === 0) cartItems.innerHTML = `<div class="empty-cart" style="text-align: center; padding: 40px; color: var(--gray);"><i class="fas fa-shopping-cart" style="font-size: 50px; margin-bottom: 15px; opacity: 0.5;"></i><p>${state.currentLanguage === 'el' ? 'Το καλάθι σας είναι άδειο' : 'Your cart is empty'}</p></div>`;
             else {
                 cartItems.innerHTML = '';
                 state.cart.forEach(item => {
@@ -1610,7 +1767,7 @@ VIP Table</textarea>
         }
         function removeFromCart(id, opts) {
             const idx = state.cart.findIndex(i => i.id===id && JSON.stringify(i.selectedOptions)===JSON.stringify(opts));
-            if (idx !== -1) { const item = state.cart[idx]; state.cart.splice(idx,1); updateCart(); showNotification(`Το ${item.name} αφαιρέθηκε από το καλάθι`); }
+            if (idx !== -1) { const item = state.cart[idx]; state.cart.splice(idx,1); updateCart(); showNotification(state.currentLanguage === 'el' ? `Το ${item.name} αφαιρέθηκε από το καλάθι` : `${item.name} removed from cart`); }
         }
         function calculateSubtotal() { return state.cart.reduce((s,i)=>s + i.price * i.quantity, 0); }
         function calculateTotal() { return calculateSubtotal(); }
@@ -1627,7 +1784,7 @@ VIP Table</textarea>
         function generateOrderNumber() { return `ORD-${Math.floor(1000+Math.random()*9000)}`; }
         function showOrderConfirmation(order) {
             orderNumberDisplay.textContent = order.orderNumber;
-            confirmationTable.textContent = `Τραπέζι: ${order.table}`;
+            confirmationTable.textContent = `${state.currentLanguage === 'el' ? 'Τραπέζι:' : 'Table:'} ${order.table}`;
             confirmationItems.innerHTML = '';
             order.items.forEach(i => {
                 let opt = '';
@@ -1637,16 +1794,16 @@ VIP Table</textarea>
                 confirmationItems.innerHTML += `<div class="order-item"><div class="order-item-name"><div class="order-item-quantity">${i.quantity}</div><div>${i.name}${opt}</div></div><div class="order-item-price">$${(i.price*i.quantity).toFixed(2)}</div></div>`;
             });
             confirmationTotal.textContent = `$${order.total.toFixed(2)}`;
-            confirmationPaymentMethod.textContent = order.paymentMethod === 'card' ? 'Πιστωτική/Χρεωστική Κάρτα' : 'Μετρητά';
-            confirmationPaymentTime.textContent = order.paymentTime === 'now' ? 'Πληρωμή Τώρα' : 'Πληρωμή Αργότερα';
-            confirmationOrderStatus.textContent = order.status === 'pending' ? 'Εκκρεμεί' : (order.status.charAt(0).toUpperCase() + order.status.slice(1));
+            confirmationPaymentMethod.textContent = order.paymentMethod === 'card' ? (state.currentLanguage === 'el' ? 'Πιστωτική/Χρεωστική Κάρτα' : 'Credit/Debit Card') : (state.currentLanguage === 'el' ? 'Μετρητά' : 'Cash');
+            confirmationPaymentTime.textContent = order.paymentTime === 'now' ? (state.currentLanguage === 'el' ? 'Πληρωμή Τώρα' : 'Pay Now') : (state.currentLanguage === 'el' ? 'Πληρωμή Αργότερα' : 'Pay Later');
+            confirmationOrderStatus.textContent = order.status === 'pending' ? (state.currentLanguage === 'el' ? 'Εκκρεμεί' : 'Pending') : (order.status.charAt(0).toUpperCase() + order.status.slice(1));
         }
         function resetCart() { state.cart = []; updateCart(); }
         function resetOrder() {
             state.cart = []; state.selectedPaymentMethod = null; state.selectedPaymentTime = null; state.currentOrderNumber = null; state.currentTable = null;
             updateCart(); document.querySelectorAll('.option-card').forEach(c=>c.classList.remove('selected'));
-            tableInfo.innerHTML = `<i class="fas fa-qrcode"></i> Σαρώστε QR για έναρξη`;
-            menuSubtitle.textContent = 'Επιλέξτε είδη για να προσθέσετε στην παραγγελία σας';
+            tableInfo.innerHTML = `<i class="fas fa-qrcode"></i> ${state.currentLanguage === 'el' ? 'Σαρώστε QR για έναρξη' : 'Scan QR to start'}`;
+            menuSubtitle.textContent = state.currentLanguage === 'el' ? 'Επιλέξτε είδη για να προσθέσετε στην παραγγελία σας' : 'Select items to add to your order';
             myOrdersButton.style.display = 'none';
             adminFloating.style.display = 'none';
         }
@@ -1655,49 +1812,55 @@ VIP Table</textarea>
             document.querySelectorAll('.app-section, .admin-dashboard-section').forEach(s=>{ s.classList.remove('active-section'); s.style.display='none'; });
             const sec = document.getElementById(id);
             if (sec) { sec.style.display = 'block'; setTimeout(()=>sec.classList.add('active-section'),10); }
-            if (id==='cartSection' && state.currentTable && !state.isAdminMode) cartSubtitle.textContent = `Η παραγγελία σας για ${state.currentTable}`;
-            if (id==='menuSection' && state.currentTable && !state.isAdminMode) menuSubtitle.textContent = state.cart.length===0 ? `Επιλέξτε είδη για την παραγγελία σας για ${state.currentTable}` : `Συνεχίστε να προσθέτετε είδη στην παραγγελία σας για ${state.currentTable}`;
+            if (id==='cartSection' && state.currentTable && !state.isAdminMode) cartSubtitle.textContent = state.currentLanguage === 'el' ? `Η παραγγελία σας για ${state.currentTable}` : `Your order for ${state.currentTable}`;
+            if (id==='menuSection' && state.currentTable && !state.isAdminMode) menuSubtitle.textContent = state.cart.length===0 ? (state.currentLanguage === 'el' ? `Επιλέξτε είδη για την παραγγελία σας για ${state.currentTable}` : `Select items for your order for ${state.currentTable}`) : (state.currentLanguage === 'el' ? `Συνεχίστε να προσθέτετε είδη στην παραγγελία σας για ${state.currentTable}` : `Continue adding items to your order for ${state.currentTable}`);
             if (id==='myOrdersSection' && state.currentTable && !state.isAdminMode) loadMyOrders();
             if (state.isAdminMode) cartFloating.style.display = 'none'; else if (id!=='scannerSection') cartFloating.style.display = 'flex';
         }
         function loadMyOrders() {
-            if (!state.currentTable || state.isAdminMode) { ordersList.innerHTML = '<div class="no-orders-message"><i class="fas fa-clipboard-list"></i><h3>Δεν επιλέχθηκε τραπέζι</h3><p>Παρακαλώ επιλέξτε πρώτα ένα τραπέζι για να δείτε τις παραγγελίες σας.</p></div>'; return; }
+            if (!state.currentTable || state.isAdminMode) { 
+                ordersList.innerHTML = `<div class="no-orders-message"><i class="fas fa-clipboard-list"></i><h3>${state.currentLanguage === 'el' ? 'Δεν επιλέχθηκε τραπέζι' : 'No table selected'}</h3><p>${state.currentLanguage === 'el' ? 'Παρακαλώ επιλέξτε πρώτα ένα τραπέζι για να δείτε τις παραγγελίες σας.' : 'Please select a table first to view your orders.'}</p></div>`; 
+                return; 
+            }
             const tableOrders = state.orders.filter(o=>o.table===state.currentTable);
-            if (tableOrders.length===0) { ordersList.innerHTML = '<div class="no-orders-message"><i class="fas fa-clipboard-list"></i><h3>Δεν υπάρχουν παραγγελίες ακόμα</h3><p>Δεν έχετε κάνει ακόμη καμία παραγγελία. Ξεκινήστε επιλέγοντας είδη από το μενού.</p></div>'; return; }
+            if (tableOrders.length===0) { 
+                ordersList.innerHTML = `<div class="no-orders-message"><i class="fas fa-clipboard-list"></i><h3>${state.currentLanguage === 'el' ? 'Δεν υπάρχουν παραγγελίες ακόμα' : 'No orders yet'}</h3><p>${state.currentLanguage === 'el' ? 'Δεν έχετε κάνει ακόμη καμία παραγγελία. Ξεκινήστε επιλέγοντας είδη από το μενού.' : 'You haven\'t placed any orders yet. Start by selecting items from the menu.'}</p></div>`; 
+                return; 
+            }
             tableOrders.sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
             ordersList.innerHTML = '';
             tableOrders.forEach(o => {
                 const card = document.createElement('div'); card.className = 'order-card';
-                const date = new Date(o.timestamp).toLocaleString('el-GR');
+                const date = new Date(o.timestamp).toLocaleString(state.currentLanguage === 'el' ? 'el-GR' : 'en-US');
                 let badge = ''; 
                 switch(o.status) { 
-                    case 'pending': badge='<span class="order-status-badge status-pending">Εκκρεμεί</span>'; break; 
-                    case 'preparing': badge='<span class="order-status-badge status-preparing">Ετοιμάζεται</span>'; break; 
-                    case 'ready': badge='<span class="order-status-badge status-ready">Έτοιμο</span>'; break; 
-                    case 'served': badge='<span class="order-status-badge status-served">Σερβιρίστηκε</span>'; break; 
-                    case 'cancelled': badge='<span class="order-status-badge status-cancelled">Ακυρώθηκε</span>'; 
+                    case 'pending': badge=`<span class="order-status-badge status-pending">${state.currentLanguage === 'el' ? 'Εκκρεμεί' : 'Pending'}</span>`; break; 
+                    case 'preparing': badge=`<span class="order-status-badge status-preparing">${state.currentLanguage === 'el' ? 'Ετοιμάζεται' : 'Preparing'}</span>`; break; 
+                    case 'ready': badge=`<span class="order-status-badge status-ready">${state.currentLanguage === 'el' ? 'Έτοιμο' : 'Ready'}</span>`; break; 
+                    case 'served': badge=`<span class="order-status-badge status-served">${state.currentLanguage === 'el' ? 'Σερβιρίστηκε' : 'Served'}</span>`; break; 
+                    case 'cancelled': badge=`<span class="order-status-badge status-cancelled">${state.currentLanguage === 'el' ? 'Ακυρώθηκε' : 'Cancelled'}</span>`; 
                 }
                 let itemsSum = '';
                 if (o.items.length<=3) itemsSum = o.items.map(i=>`<div class="order-item-summary"><div class="order-item-summary-name"><div class="order-item-summary-quantity">${i.quantity}</div><div>${i.name}</div></div><div>$${(i.price*i.quantity).toFixed(2)}</div></div>`).join('');
                 else {
                     const first = o.items.slice(0,3); const rem = o.items.length-3;
                     itemsSum = first.map(i=>`<div class="order-item-summary"><div class="order-item-summary-name"><div class="order-item-summary-quantity">${i.quantity}</div><div>${i.name}</div></div><div>$${(i.price*i.quantity).toFixed(2)}</div></div>`).join('');
-                    itemsSum += `<div class="order-item-summary"><div class="order-item-summary-name" style="margin-left: 10px; font-style: italic;">+${rem} ακόμα ${rem>1?'είδη':'είδος'}</div><div></div></div>`;
+                    itemsSum += `<div class="order-item-summary"><div class="order-item-summary-name" style="margin-left: 10px; font-style: italic;">+${rem} ${state.currentLanguage === 'el' ? 'ακόμα' : 'more'} ${rem>1 ? (state.currentLanguage === 'el' ? 'είδη' : 'items') : (state.currentLanguage === 'el' ? 'είδος' : 'item')}</div><div></div></div>`;
                 }
-                card.innerHTML = `<div class="order-card-header"><div><div class="order-card-title">Παραγγελία #${o.orderNumber}</div><div class="order-card-time">${date}</div></div><div>${badge}</div></div><div class="order-card-body"><div class="order-items-summary">${itemsSum}</div><div style="margin-top:15px;"><div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>Τρόπος Πληρωμής:</span><span>${o.paymentMethod==='card'?'Κάρτα':'Μετρητά'}</span></div><div style="display:flex; justify-content:space-between;"><span>Χρόνος Πληρωμής:</span><span>${o.paymentTime==='now'?'Πληρωμή Τώρα':'Πληρωμή Αργότερα'}</span></div></div></div><div class="order-card-footer"><div class="order-total-summary">Σύνολο: $${o.total.toFixed(2)}</div><div style="font-size:14px; color:var(--gray);">${o.status==='pending'?'Η παραγγελία σας επεξεργάζεται':o.status==='preparing'?'Το φαγητό σας ετοιμάζεται':o.status==='ready'?'Η παραγγελία σας είναι έτοιμη':o.status==='served'?'Η παραγγελία σας σερβιρίστηκε':'Η παραγγελία σας ακυρώθηκε'}</div></div>`;
+                card.innerHTML = `<div class="order-card-header"><div><div class="order-card-title">${state.currentLanguage === 'el' ? 'Παραγγελία' : 'Order'} #${o.orderNumber}</div><div class="order-card-time">${date}</div></div><div>${badge}</div></div><div class="order-card-body"><div class="order-items-summary">${itemsSum}</div><div style="margin-top:15px;"><div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>${state.currentLanguage === 'el' ? 'Τρόπος Πληρωμής:' : 'Payment Method:'}</span><span>${o.paymentMethod==='card' ? (state.currentLanguage === 'el' ? 'Κάρτα' : 'Card') : (state.currentLanguage === 'el' ? 'Μετρητά' : 'Cash')}</span></div><div style="display:flex; justify-content:space-between;"><span>${state.currentLanguage === 'el' ? 'Χρόνος Πληρωμής:' : 'Payment Time:'}</span><span>${o.paymentTime==='now' ? (state.currentLanguage === 'el' ? 'Πληρωμή Τώρα' : 'Pay Now') : (state.currentLanguage === 'el' ? 'Πληρωμή Αργότερα' : 'Pay Later')}</span></div></div></div><div class="order-card-footer"><div class="order-total-summary">${state.currentLanguage === 'el' ? 'Σύνολο:' : 'Total:'} $${o.total.toFixed(2)}</div><div style="font-size:14px; color:var(--gray);">${o.status==='pending' ? (state.currentLanguage === 'el' ? 'Η παραγγελία σας επεξεργάζεται' : 'Your order is being processed') : o.status==='preparing' ? (state.currentLanguage === 'el' ? 'Το φαγητό σας ετοιμάζεται' : 'Your food is being prepared') : o.status==='ready' ? (state.currentLanguage === 'el' ? 'Η παραγγελία σας είναι έτοιμη' : 'Your order is ready') : o.status==='served' ? (state.currentLanguage === 'el' ? 'Η παραγγελία σας σερβιρίστηκε' : 'Your order has been served') : (state.currentLanguage === 'el' ? 'Η παραγγελία σας ακυρώθηκε' : 'Your order was cancelled')}</div></div>`;
                 ordersList.appendChild(card);
             });
-            myOrdersSubtitle.textContent = `Έχετε ${tableOrders.length} παραγγελ${tableOrders.length!==1?'ίες':'ία'} για ${state.currentTable}`;
+            myOrdersSubtitle.textContent = state.currentLanguage === 'el' ? `Έχετε ${tableOrders.length} παραγγελ${tableOrders.length!==1?'ίες':'ία'} για ${state.currentTable}` : `You have ${tableOrders.length} order${tableOrders.length!==1?'s':''} for ${state.currentTable}`;
         }
 
         // ========== SELECT TABLE ==========
         function selectTable(name, isAutoLogin = false) {
             state.currentTable = name;
             tableInfo.innerHTML = `<i class="fas fa-chair"></i> ${name}`;
-            menuSubtitle.textContent = `Επιλέξτε είδη για να προσθέσετε στην παραγγελία σας για ${name}`;
-            cartSubtitle.textContent = `Η παραγγελία σας για ${name}`;
+            menuSubtitle.textContent = state.currentLanguage === 'el' ? `Επιλέξτε είδη για να προσθέσετε στην παραγγελία σας για ${name}` : `Select items to add to your order for ${name}`;
+            cartSubtitle.textContent = state.currentLanguage === 'el' ? `Η παραγγελία σας για ${name}` : `Your order for ${name}`;
             localStorage.setItem('dineEasyTable', name);
-            showNotification(`Το τραπέζι ${name} επιλέχθηκε. Καλώς ήρθατε!`);
+            showNotification(state.currentLanguage === 'el' ? `Το τραπέζι ${name} επιλέχθηκε. Καλώς ήρθατε!` : `Table ${name} selected. Welcome!`);
             resetCart();
             updateCategoryTabs();
             displayMenuItems('all');
@@ -1723,7 +1886,7 @@ VIP Table</textarea>
         // ========== HELP REQUEST ==========
         async function requestHelp() {
             if (!state.currentTable || state.isAdminMode) {
-                showNotification('Παρακαλώ επιλέξτε πρώτα ένα τραπέζι.');
+                showNotification(state.currentLanguage === 'el' ? 'Παρακαλώ επιλέξτε πρώτα ένα τραπέζι.' : 'Please select a table first.');
                 return;
             }
             playSound(state.soundEffects.helpRequestSound);
@@ -1736,11 +1899,11 @@ VIP Table</textarea>
             };
             state.helpRequests.push(helpRequest);
             await saveHelpRequest(helpRequest);
-            showNotification(`Αίτημα βοήθειας για ${state.currentTable}. Ένας σερβιτόρος θα σας εξυπηρετήσει σύντομα.`);
+            showNotification(state.currentLanguage === 'el' ? `Αίτημα βοήθειας για ${state.currentTable}. Ένας σερβιτόρος θα σας εξυπηρετήσει σύντομα.` : `Help request for ${state.currentTable}. A waiter will assist you shortly.`);
         }
         function showHelpNotification() { 
             if (state.currentTable) { requestHelp(); } 
-            else { showNotification('Ένας σερβιτόρος θα σας εξυπηρετήσει σύντομα.'); }
+            else { showNotification(state.currentLanguage === 'el' ? 'Ένας σερβιτόρος θα σας εξυπηρετήσει σύντομα.' : 'A waiter will assist you shortly.'); }
         }
 
         // ========== ADMIN MODE ==========
@@ -1770,8 +1933,8 @@ VIP Table</textarea>
         function exitAdminMode() {
             state.isAdminMode = false; state.currentTable = null;
             document.body.classList.remove('admin-mode');
-            document.querySelector('.header-center').innerHTML = '<button class="help-button" id="headerHelpButton"><i class="fas fa-headset"></i> Χρειάζεστε βοήθεια?</button><button class="language-toggle" id="languageToggleBtn"><i class="fas fa-language"></i> <span id="langToggleText">EN</span></button>';
-            document.querySelector('.header-right').innerHTML = '<button class="my-orders-button" id="myOrdersButton" style="display: none;"><i class="fas fa-clipboard-list"></i> Οι Παραγγελίες μου</button><div class="table-info" id="tableInfo"><i class="fas fa-qrcode"></i> Σαρώστε QR για έναρξη</div>';
+            document.querySelector('.header-center').innerHTML = '<button class="help-button" id="headerHelpButton"><i class="fas fa-headset"></i> <span data-i18n="helpButton">Χρειάζεστε βοήθεια?</span></button><button class="language-toggle" id="languageToggleBtn"><i class="fas fa-language"></i> <span id="langToggleText">EN</span></button>';
+            document.querySelector('.header-right').innerHTML = '<button class="my-orders-button" id="myOrdersButton" style="display: none;"><i class="fas fa-clipboard-list"></i> <span data-i18n="myOrdersButton">Οι Παραγγελίες μου</span></button><div class="table-info" id="tableInfo"><i class="fas fa-qrcode"></i> <span data-i18n="tableInfo">Σαρώστε QR για έναρξη</span></div>';
             document.getElementById('headerHelpButton').addEventListener('click', showHelpNotification);
             document.getElementById('languageToggleBtn').addEventListener('click', toggleLanguage);
             cartFloating.style.display = 'flex';
@@ -1780,6 +1943,7 @@ VIP Table</textarea>
             adminFloating.style.display = 'none';
             showNotification("Logged out of admin mode.");
             if (state.helpSoundInterval) { clearInterval(state.helpSoundInterval); state.helpSoundInterval = null; }
+            applyTranslations(); // Reapply translations after re-creating elements
         }
 
         // ========== DRAG AND DROP ==========
@@ -3005,7 +3169,7 @@ VIP Table</textarea>
             document.querySelectorAll('.table-btn').forEach(btn => btn.addEventListener('click', function() { selectTable(this.dataset.table, false); }));
             cartFloating.addEventListener('click', function() { if (!state.isAdminMode) showSection('cartSection'); });
             document.getElementById('backToMenuBtn').addEventListener('click', ()=> showSection('menuSection'));
-            document.getElementById('proceedToPaymentBtn').addEventListener('click', function() { if (state.cart.length===0) { showNotification('Παρακαλώ προσθέστε είδη στο καλάθι σας πριν προχωρήσετε στην πληρωμή'); return; } updatePaymentSummary(); showSection('paymentSection'); });
+            document.getElementById('proceedToPaymentBtn').addEventListener('click', function() { if (state.cart.length===0) { showNotification(state.currentLanguage === 'el' ? 'Παρακαλώ προσθέστε είδη στο καλάθι σας πριν προχωρήσετε στην πληρωμή' : 'Please add items to your cart before proceeding to payment'); return; } updatePaymentSummary(); showSection('paymentSection'); });
             document.getElementById('backToCartBtn').addEventListener('click', ()=> showSection('cartSection'));
             document.querySelectorAll('.option-card[data-payment]').forEach(card => {
                 card.addEventListener('click', function() { document.querySelectorAll('.option-card[data-payment]').forEach(c=>c.classList.remove('selected')); this.classList.add('selected'); state.selectedPaymentMethod = this.dataset.payment; });
@@ -3016,7 +3180,7 @@ VIP Table</textarea>
             document.getElementById('confirmPaymentBtn').addEventListener('click', placeOrderOptimistic);
             document.getElementById('newOrderBtn').addEventListener('click', function() { resetOrder(); showSection('scannerSection'); });
             document.getElementById('viewMyOrdersBtn').addEventListener('click', function() { loadMyOrders(); showSection('myOrdersSection'); });
-            document.getElementById('viewMenuBtn').addEventListener('click', function() { resetCart(); state.selectedPaymentMethod = null; state.selectedPaymentTime = null; document.querySelectorAll('.option-card').forEach(c=>c.classList.remove('selected')); if (state.currentTable) menuSubtitle.textContent = `Ξεκινήστε μια νέα παραγγελία για ${state.currentTable}`; showSection('menuSection'); showNotification('Έτοιμοι για νέα παραγγελία!'); });
+            document.getElementById('viewMenuBtn').addEventListener('click', function() { resetCart(); state.selectedPaymentMethod = null; state.selectedPaymentTime = null; document.querySelectorAll('.option-card').forEach(c=>c.classList.remove('selected')); if (state.currentTable) menuSubtitle.textContent = state.currentLanguage === 'el' ? `Ξεκινήστε μια νέα παραγγελία για ${state.currentTable}` : `Start a new order for ${state.currentTable}`; showSection('menuSection'); showNotification(state.currentLanguage === 'el' ? 'Έτοιμοι για νέα παραγγελία!' : 'Ready for a new order!'); });
             document.getElementById('needHelpBtn').addEventListener('click', showHelpNotification);
             headerHelpButton.addEventListener('click', showHelpNotification);
             myOrdersButton.addEventListener('click', function() { loadMyOrders(); showSection('myOrdersSection'); });
@@ -3024,11 +3188,11 @@ VIP Table</textarea>
             document.getElementById('placeNewOrderBtn').addEventListener('click', function() { resetCart(); showSection('menuSection'); });
             adminFloating.addEventListener('click', function() {
                 if (!state.currentTable || state.currentTable.toLowerCase() !== "admin") {
-                    showNotification('Η πρόσβαση διαχειριστή είναι διαθέσιμη μόνο μέσω QR του τραπεζιού Admin.');
+                    showNotification(state.currentLanguage === 'el' ? 'Η πρόσβαση διαχειριστή είναι διαθέσιμη μόνο μέσω QR του τραπεζιού Admin.' : 'Admin access is only available via Admin table QR.');
                     return;
                 }
                 if (state.isAdminMode) {
-                    showNotification('Είστε ήδη σε λειτουργία διαχειριστή.');
+                    showNotification(state.currentLanguage === 'el' ? 'Είστε ήδη σε λειτουργία διαχειριστή.' : 'You are already in admin mode.');
                     return;
                 }
                 showAdminCodePrompt();
@@ -3039,7 +3203,7 @@ VIP Table</textarea>
                     adminCodeInput.value = ''; 
                     enterAdminMode(); 
                 } else { 
-                    showNotification("Λάθος κωδικός διαχειριστή."); 
+                    showNotification(state.currentLanguage === 'el' ? "Λάθος κωδικός διαχειριστή." : "Incorrect administrator code."); 
                     adminCodeInput.value = ''; 
                     adminCodeInput.focus(); 
                 } 
@@ -3054,18 +3218,18 @@ VIP Table</textarea>
                     } 
                     state.pendingAdminAction = null; 
                 } else { 
-                    showNotification("Λάθος κωδικός επιβεβαίωσης."); 
+                    showNotification(state.currentLanguage === 'el' ? "Λάθος κωδικός επιβεβαίωσης." : "Incorrect confirmation code."); 
                     adminChangeCodeInput.value = ''; 
                     adminChangeCodeInput.focus(); 
                 } 
             });
-            cancelChangeBtn.addEventListener('click', function() { adminChangePrompt.style.display = 'none'; adminChangeCodeInput.value = ''; state.pendingAdminAction = null; showNotification("Οι αλλαγές ακυρώθηκαν."); });
+            cancelChangeBtn.addEventListener('click', function() { adminChangePrompt.style.display = 'none'; adminChangeCodeInput.value = ''; state.pendingAdminAction = null; showNotification(state.currentLanguage === 'el' ? "Οι αλλαγές ακυρώθηκαν." : "Changes cancelled."); });
             setupAdminPanel();
         }
 
         window.placeOrderOptimistic = async function() {
-            if (!state.selectedPaymentMethod || !state.selectedPaymentTime) { showNotification('Παρακαλώ επιλέξτε τρόπο και χρόνο πληρωμής'); return; }
-            if (state.cart.length === 0) { showNotification('Το καλάθι είναι άδειο'); return; }
+            if (!state.selectedPaymentMethod || !state.selectedPaymentTime) { showNotification(state.currentLanguage === 'el' ? 'Παρακαλώ επιλέξτε τρόπο και χρόνο πληρωμής' : 'Please select payment method and time'); return; }
+            if (state.cart.length === 0) { showNotification(state.currentLanguage === 'el' ? 'Το καλάθι είναι άδειο' : 'Cart is empty'); return; }
             const orderNumber = generateOrderNumber();
             const order = {
                 orderNumber, table: state.currentTable,
@@ -3078,7 +3242,7 @@ VIP Table</textarea>
             showOrderConfirmation(order);
             showSection('confirmationSection');
             resetCart();
-            showNotification(`Η παραγγελία #${orderNumber} επιβεβαιώθηκε!`);
+            showNotification(state.currentLanguage === 'el' ? `Η παραγγελία #${orderNumber} επιβεβαιώθηκε!` : `Order #${orderNumber} confirmed!`);
             playSound(state.soundEffects.checkoutSound);
             await saveOrder(order);
         };
