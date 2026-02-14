@@ -1068,9 +1068,9 @@ VIP Table</textarea>
         </div>
     </div>
 
-    <!-- ========== CART FLOATING BUTTON – CHANGED TO WAITER ICON ========== -->
+    <!-- ========== CART FLOATING BUTTON – CHANGED TO SHOPPING BASKET ========== -->
     <div class="cart-floating" id="cartFloating">
-        <i class="fas fa-concierge-bell"></i>
+        <i class="fas fa-shopping-basket"></i>
         <div class="cart-count" id="cartCount">0</div>
     </div>
 
@@ -1252,7 +1252,7 @@ VIP Table</textarea>
             helpRequests: [],
             seenHelpRequests: new Set(),
             adminAccessCode: "3232",
-            adminChangeCode: "3232",  // Changed from 6262 to 3232
+            adminChangeCode: "6262",  // Changed from 3232 to 6262
             categories: [],
             isAdminMode: false,
             pendingAdminAction: null,
@@ -2247,9 +2247,9 @@ VIP Table</textarea>
             showNotification(`PDF generated with ${tableNamesArray.length} QR code(s).`);
         }
 
-        // ========== NEW FUNCTION: OPEN VERTICAL ORDERS VIEW IN SEPARATE WINDOW ==========
+        // ========== NEW FUNCTION: OPEN VERTICAL ORDERS VIEW IN SEPARATE WINDOW (with status filter) ==========
         function openOrdersVerticalView() {
-            // Build a simple HTML string for the new window – now with status controls
+            // Build a simple HTML string for the new window – now with status filter
             const winHtml = '<!DOCTYPE html>' +
             '<html>' +
             '<head>' +
@@ -2260,7 +2260,8 @@ VIP Table</textarea>
                     'body { font-family: "Poppins", sans-serif; background: #f8f9fa; margin: 0; padding: 20px; }' +
                     '.container { max-width: 1200px; margin: 0 auto; }' +
                     'h2 { color: #e63946; border-bottom: 2px solid #e9ecef; padding-bottom: 10px; margin-top: 0; }' +
-                    '.toolbar { margin-bottom: 20px; display: flex; gap: 10px; }' +
+                    '.toolbar { margin-bottom: 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }' +
+                    '.toolbar select { padding: 8px; border-radius: 6px; border: 1px solid #ced4da; flex: 0 0 200px; }' +
                     'button { padding: 8px 16px; border: none; border-radius: 6px; font-weight: 500; cursor: pointer; background: #e63946; color: white; transition: 0.2s; }' +
                     'button:hover { background: #c1121f; }' +
                     'button.secondary { background: #6c757d; }' +
@@ -2298,6 +2299,14 @@ VIP Table</textarea>
                 '<div class="container">' +
                     '<h2><i class="fas fa-clipboard-list"></i> Vertical Orders View</h2>' +
                     '<div class="toolbar">' +
+                        '<select id="statusFilter">' +
+                            '<option value="all">All Orders</option>' +
+                            '<option value="pending">Pending</option>' +
+                            '<option value="preparing">Preparing</option>' +
+                            '<option value="ready">Ready</option>' +
+                            '<option value="served">Served</option>' +
+                            '<option value="cancelled">Cancelled</option>' +
+                        '</select>' +
                         '<button id="refreshBtn"><i class="fas fa-sync-alt"></i> Refresh</button>' +
                         '<button class="secondary" onclick="window.close()"><i class="fas fa-times"></i> Close</button>' +
                     '</div>' +
@@ -2333,13 +2342,18 @@ VIP Table</textarea>
                     '' +
                     'function renderOrders(orders) {' +
                         'const list = document.getElementById("ordersList");' +
-                        'if (orders.length === 0) {' +
+                        'const filter = document.getElementById("statusFilter").value;' +
+                        'let filtered = orders;' +
+                        'if (filter !== "all") {' +
+                            'filtered = orders.filter(o => o.status === filter);' +
+                        '}' +
+                        'if (filtered.length === 0) {' +
                             'list.innerHTML = "<div class=\\"no-orders\\"><i class=\\"fas fa-clipboard-list\\"></i><p>No orders found.</p></div>";' +
                             'return;' +
                         '}' +
-                        'orders.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));' +
+                        'filtered.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));' +
                         'let html = "";' +
-                        'orders.forEach(o => {' +
+                        'filtered.forEach(o => {' +
                             'let badgeClass = "";' +
                             'let badgeText = o.status;' +
                             'if (o.status === "pending") badgeClass = "status-pending";' +
@@ -2395,6 +2409,13 @@ VIP Table</textarea>
                             'document.getElementById("ordersList").innerHTML = "<div class=\\"no-orders\\"><i class=\\"fas fa-exclamation-triangle\\"></i><p>Error loading orders.</p></div>";' +
                         '});' +
                     '}' +
+                    '' +
+                    'document.getElementById("statusFilter").addEventListener("change", () => {' +
+                        'db.collection("orders").get().then(snap => {' +
+                            'const orders = snap.docs.map(doc => ({ orderNumber: doc.id, ...doc.data() }));' +
+                            'renderOrders(orders);' +
+                        '});' +
+                    '});' +
                     '' +
                     'document.getElementById("refreshBtn").addEventListener("click", () => { loadOrders(); });' +
                     '' +
@@ -3720,7 +3741,20 @@ VIP Table</textarea>
                 card.addEventListener('click', function() { document.querySelectorAll('.option-card[data-time]').forEach(c=>c.classList.remove('selected')); this.classList.add('selected'); state.selectedPaymentTime = this.dataset.time; });
             });
             document.getElementById('confirmPaymentBtn').addEventListener('click', placeOrderOptimistic);
-            document.getElementById('newOrderBtn').addEventListener('click', function() { resetOrder(); showSection('scannerSection'); });
+            
+            // ========== MODIFIED: New Order button goes to menu, not scanner ==========
+            document.getElementById('newOrderBtn').addEventListener('click', function() {
+                resetCart(); // Clear cart
+                state.selectedPaymentMethod = null;
+                state.selectedPaymentTime = null;
+                document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+                if (state.currentTable) {
+                    menuSubtitle.textContent = state.currentLanguage === 'el' ? `Ξεκινήστε μια νέα παραγγελία για ${state.currentTable}` : `Start a new order for ${state.currentTable}`;
+                }
+                showSection('menuSection');
+                showNotification(state.currentLanguage === 'el' ? 'Έτοιμοι για νέα παραγγελία!' : 'Ready for a new order!');
+            });
+            
             document.getElementById('viewMyOrdersBtn').addEventListener('click', function() { loadMyOrders(); showSection('myOrdersSection'); });
             document.getElementById('viewMenuBtn').addEventListener('click', function() { resetCart(); state.selectedPaymentMethod = null; state.selectedPaymentTime = null; document.querySelectorAll('.option-card').forEach(c=>c.classList.remove('selected')); if (state.currentTable) menuSubtitle.textContent = state.currentLanguage === 'el' ? `Ξεκινήστε μια νέα παραγγελία για ${state.currentTable}` : `Start a new order for ${state.currentTable}`; showSection('menuSection'); showNotification(state.currentLanguage === 'el' ? 'Έτοιμοι για νέα παραγγελία!' : 'Ready for a new order!'); });
             document.getElementById('needHelpBtn').addEventListener('click', showHelpNotification);
