@@ -13,7 +13,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
-        /* ========== COMPLETE STYLES – UNCHANGED ========== */
+        /* ========== COMPLETE STYLES – UNCHANGED (plus new classes for payed status, request button, etc.) ========== */
         :root {
             --primary: #e63946;
             --primary-dark: #c1121f;
@@ -38,6 +38,7 @@
             --button-text: #ffffff;
             --font-primary: 'Poppins', sans-serif;
             --font-secondary: 'Playfair Display', serif;
+            --payed: #4a90e2; /* new color for payed status */
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: var(--font-primary); background-color: var(--background); color: var(--text); line-height: 1.6; }
@@ -57,6 +58,12 @@
         .my-orders-button:hover { background-color: var(--secondary); filter: brightness(0.9); transform: translateY(-2px); box-shadow: 0 4px 8px rgba(69, 123, 157, 0.2); }
         .table-info { background-color: var(--light-gray); padding: 8px 16px; border-radius: 50px; font-weight: 500; display: flex; align-items: center; }
         .table-info i { margin-right: 8px; color: var(--secondary); }
+        /* New request pay button */
+        .request-pay-button { background-color: var(--danger); color: white; border: none; padding: 8px 16px; border-radius: 50px; font-weight: 600; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 8px; font-size: 15px; white-space: nowrap; }
+        .request-pay-button:hover { background-color: #c82333; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(220,53,69,0.3); }
+        /* Back to admin button (appears when admin is in table mode) */
+        .back-to-admin { background-color: var(--dark); color: white; border: none; padding: 8px 16px; border-radius: 50px; font-weight: 500; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 8px; font-size: 15px; }
+        .back-to-admin:hover { background-color: #343a40; }
         .app-section { display: none; padding: 30px 0; min-height: calc(100vh - 80px); background-color: var(--background); }
         .active-section { display: block; }
         .scanner-section { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
@@ -152,6 +159,7 @@
         .status-ready { background-color: #d4edda; color: #155724; }
         .status-served { background-color: #cce5ff; color: #004085; }
         .status-cancelled { background-color: #f8d7da; color: #721c24; }
+        .status-payed { background-color: #cce5ff; color: #004085; } /* new payed status */
         .no-orders-message { text-align: center; padding: 60px 20px; color: var(--gray); }
         .no-orders-message i { font-size: 60px; margin-bottom: 20px; opacity: 0.5; }
         .no-orders-message h3 { margin-bottom: 10px; font-size: 22px; }
@@ -379,6 +387,16 @@
         /* Pending badges */
         .pending-badge { display: none; color: red; margin-left: 5px; }
         .admin-tab.active .pending-badge { color: red; } /* keep red even when active */
+        /* Edit order modal */
+        .edit-order-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); z-index: 2002; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .edit-order-container { background-color: var(--card-bg); border-radius: var(--radius); max-width: 600px; width: 100%; max-height: 80vh; overflow-y: auto; padding: 30px; box-shadow: var(--shadow); }
+        .edit-order-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--light-gray); }
+        .edit-order-item-info { flex: 1; }
+        .edit-order-item-name { font-weight: 500; }
+        .edit-order-item-options { font-size: 12px; color: var(--gray); }
+        .edit-order-item-controls { display: flex; align-items: center; gap: 10px; }
+        .edit-order-item-quantity { width: 60px; text-align: center; }
+        .edit-order-item-price { font-weight: 600; color: var(--primary); min-width: 80px; text-align: right; }
     </style>
 </head>
 <body>
@@ -397,11 +415,19 @@
                 <span id="restaurantName">DineEasy</span>
             </div>
             <div class="header-center">
+                <!-- New Request to Pay button (red) -->
+                <button class="request-pay-button" id="requestPayBtn" style="display: none;">
+                    <i class="fas fa-credit-card"></i> <span data-i18n="requestPay">Αίτημα Πληρωμής</span>
+                </button>
                 <button class="help-button" id="headerHelpButton">
                     <i class="fas fa-headset"></i> <span data-i18n="helpButton">Χρειάζεστε βοήθεια?</span>
                 </button>
                 <button class="language-toggle" id="languageToggleBtn">
                     <i class="fas fa-language"></i> <span id="langToggleText">EN</span>
+                </button>
+                <!-- Back to Admin button (visible only when admin is in table mode) -->
+                <button class="back-to-admin" id="backToAdminBtn" style="display: none;">
+                    <i class="fas fa-arrow-left"></i> <span data-i18n="backToAdmin">Πίσω στον Διαχειριστή</span>
                 </button>
             </div>
             <div class="header-right">
@@ -553,7 +579,7 @@
         </div>
     </section>
 
-    <!-- ========== ADMIN DASHBOARD SECTION ========== (ΑΜΕΤΑΦΡΑΣΤΟ – ΑΓΓΛΙΚΑ) -->
+    <!-- ========== ADMIN DASHBOARD SECTION ========== (updated with Tables tab and edit order) -->
     <section id="adminDashboardSection" class="admin-dashboard-section">
         <div class="container">
             <div class="admin-dashboard-container">
@@ -565,6 +591,7 @@
                     <button class="admin-tab" data-tab="categories">Category Management</button>
                     <button class="admin-tab" data-tab="orders">Order Management <span class="pending-badge" id="orderPendingBadge"><i class="fas fa-exclamation-circle"></i></span></button>
                     <button class="admin-tab" data-tab="helpRequests">🆘 Help Requests <span class="pending-badge" id="helpPendingBadge"><i class="fas fa-exclamation-circle"></i></span></button>
+                    <button class="admin-tab" data-tab="tables">📋 Tables</button> <!-- new tables tab -->
                     <button class="admin-tab" data-tab="customization">Visual Customization</button>
                     <button class="admin-tab" data-tab="sound">🔊 Sound Effects</button>
                     <button class="admin-tab" data-tab="qr">Table QR Codes</button>
@@ -660,7 +687,7 @@
                         </div>
                     </div>
                 </div>
-                <!-- Order Management (with two filters) -->
+                <!-- Order Management (with two filters + edit button) -->
                 <div class="admin-content" id="ordersTab">
                     <div class="admin-form-group" style="display: flex; gap: 10px; flex-wrap: wrap;">
                         <div style="flex: 1;">
@@ -672,6 +699,7 @@
                                 <option value="ready">Ready</option>
                                 <option value="served">Served</option>
                                 <option value="cancelled">Cancelled</option>
+                                <option value="payed">Payed</option> <!-- new payed status -->
                             </select>
                         </div>
                         <div style="flex: 1;">
@@ -694,14 +722,13 @@
                         </div>
                         <p style="margin-top: 10px; font-size: 13px; color: var(--warning);"><i class="fas fa-exclamation-triangle"></i> This action cannot be undone. Orders will be permanently deleted from the database.</p>
                     </div>
-                    <!-- ========== NEW BUTTON FOR VERTICAL ORDERS VIEW ========== -->
                     <div style="margin-top: 20px; text-align: right;">
                         <button class="btn btn-secondary" id="openOrdersVerticalBtn">
                             <i class="fas fa-external-link-alt"></i> Open Vertical Orders View
                         </button>
                     </div>
                 </div>
-                <!-- Help Requests Management -->
+                <!-- Help Requests Management (updated to show payment requests) -->
                 <div class="admin-content" id="helpRequestsTab">
                     <div class="admin-form-group">
                         <label class="admin-label">Filter by Status</label>
@@ -712,11 +739,29 @@
                         <h4 style="margin-bottom: 15px;"><i class="fas fa-trash-alt"></i> Delete Old Requests</h4>
                         <button class="btn btn-danger" id="deleteAllResolvedHelpBtn"><i class="fas fa-trash"></i> Delete All Resolved</button>
                     </div>
-                    <!-- ========== NEW BUTTON FOR VERTICAL HELP REQUESTS VIEW ========== -->
                     <div style="margin-top: 20px; text-align: right;">
                         <button class="btn btn-secondary" id="openHelpVerticalBtn">
                             <i class="fas fa-external-link-alt"></i> Open Vertical Help Requests View
                         </button>
+                    </div>
+                </div>
+                <!-- NEW TAB: Tables Management -->
+                <div class="admin-content" id="tablesTab">
+                    <h3 style="margin-bottom: 20px;"><i class="fas fa-chair"></i> Table Management</h3>
+                    <p style="margin-bottom: 25px; color: var(--gray);">Add, edit, or remove restaurant tables. Click "Order for this table" to place an order on behalf of that table.</p>
+                    <div class="categories-management">
+                        <div class="categories-list">
+                            <h4 style="margin-bottom: 15px;">Existing Tables</h4>
+                            <div class="categories-list-container" id="tablesListContainer"></div>
+                        </div>
+                        <div class="add-category-form">
+                            <h4 style="margin-bottom: 15px;">Add New Table</h4>
+                            <div class="admin-form-group">
+                                <label class="admin-label">Table Name</label>
+                                <input type="text" class="admin-input" id="newTableName" placeholder="e.g., Table 6, Outdoor 2">
+                            </div>
+                            <button class="btn btn-success" id="addTableBtn"><i class="fas fa-plus"></i> Add Table</button>
+                        </div>
                     </div>
                 </div>
                 <!-- Visual Customization -->
@@ -779,7 +824,7 @@
                         <button class="btn btn-primary" id="saveCustomizationBtn"><i class="fas fa-save"></i> Save All Changes</button>
                     </div>
                 </div>
-                <!-- Sound Effects Settings (updated with New Order Sound) -->
+                <!-- Sound Effects Settings (unchanged) -->
                 <div class="admin-content" id="soundTab">
                     <h3 style="margin-bottom: 20px;"><i class="fas fa-music"></i> Sound Effects</h3>
                     <p style="margin-bottom: 25px; color: var(--gray);">Upload custom sounds that will play when customers add items to cart, confirm payment, request help, or when a new order arrives (admin only).</p>
@@ -876,7 +921,7 @@ VIP Table</textarea>
         </div>
     </section>
 
-    <!-- ========== ADMIN PANEL (MODAL) – SIMPLIFIED ========== (ΑΜΕΤΑΦΡΑΣΤΟ) -->
+    <!-- ========== ADMIN PANEL (MODAL) – UPDATED WITH TABLES TAB ========== -->
     <div class="admin-panel" id="adminPanel">
         <div class="admin-container">
             <button class="admin-close" id="adminClose"><i class="fas fa-times"></i></button>
@@ -888,6 +933,7 @@ VIP Table</textarea>
                 <button class="admin-tab" data-tab="categories">Categories</button>
                 <button class="admin-tab" data-tab="orders">Orders <span class="pending-badge" id="orderPendingBadgeModal"><i class="fas fa-exclamation-circle"></i></span></button>
                 <button class="admin-tab" data-tab="helpRequests">🆘 Help <span class="pending-badge" id="helpPendingBadgeModal"><i class="fas fa-exclamation-circle"></i></span></button>
+                <button class="admin-tab" data-tab="tablesModal">📋 Tables</button> <!-- new tables tab in modal -->
                 <button class="admin-tab" data-tab="customization">Visual</button>
                 <button class="admin-tab" data-tab="sound">🔊 Sound</button>
                 <button class="admin-tab" data-tab="qr">QR Codes</button>
@@ -934,7 +980,7 @@ VIP Table</textarea>
                     </div>
                 </div>
             </div>
-            <!-- Order Management Modal (with two filters) -->
+            <!-- Order Management Modal (with payed status) -->
             <div class="admin-content" id="ordersTabModal">
                 <div class="admin-form-group" style="display: flex; gap: 10px; flex-wrap: wrap;">
                     <div style="flex: 1;">
@@ -946,13 +992,13 @@ VIP Table</textarea>
                             <option value="ready">Ready</option>
                             <option value="served">Served</option>
                             <option value="cancelled">Cancelled</option>
+                            <option value="payed">Payed</option>
                         </select>
                     </div>
                     <div style="flex: 1;">
                         <label class="admin-label">Filter by Table</label>
                         <select class="admin-select" id="orderTableFilterModal">
                             <option value="all">All Tables</option>
-                            <!-- Options populated dynamically -->
                         </select>
                     </div>
                 </div>
@@ -967,7 +1013,6 @@ VIP Table</textarea>
                         <button class="btn btn-danger" id="deleteOrdersForTableBtnModal"><i class="fas fa-trash"></i> Delete Orders</button>
                     </div>
                 </div>
-                <!-- ========== NEW BUTTON FOR VERTICAL ORDERS VIEW (MODAL) ========== -->
                 <div style="margin-top: 20px; text-align: right;">
                     <button class="btn btn-secondary" id="openOrdersVerticalBtnModal">
                         <i class="fas fa-external-link-alt"></i> Open Vertical Orders View
@@ -986,11 +1031,28 @@ VIP Table</textarea>
                     </select>
                 </div>
                 <div id="adminHelpRequestsListModal" style="margin-top: 20px;"></div>
-                <!-- ========== NEW BUTTON FOR VERTICAL HELP REQUESTS VIEW (MODAL) ========== -->
                 <div style="margin-top: 20px; text-align: right;">
                     <button class="btn btn-secondary" id="openHelpVerticalBtnModal">
                         <i class="fas fa-external-link-alt"></i> Open Vertical Help Requests View
                     </button>
+                </div>
+            </div>
+            <!-- Tables Modal -->
+            <div class="admin-content" id="tablesTabModal">
+                <h3 style="margin-bottom: 20px;"><i class="fas fa-chair"></i> Tables</h3>
+                <div class="categories-management">
+                    <div class="categories-list">
+                        <h4 style="margin-bottom: 15px;">Existing Tables</h4>
+                        <div class="categories-list-container" id="tablesListContainerModal"></div>
+                    </div>
+                    <div class="add-category-form">
+                        <h4 style="margin-bottom: 15px;">Add New Table</h4>
+                        <div class="admin-form-group">
+                            <label class="admin-label">Table Name</label>
+                            <input type="text" class="admin-input" id="newTableNameModal" placeholder="e.g., Table 6">
+                        </div>
+                        <button class="btn btn-success" id="addTableBtnModal"><i class="fas fa-plus"></i> Add Table</button>
+                    </div>
                 </div>
             </div>
             <!-- Visual Customization Modal -->
@@ -1033,7 +1095,7 @@ VIP Table</textarea>
         </div>
     </div>
 
-    <!-- ========== ADMIN CODE PROMPT ========== (ΜΕΤΑΦΡΑΣΜΕΝΟ) -->
+    <!-- ========== ADMIN CODE PROMPT ========== -->
     <div class="admin-code-prompt" id="adminCodePrompt">
         <div class="admin-code-container">
             <div class="admin-code-icon"><i class="fas fa-lock"></i></div>
@@ -1047,7 +1109,7 @@ VIP Table</textarea>
         </div>
     </div>
 
-    <!-- ========== ADMIN CHANGE CONFIRMATION PROMPT ========== (ΜΕΤΑΦΡΑΣΜΕΝΟ) -->
+    <!-- ========== ADMIN CHANGE CONFIRMATION PROMPT ========== -->
     <div class="admin-code-prompt" id="adminChangePrompt">
         <div class="admin-code-container">
             <div class="admin-code-icon"><i class="fas fa-shield-alt"></i></div>
@@ -1061,20 +1123,35 @@ VIP Table</textarea>
         </div>
     </div>
 
-    <!-- ========== OPTIONS MODAL ========== (ΜΕΤΑΦΡΑΣΜΕΝΟ) -->
+    <!-- ========== OPTIONS MODAL ========== -->
     <div class="options-modal" id="optionsModal">
         <div class="options-modal-container">
             <div id="optionsModalContent"></div>
         </div>
     </div>
 
-    <!-- ========== CART FLOATING BUTTON – CHANGED TO SHOPPING BASKET ========== -->
+    <!-- ========== EDIT ORDER MODAL (NEW) ========== -->
+    <div class="edit-order-modal" id="editOrderModal">
+        <div class="edit-order-container">
+            <h3 style="margin-bottom: 20px;"><i class="fas fa-edit"></i> Edit Order <span id="editOrderNumber"></span></h3>
+            <div id="editOrderItemsList"></div>
+            <div style="margin-top: 20px; text-align: right; font-size: 18px; font-weight: 600;">
+                <span data-i18n="total">Total:</span> $<span id="editOrderTotal">0.00</span>
+            </div>
+            <div class="payment-actions" style="margin-top: 30px;">
+                <button class="btn btn-secondary" id="cancelEditOrderBtn"><i class="fas fa-times"></i> Cancel</button>
+                <button class="btn btn-primary" id="saveEditOrderBtn"><i class="fas fa-save"></i> Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== CART FLOATING BUTTON ========== -->
     <div class="cart-floating" id="cartFloating">
         <i class="fas fa-shopping-basket"></i>
         <div class="cart-count" id="cartCount">0</div>
     </div>
 
-    <!-- ========== NEW ELEGANT ADMIN ICON – HIDDEN UNTIL ADMIN TABLE IS SELECTED ========== -->
+    <!-- ========== ADMIN FLOATING ICON ========== -->
     <div class="admin-floating" id="adminFloating" title="Σύνδεση Διαχειριστή">
         <i class="fas fa-shield-alt"></i>
     </div>
@@ -1086,12 +1163,14 @@ VIP Table</textarea>
     </div>
 
     <script>
-        // ========== TRANSLATIONS OBJECT ==========
+        // ========== TRANSLATIONS OBJECT (updated with new keys) ==========
         const translations = {
             el: {
                 appTitle: "Εφαρμογή Εστιατορίου - PERFECT + SOUNDS",
                 loading: "Φόρτωση μενού...",
                 helpButton: "Χρειάζεστε βοήθεια?",
+                requestPay: "Αίτημα Πληρωμής",
+                backToAdmin: "Πίσω στον Διαχειριστή",
                 myOrdersButton: "Οι Παραγγελίες μου",
                 tableInfo: "Σαρώστε QR για έναρξη",
                 scannerTitle: "Σαρώστε το QR του τραπεζιού",
@@ -1157,6 +1236,8 @@ VIP Table</textarea>
                 appTitle: "Restaurant App - PERFECT + SOUNDS",
                 loading: "Loading menu...",
                 helpButton: "Need help?",
+                requestPay: "Request Payment",
+                backToAdmin: "Back to Admin",
                 myOrdersButton: "My Orders",
                 tableInfo: "Scan QR to start",
                 scannerTitle: "Scan Table QR",
@@ -1232,14 +1313,14 @@ VIP Table</textarea>
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // ========== STATE (updated with cumulativeStats and pendingAdminCodeAction) ==========
+        // ========== STATE (updated with tables array) ==========
         const state = {
             currentTable: null,
             cart: [],
             selectedPaymentMethod: null,
             selectedPaymentTime: null,
             currentOrderNumber: null,
-            currentLanguage: 'el', // 'el' or 'en'
+            currentLanguage: 'el',
             restaurantInfo: {
                 name: "DineEasy",
                 taxRate: 8,
@@ -1250,13 +1331,14 @@ VIP Table</textarea>
             menuItems: [],
             orders: [],
             helpRequests: [],
+            tables: [], // new: list of table names
             seenHelpRequests: new Set(),
             adminAccessCode: "3232",
-            adminChangeCode: "6262",  // Changed from 3232 to 6262
+            adminChangeCode: "6262",
             categories: [],
             isAdminMode: false,
             pendingAdminAction: null,
-            pendingAdminCodeAction: null, // new for actions requiring adminAccessCode
+            pendingAdminCodeAction: null,
             currentImageUpload: null,
             customization: {
                 primary: "#e63946",
@@ -1292,10 +1374,11 @@ VIP Table</textarea>
                 newOrderSound: null
             },
             helpSoundInterval: null,
-            cumulativeStats: { totalOrders: 0, totalRevenue: 0 }  // New cumulative stats
+            cumulativeStats: { totalOrders: 0, totalRevenue: 0 },
+            currentEditOrder: null // for editing
         };
 
-        // ========== DEFAULT DATA – NOW WITH GREEK + ENGLISH FIELDS ==========
+        // ========== DEFAULT DATA ==========
         const defaultMenuItems = [
             { id: 1, name: "Πίτσα Μαργαρίτα", nameEn: "Margherita Pizza", description: "Κλασική σάλτσα ντομάτας, φρέσκια μοτσαρέλα, βασιλικός", descriptionEn: "Classic tomato sauce, fresh mozzarella, basil", price: 14.99, category: "pizza", tags: ["Χορτοφαγική", "Δημοφιλής"], tagsEn: ["Vegetarian", "Popular"], image: "", options: [] },
             { id: 2, name: "Πίτσα Πεπερονί", nameEn: "Pepperoni Pizza", description: "Σάλτσα ντομάτας, μοτσαρέλα, διπλό πεπερόνι", descriptionEn: "Tomato sauce, mozzarella, double pepperoni", price: 16.99, category: "pizza", tags: ["Πικάντικη"], tagsEn: ["Spicy"], image: "", options: [] },
@@ -1387,6 +1470,8 @@ VIP Table</textarea>
         const confirmationPaymentTime = document.getElementById('confirmationPaymentTime');
         const confirmationOrderStatus = document.getElementById('confirmationOrderStatus');
         const headerHelpButton = document.getElementById('headerHelpButton');
+        const requestPayBtn = document.getElementById('requestPayBtn');
+        const backToAdminBtn = document.getElementById('backToAdminBtn');
         const restaurantName = document.getElementById('restaurantName');
         const menuTitle = document.getElementById('menuTitle');
         const estimatedTime = document.getElementById('estimatedTime');
@@ -1407,6 +1492,12 @@ VIP Table</textarea>
         const optionsModal = document.getElementById('optionsModal');
         const optionsModalContent = document.getElementById('optionsModalContent');
         const adminFloating = document.getElementById('adminFloating');
+        const editOrderModal = document.getElementById('editOrderModal');
+        const editOrderNumber = document.getElementById('editOrderNumber');
+        const editOrderItemsList = document.getElementById('editOrderItemsList');
+        const editOrderTotal = document.getElementById('editOrderTotal');
+        const cancelEditOrderBtn = document.getElementById('cancelEditOrderBtn');
+        const saveEditOrderBtn = document.getElementById('saveEditOrderBtn');
 
         // ========== LANGUAGE HELPER FUNCTIONS ==========
         function getItemName(item) {
@@ -1453,14 +1544,12 @@ VIP Table</textarea>
                     }
                 }
             });
-            // Update dynamic texts that are not in data-i18n
             if (state.currentTable && !state.isAdminMode) {
                 menuSubtitle.textContent = state.cart.length === 0 
                     ? (lang === 'el' ? `Επιλέξτε είδη για την παραγγελία σας για ${state.currentTable}` : `Select items for your order for ${state.currentTable}`)
                     : (lang === 'el' ? `Συνεχίστε να προσθέτετε είδη στην παραγγελία σας για ${state.currentTable}` : `Continue adding items to your order for ${state.currentTable}`);
                 cartSubtitle.textContent = lang === 'el' ? `Η παραγγελία σας για ${state.currentTable}` : `Your order for ${state.currentTable}`;
             }
-            // Update language toggle button text
             document.getElementById('langToggleText').textContent = lang === 'el' ? 'EN' : 'EL';
         }
 
@@ -1475,7 +1564,7 @@ VIP Table</textarea>
             showNotification(`Language switched to ${state.currentLanguage === 'el' ? 'Greek' : 'English'}`);
         }
 
-        // ========== FIRESTORE SAVE / LOAD (including cumulativeStats) ==========
+        // ========== FIRESTORE SAVE / LOAD (including tables) ==========
         async function saveRestaurantInfo() { try { await db.collection('settings').doc('restaurantInfo').set(state.restaurantInfo); } catch (e) { console.error(e); } }
         async function saveMenuItem(item) { try { await db.collection('menuItems').doc(item.id.toString()).set(item); } catch (e) { console.error(e); } }
         async function deleteMenuItemFirestore(id) { try { await db.collection('menuItems').doc(id.toString()).delete(); } catch (e) { console.error(e); } }
@@ -1487,11 +1576,14 @@ VIP Table</textarea>
         async function saveHelpRequest(request) { try { await db.collection('helpRequests').doc(request.id).set(request); } catch (e) { console.error(e); } }
         async function deleteHelpRequestFirestore(id) { try { await db.collection('helpRequests').doc(id).delete(); } catch (e) { console.error(e); } }
         async function saveCumulativeStats() { try { await db.collection('settings').doc('cumulativeStats').set(state.cumulativeStats); } catch (e) { console.error(e); } }
+        // New table functions
+        async function saveTable(tableName) { try { await db.collection('tables').doc(tableName).set({ name: tableName }); } catch (e) { console.error(e); } }
+        async function deleteTableFirestore(tableName) { try { await db.collection('tables').doc(tableName).delete(); } catch (e) { console.error(e); } }
 
-        // ========== INITIAL LOAD ==========
+        // ========== INITIAL LOAD (updated to load tables) ==========
         async function loadInitialData() {
             try {
-                const [restDoc, menuSnap, ordersSnap, catDoc, customDoc, soundDoc, helpSnap, statsDoc] = await Promise.all([
+                const [restDoc, menuSnap, ordersSnap, catDoc, customDoc, soundDoc, helpSnap, statsDoc, tablesSnap] = await Promise.all([
                     db.collection('settings').doc('restaurantInfo').get(),
                     db.collection('menuItems').get(),
                     db.collection('orders').get(),
@@ -1499,7 +1591,8 @@ VIP Table</textarea>
                     db.collection('settings').doc('customization').get(),
                     db.collection('settings').doc('soundEffects').get(),
                     db.collection('helpRequests').get(),
-                    db.collection('settings').doc('cumulativeStats').get()
+                    db.collection('settings').doc('cumulativeStats').get(),
+                    db.collection('tables').get()
                 ]);
                 if (restDoc.exists) state.restaurantInfo = restDoc.data();
                 else await db.collection('settings').doc('restaurantInfo').set(state.restaurantInfo);
@@ -1554,9 +1647,19 @@ VIP Table</textarea>
                 
                 state.helpRequests = helpSnap.docs.map(doc => {
                     const req = { id: doc.id, ...doc.data() };
+                    // Ensure requestType exists for backward compatibility
+                    if (!req.requestType) req.requestType = 'help';
                     state.seenHelpRequests.add(req.id);
                     return req;
                 });
+
+                // Load tables
+                if (tablesSnap.empty) {
+                    state.tables = ['Table 1', 'Table 2', 'Table 3', 'VIP Table']; // default
+                    await Promise.all(state.tables.map(t => saveTable(t)));
+                } else {
+                    state.tables = tablesSnap.docs.map(doc => doc.data().name);
+                }
                 
                 determineCurrentTheme();
                 determineCurrentFont();
@@ -1564,10 +1667,8 @@ VIP Table</textarea>
                 updateRestaurantUI();
                 updateCategoryTabs();
                 displayMenuItems('all');
-                applyTranslations(); // Initial translation
-                // Update pending badges after initial load
+                applyTranslations();
                 updatePendingBadges();
-                // Populate table filters
                 populateTableFilter();
                 populateTableFilterModal();
             } catch (e) { console.error("loadInitialData", e); }
@@ -1626,28 +1727,26 @@ VIP Table</textarea>
             });
         }
 
-        // ========== REAL‑TIME LISTENERS (updated to play newOrderSound for admin) ==========
+        // ========== REAL‑TIME LISTENERS (updated to include tables) ==========
         function setupListeners() {
             db.collection('orders').onSnapshot(snap => {
-                // Detect new orders added
                 snap.docChanges().forEach(change => {
                     if (change.type === 'added' && state.isAdminMode) {
-                        // Play new order sound if admin mode is active
                         playSound(state.soundEffects.newOrderSound);
                     }
                 });
                 state.orders = snap.docs.map(d => ({ ...d.data(), orderNumber: d.id }));
-                updatePendingBadges(); // Update badges
+                updatePendingBadges();
                 populateTableFilter();
                 populateTableFilterModal();
                 if (!state.isAdminMode && document.querySelector('#myOrdersSection.active-section')) loadMyOrders();
                 if (state.isAdminMode && document.querySelector('#adminDashboardSection.active-section')) {
                     loadOrdersForAdmin();
-                    // Do not call loadSystemStats here because we want cumulative stats to remain unchanged
-                    // loadSystemStats();
                     populateTableSelect('tableSelectForDelete');
                     if (adminPanel.style.display === 'flex') populateTableSelect('tableSelectForDeleteModal');
                 }
+                // Update request pay button visibility
+                updateRequestPayButton();
             });
             db.collection('menuItems').onSnapshot(snap => {
                 const incoming = snap.docs.map(doc => {
@@ -1721,7 +1820,7 @@ VIP Table</textarea>
                     }
                 });
                 state.helpRequests = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                updatePendingBadges(); // Update badges
+                updatePendingBadges();
                 if (state.isAdminMode) {
                     if (document.querySelector('#adminDashboardSection.active-section')) {
                         const activeTab = document.querySelector('#adminDashboardSection .admin-tab.active')?.dataset?.tab;
@@ -1733,13 +1832,24 @@ VIP Table</textarea>
                     }
                 }
             });
-            // Listener for cumulative stats (optional, not used elsewhere)
             db.collection('settings').doc('cumulativeStats').onSnapshot(doc => {
                 if (doc.exists) state.cumulativeStats = doc.data();
             });
+            // New listener for tables
+            db.collection('tables').onSnapshot(snap => {
+                state.tables = snap.docs.map(doc => doc.data().name);
+                if (state.isAdminMode && document.querySelector('#adminDashboardSection.active-section')) {
+                    const activeTab = document.querySelector('#adminDashboardSection .admin-tab.active')?.dataset?.tab;
+                    if (activeTab === 'tables') loadTablesForAdmin();
+                }
+                if (adminPanel.style.display === 'flex') {
+                    const modalActive = document.querySelector('#adminPanel .admin-tab.active')?.dataset?.tab;
+                    if (modalActive === 'tablesModal') loadTablesForAdminModal();
+                }
+            });
         }
 
-        // ========== UI HELPERS (unchanged) ==========
+        // ========== UI HELPERS ==========
         function determineCurrentTheme() {
             for (const [id, t] of Object.entries(themes)) {
                 if (state.customization.primary === t.primary && state.customization.secondary === t.secondary && state.customization.background === t.background) {
@@ -1809,13 +1919,15 @@ VIP Table</textarea>
 
         // ========== CART FUNCTIONS ==========
         function addToCart(itemId) {
+            // Allow admin to add to cart only if they are in table mode (currentTable set and not "Admin")
+            if (state.isAdminMode && (!state.currentTable || state.currentTable === "Admin")) return;
             const item = state.menuItems.find(i=>i.id===itemId);
             if (!item) return;
             if (item.options && item.options.length) openOptionsModal(item);
             else addToCartWithOptions(itemId, []);
         }
         function addToCartWithOptions(itemId, selectedOptions = []) {
-            if (state.isAdminMode) return;
+            if (state.isAdminMode && (!state.currentTable || state.currentTable === "Admin")) return;
             const menuItem = state.menuItems.find(i=>i.id===itemId);
             if (!menuItem) return;
             const itemPrice = menuItem.price + selectedOptions.reduce((sum,o)=>sum+(o.price||0),0);
@@ -1885,7 +1997,13 @@ VIP Table</textarea>
             });
         }
         function updateCart() {
-            if (state.isAdminMode) return;
+            if (state.isAdminMode && (!state.currentTable || state.currentTable === "Admin")) {
+                // Hide cart when admin is not in table mode
+                cartFloating.style.display = 'none';
+                return;
+            } else {
+                cartFloating.style.display = 'flex';
+            }
             const totalItems = state.cart.reduce((s,i)=>s+i.quantity,0);
             cartCount.textContent = totalItems;
             if (state.cart.length === 0) cartItems.innerHTML = `<div class="empty-cart" style="text-align: center; padding: 40px; color: var(--gray);"><i class="fas fa-shopping-cart" style="font-size: 50px; margin-bottom: 15px; opacity: 0.5;"></i><p>${state.currentLanguage === 'el' ? 'Το καλάθι σας είναι άδειο' : 'Your cart is empty'}</p></div>`;
@@ -1969,7 +2087,16 @@ VIP Table</textarea>
             if (id==='cartSection' && state.currentTable && !state.isAdminMode) cartSubtitle.textContent = state.currentLanguage === 'el' ? `Η παραγγελία σας για ${state.currentTable}` : `Your order for ${state.currentTable}`;
             if (id==='menuSection' && state.currentTable && !state.isAdminMode) menuSubtitle.textContent = state.cart.length===0 ? (state.currentLanguage === 'el' ? `Επιλέξτε είδη για την παραγγελία σας για ${state.currentTable}` : `Select items for your order for ${state.currentTable}`) : (state.currentLanguage === 'el' ? `Συνεχίστε να προσθέτετε είδη στην παραγγελία σας για ${state.currentTable}` : `Continue adding items to your order for ${state.currentTable}`);
             if (id==='myOrdersSection' && state.currentTable && !state.isAdminMode) loadMyOrders();
-            if (state.isAdminMode) cartFloating.style.display = 'none'; else if (id!=='scannerSection') cartFloating.style.display = 'flex';
+            // Show cart floating only if not in admin mode, or in admin mode with a valid current table (not "Admin")
+            if (state.isAdminMode && state.currentTable && state.currentTable !== "Admin") {
+                cartFloating.style.display = 'flex';
+            } else if (!state.isAdminMode && id !== 'scannerSection') {
+                cartFloating.style.display = 'flex';
+            } else {
+                cartFloating.style.display = 'none';
+            }
+            // Update request pay button visibility
+            updateRequestPayButton();
         }
         function loadMyOrders() {
             if (!state.currentTable || state.isAdminMode) { 
@@ -1992,7 +2119,8 @@ VIP Table</textarea>
                     case 'preparing': badge=`<span class="order-status-badge status-preparing">${state.currentLanguage === 'el' ? 'Ετοιμάζεται' : 'Preparing'}</span>`; break; 
                     case 'ready': badge=`<span class="order-status-badge status-ready">${state.currentLanguage === 'el' ? 'Έτοιμο' : 'Ready'}</span>`; break; 
                     case 'served': badge=`<span class="order-status-badge status-served">${state.currentLanguage === 'el' ? 'Σερβιρίστηκε' : 'Served'}</span>`; break; 
-                    case 'cancelled': badge=`<span class="order-status-badge status-cancelled">${state.currentLanguage === 'el' ? 'Ακυρώθηκε' : 'Cancelled'}</span>`; 
+                    case 'cancelled': badge=`<span class="order-status-badge status-cancelled">${state.currentLanguage === 'el' ? 'Ακυρώθηκε' : 'Cancelled'}</span>`;
+                    case 'payed': badge=`<span class="order-status-badge status-payed">${state.currentLanguage === 'el' ? 'Πληρωμένο' : 'Payed'}</span>`;
                 }
                 let itemsSum = '';
                 if (o.items.length<=3) itemsSum = o.items.map(i=>`<div class="order-item-summary"><div class="order-item-summary-name"><div class="order-item-summary-quantity">${i.quantity}</div><div>${i.name}</div></div><div>$${(i.price*i.quantity).toFixed(2)}</div></div>`).join('');
@@ -2001,7 +2129,7 @@ VIP Table</textarea>
                     itemsSum = first.map(i=>`<div class="order-item-summary"><div class="order-item-summary-name"><div class="order-item-summary-quantity">${i.quantity}</div><div>${i.name}</div></div><div>$${(i.price*i.quantity).toFixed(2)}</div></div>`).join('');
                     itemsSum += `<div class="order-item-summary"><div class="order-item-summary-name" style="margin-left: 10px; font-style: italic;">+${rem} ${state.currentLanguage === 'el' ? 'ακόμα' : 'more'} ${rem>1 ? (state.currentLanguage === 'el' ? 'είδη' : 'items') : (state.currentLanguage === 'el' ? 'είδος' : 'item')}</div><div></div></div>`;
                 }
-                card.innerHTML = `<div class="order-card-header"><div><div class="order-card-title">${state.currentLanguage === 'el' ? 'Παραγγελία' : 'Order'} #${o.orderNumber}</div><div class="order-card-time">${date}</div></div><div>${badge}</div></div><div class="order-card-body"><div class="order-items-summary">${itemsSum}</div><div style="margin-top:15px;"><div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>${state.currentLanguage === 'el' ? 'Τρόπος Πληρωμής:' : 'Payment Method:'}</span><span>${o.paymentMethod==='card' ? (state.currentLanguage === 'el' ? 'Κάρτα' : 'Card') : (state.currentLanguage === 'el' ? 'Μετρητά' : 'Cash')}</span></div><div style="display:flex; justify-content:space-between;"><span>${state.currentLanguage === 'el' ? 'Χρόνος Πληρωμής:' : 'Payment Time:'}</span><span>${o.paymentTime==='now' ? (state.currentLanguage === 'el' ? 'Πληρωμή Τώρα' : 'Pay Now') : (state.currentLanguage === 'el' ? 'Πληρωμή Αργότερα' : 'Pay Later')}</span></div></div></div><div class="order-card-footer"><div class="order-total-summary">${state.currentLanguage === 'el' ? 'Σύνολο:' : 'Total:'} $${o.total.toFixed(2)}</div><div style="font-size:14px; color:var(--gray);">${o.status==='pending' ? (state.currentLanguage === 'el' ? 'Η παραγγελία σας επεξεργάζεται' : 'Your order is being processed') : o.status==='preparing' ? (state.currentLanguage === 'el' ? 'Το φαγητό σας ετοιμάζεται' : 'Your food is being prepared') : o.status==='ready' ? (state.currentLanguage === 'el' ? 'Η παραγγελία σας είναι έτοιμη' : 'Your order is ready') : o.status==='served' ? (state.currentLanguage === 'el' ? 'Η παραγγελία σας σερβιρίστηκε' : 'Your order has been served') : (state.currentLanguage === 'el' ? 'Η παραγγελία σας ακυρώθηκε' : 'Your order was cancelled')}</div></div>`;
+                card.innerHTML = `<div class="order-card-header"><div><div class="order-card-title">${state.currentLanguage === 'el' ? 'Παραγγελία' : 'Order'} #${o.orderNumber}</div><div class="order-card-time">${date}</div></div><div>${badge}</div></div><div class="order-card-body"><div class="order-items-summary">${itemsSum}</div><div style="margin-top:15px;"><div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>${state.currentLanguage === 'el' ? 'Τρόπος Πληρωμής:' : 'Payment Method:'}</span><span>${o.paymentMethod==='card' ? (state.currentLanguage === 'el' ? 'Κάρτα' : 'Card') : (state.currentLanguage === 'el' ? 'Μετρητά' : 'Cash')}</span></div><div style="display:flex; justify-content:space-between;"><span>${state.currentLanguage === 'el' ? 'Χρόνος Πληρωμής:' : 'Payment Time:'}</span><span>${o.paymentTime==='now' ? (state.currentLanguage === 'el' ? 'Πληρωμή Τώρα' : 'Pay Now') : (state.currentLanguage === 'el' ? 'Πληρωμή Αργότερα' : 'Pay Later')}</span></div></div></div><div class="order-card-footer"><div class="order-total-summary">${state.currentLanguage === 'el' ? 'Σύνολο:' : 'Total:'} $${o.total.toFixed(2)}</div><div style="font-size:14px; color:var(--gray);">${o.status==='pending' ? (state.currentLanguage === 'el' ? 'Η παραγγελία σας επεξεργάζεται' : 'Your order is being processed') : o.status==='preparing' ? (state.currentLanguage === 'el' ? 'Το φαγητό σας ετοιμάζεται' : 'Your food is being prepared') : o.status==='ready' ? (state.currentLanguage === 'el' ? 'Η παραγγελία σας είναι έτοιμη' : 'Your order is ready') : o.status==='served' ? (state.currentLanguage === 'el' ? 'Η παραγγελία σας σερβιρίστηκε' : 'Your order has been served') : o.status==='payed' ? (state.currentLanguage === 'el' ? 'Η παραγγελία σας πληρώθηκε' : 'Your order is payed') : (state.currentLanguage === 'el' ? 'Η παραγγελία σας ακυρώθηκε' : 'Your order was cancelled')}</div></div>`;
                 ordersList.appendChild(card);
             });
             myOrdersSubtitle.textContent = state.currentLanguage === 'el' ? `Έχετε ${tableOrders.length} παραγγελ${tableOrders.length!==1?'ίες':'ία'} για ${state.currentTable}` : `You have ${tableOrders.length} order${tableOrders.length!==1?'s':''} for ${state.currentTable}`;
@@ -2025,6 +2153,8 @@ VIP Table</textarea>
             } else {
                 adminFloating.style.display = 'none';
             }
+            // Update request pay button visibility
+            updateRequestPayButton();
         }
         function autoLoginFromUrl() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -2035,6 +2165,44 @@ VIP Table</textarea>
             } else {
                 selectTable('Table 1', true);
             }
+        }
+
+        // ========== REQUEST PAY BUTTON ==========
+        function updateRequestPayButton() {
+            if (!state.currentTable || state.currentTable === "Admin" || state.isAdminMode) {
+                requestPayBtn.style.display = 'none';
+                return;
+            }
+            // Check if there is any active order (not payed, not served, not cancelled) with paymentTime='later'
+            const activeOrders = state.orders.filter(o => 
+                o.table === state.currentTable && 
+                o.paymentTime === 'later' && 
+                o.status !== 'payed' && 
+                o.status !== 'served' && 
+                o.status !== 'cancelled'
+            );
+            if (activeOrders.length > 0) {
+                requestPayBtn.style.display = 'flex';
+            } else {
+                requestPayBtn.style.display = 'none';
+            }
+        }
+
+        async function requestPay() {
+            if (!state.currentTable || state.currentTable === "Admin" || state.isAdminMode) return;
+            // Create a help request with type 'payment'
+            const requestId = 'pay_' + Date.now() + '_' + Math.random().toString(36).substring(2);
+            const payRequest = {
+                id: requestId,
+                table: state.currentTable,
+                timestamp: new Date().toISOString(),
+                status: 'pending',
+                requestType: 'payment' // special type
+            };
+            state.helpRequests.push(payRequest);
+            await saveHelpRequest(payRequest);
+            showNotification(state.currentLanguage === 'el' ? `Αίτημα πληρωμής για ${state.currentTable} στάλθηκε.` : `Payment request for ${state.currentTable} sent.`);
+            playSound(state.soundEffects.helpRequestSound);
         }
 
         // ========== HELP REQUEST ==========
@@ -2049,7 +2217,8 @@ VIP Table</textarea>
                 id: requestId,
                 table: state.currentTable,
                 timestamp: new Date().toISOString(),
-                status: 'pending'
+                status: 'pending',
+                requestType: 'help'
             };
             state.helpRequests.push(helpRequest);
             await saveHelpRequest(helpRequest);
@@ -2073,7 +2242,7 @@ VIP Table</textarea>
         function enterAdminMode() {
             state.isAdminMode = true; state.currentTable = "Admin";
             document.body.classList.add('admin-mode');
-            document.querySelector('.header-center').innerHTML = '<div class="admin-badge"><i class="fas fa-shield-alt"></i> Administrator Mode</div>';
+            document.querySelector('.header-center').innerHTML = '<div class="admin-badge"><i class="fas fa-shield-alt"></i> Administrator Mode</div><button class="language-toggle" id="languageToggleBtn"><i class="fas fa-language"></i> <span id="langToggleText">EN</span></button>';
             document.querySelector('.header-right').innerHTML = '<button class="logout-button" id="logoutButton"><i class="fas fa-sign-out-alt"></i> Logout</button>';
             document.getElementById('logoutButton').addEventListener('click', exitAdminMode);
             cartFloating.style.display = 'none';
@@ -2083,21 +2252,25 @@ VIP Table</textarea>
             playSound(state.soundEffects.helpRequestSound);
             showNotification("Admin mode activated. Full administrative access granted.");
             startHelpSoundInterval();
+            // Hide request pay button
+            requestPayBtn.style.display = 'none';
         }
         function exitAdminMode() {
             state.isAdminMode = false; state.currentTable = null;
             document.body.classList.remove('admin-mode');
-            document.querySelector('.header-center').innerHTML = '<button class="help-button" id="headerHelpButton"><i class="fas fa-headset"></i> <span data-i18n="helpButton">Χρειάζεστε βοήθεια?</span></button><button class="language-toggle" id="languageToggleBtn"><i class="fas fa-language"></i> <span id="langToggleText">EN</span></button>';
+            document.querySelector('.header-center').innerHTML = '<button class="request-pay-button" id="requestPayBtn" style="display:none;"><i class="fas fa-credit-card"></i> <span data-i18n="requestPay">Αίτημα Πληρωμής</span></button><button class="help-button" id="headerHelpButton"><i class="fas fa-headset"></i> <span data-i18n="helpButton">Χρειάζεστε βοήθεια?</span></button><button class="language-toggle" id="languageToggleBtn"><i class="fas fa-language"></i> <span id="langToggleText">EN</span></button><button class="back-to-admin" id="backToAdminBtn" style="display:none;"><i class="fas fa-arrow-left"></i> <span data-i18n="backToAdmin">Πίσω στον Διαχειριστή</span></button>';
             document.querySelector('.header-right').innerHTML = '<button class="my-orders-button" id="myOrdersButton" style="display: none;"><i class="fas fa-clipboard-list"></i> <span data-i18n="myOrdersButton">Οι Παραγγελίες μου</span></button><div class="table-info" id="tableInfo"><i class="fas fa-qrcode"></i> <span data-i18n="tableInfo">Σαρώστε QR για έναρξη</span></div>';
             document.getElementById('headerHelpButton').addEventListener('click', showHelpNotification);
             document.getElementById('languageToggleBtn').addEventListener('click', toggleLanguage);
+            document.getElementById('requestPayBtn').addEventListener('click', requestPay);
             cartFloating.style.display = 'flex';
             showSection('scannerSection');
             localStorage.removeItem('dineEasyAdminMode');
             adminFloating.style.display = 'none';
             showNotification("Logged out of admin mode.");
             if (state.helpSoundInterval) { clearInterval(state.helpSoundInterval); state.helpSoundInterval = null; }
-            applyTranslations(); // Reapply translations after re-creating elements
+            applyTranslations();
+            updateRequestPayButton();
         }
 
         // ========== DRAG AND DROP ==========
@@ -2163,7 +2336,7 @@ VIP Table</textarea>
             });
         }
 
-        // ========== DELETE ORDERS BY TABLE (does not affect cumulativeStats) ==========
+        // ========== DELETE ORDERS BY TABLE ==========
         function populateTableSelect(selectId) {
             const sel = document.getElementById(selectId); if (!sel) return;
             const tables = [...new Set(state.orders.filter(o=>o.table&&o.table.toLowerCase()!=='admin').map(o=>o.table))].sort();
@@ -2182,12 +2355,10 @@ VIP Table</textarea>
             const toDelete = state.orders.filter(o=>o.table===tableName);
             if (toDelete.length===0) { showNotification(`No orders for table "${tableName}".`); return; }
             if (!confirm(`Delete ALL orders for table "${tableName}"?`)) return;
-            // Remove from state.orders but do NOT update cumulativeStats
             state.orders = state.orders.filter(o=>o.table!==tableName);
-            updatePendingBadges(); // Update badges after deletion
+            updatePendingBadges();
             populateTableFilter();
             populateTableFilterModal();
-            // Update UI without reloading stats
             loadOrdersForAdmin();
             if (adminPanel.style.display === 'flex') loadOrdersForAdminModal();
             populateTableSelect('tableSelectForDelete');
@@ -2248,9 +2419,8 @@ VIP Table</textarea>
             showNotification(`PDF generated with ${tableNamesArray.length} QR code(s).`);
         }
 
-        // ========== NEW FUNCTION: OPEN VERTICAL ORDERS VIEW IN SEPARATE WINDOW (with status filter) ==========
+        // ========== OPEN VERTICAL ORDERS VIEW (updated with payed) ==========
         function openOrdersVerticalView() {
-            // Build a simple HTML string for the new window – now with status filter
             const winHtml = '<!DOCTYPE html>' +
             '<html>' +
             '<head>' +
@@ -2278,6 +2448,7 @@ VIP Table</textarea>
                     '.status-ready { background: #d4edda; color: #155724; }' +
                     '.status-served { background: #cce5ff; color: #004085; }' +
                     '.status-cancelled { background: #f8d7da; color: #721c24; }' +
+                    '.status-payed { background: #cce5ff; color: #004085; }' +
                     '.order-body { margin-bottom: 15px; }' +
                     '.order-items { margin: 10px 0; padding-left: 15px; }' +
                     '.order-item { display: flex; justify-content: space-between; margin-bottom: 8px; }' +
@@ -2307,6 +2478,7 @@ VIP Table</textarea>
                             '<option value="ready">Ready</option>' +
                             '<option value="served">Served</option>' +
                             '<option value="cancelled">Cancelled</option>' +
+                            '<option value="payed">Payed</option>' +
                         '</select>' +
                         '<button id="refreshBtn"><i class="fas fa-sync-alt"></i> Refresh</button>' +
                         '<button class="secondary" onclick="window.close()"><i class="fas fa-times"></i> Close</button>' +
@@ -2362,6 +2534,7 @@ VIP Table</textarea>
                             'else if (o.status === "ready") badgeClass = "status-ready";' +
                             'else if (o.status === "served") badgeClass = "status-served";' +
                             'else if (o.status === "cancelled") badgeClass = "status-cancelled";' +
+                            'else if (o.status === "payed") badgeClass = "status-payed";' +
                             '' +
                             'let itemsHtml = "";' +
                             'o.items.forEach(item => {' +
@@ -2393,6 +2566,7 @@ VIP Table</textarea>
                                     '+ "<option value=\\"ready\\"" + (o.status === "ready" ? " selected" : "") + ">Ready</option>"' +
                                     '+ "<option value=\\"served\\"" + (o.status === "served" ? " selected" : "") + ">Served</option>"' +
                                     '+ "<option value=\\"cancelled\\"" + (o.status === "cancelled" ? " selected" : "") + ">Cancelled</option>"' +
+                                    '+ "<option value=\\"payed\\"" + (o.status === "payed" ? " selected" : "") + ">Payed</option>"' +
                                 '+ "</select>"' +
                                 '+ "<button onclick=\\"updateOrderStatus(\'" + o.orderNumber + "\', document.getElementById(\'status-" + o.orderNumber + "\').value)\\"><i class=\\"fas fa-save\\"></i> Update</button>"' +
                             '+ "</div>"' +
@@ -2433,7 +2607,7 @@ VIP Table</textarea>
             }
         }
 
-        // ========== FIXED FUNCTION: OPEN VERTICAL HELP REQUESTS VIEW IN SEPARATE WINDOW ==========
+        // ========== OPEN VERTICAL HELP REQUESTS VIEW (updated to show payment requests) ==========
         function openHelpVerticalView() {
             const winHtml = '<!DOCTYPE html>' +
             '<html>' +
@@ -2540,8 +2714,9 @@ VIP Table</textarea>
                         'let html = "";' +
                         'filtered.forEach(r => {' +
                             'const badgeClass = r.status === "pending" ? "help-badge-pending" : "help-badge-resolved";' +
+                            'const icon = r.requestType === "payment" ? "💰" : "🆘";' +
                             'html += "<div class=\\"help-card\\">"' +
-                                '+ "<div class=\\"help-header\\"><div class=\\"help-table\\"><i class=\\"fas fa-chair\\"></i> " + r.table + "</div><span class=\\"help-badge " + badgeClass + "\\">" + r.status.charAt(0).toUpperCase() + r.status.slice(1) + "</span></div>"' +
+                                '+ "<div class=\\"help-header\\"><div class=\\"help-table\\">" + icon + " " + r.table + "</div><span class=\\"help-badge " + badgeClass + "\\">" + r.status.charAt(0).toUpperCase() + r.status.slice(1) + "</span></div>"' +
                                 '+ "<div class=\\"help-time\\">" + formatDate(r.timestamp) + "</div>"' +
                                 '+ "<div class=\\"help-actions\\">"' +
                                     (r.status === "pending" ? '<button class="resolve" onclick="updateHelpStatus(\'' + r.id + '\', \'resolved\')"><i class="fas fa-check"></i> Mark Resolved</button>' : '') +
@@ -2582,7 +2757,248 @@ VIP Table</textarea>
             }
         }
 
-        // ========== ADMIN DASHBOARD (updated with cumulativeStats and delete orders by table using adminAccessCode) ==========
+        // ========== TABLE MANAGEMENT FUNCTIONS ==========
+        function loadTablesForAdmin() {
+            const container = document.getElementById('tablesListContainer');
+            if (!container) return;
+            container.innerHTML = '';
+            if (state.tables.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: var(--gray); padding: 20px;">No tables added yet.</p>';
+                return;
+            }
+            state.tables.sort().forEach(tableName => {
+                const el = document.createElement('div'); el.className = 'category-item';
+                el.innerHTML = `
+                    <div style="display:flex; align-items:center;">
+                        <i class="fas fa-chair"></i>
+                        <span class="category-item-name">${tableName}</span>
+                    </div>
+                    <div class="admin-card-actions">
+                        <button class="admin-small-btn btn-success order-for-table" data-table="${tableName}"><i class="fas fa-shopping-cart"></i> Order</button>
+                        <button class="admin-small-btn btn-danger delete-table" data-table="${tableName}"><i class="fas fa-trash"></i></button>
+                    </div>
+                `;
+                container.appendChild(el);
+            });
+            document.querySelectorAll('.order-for-table').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const table = this.dataset.table;
+                    // Set current table and show menu section
+                    state.currentTable = table;
+                    tableInfo.innerHTML = `<i class="fas fa-chair"></i> ${table}`;
+                    menuSubtitle.textContent = state.currentLanguage === 'el' ? `Επιλέξτε είδη για να προσθέσετε στην παραγγελία σας για ${table}` : `Select items to add to your order for ${table}`;
+                    cartSubtitle.textContent = state.currentLanguage === 'el' ? `Η παραγγελία σας για ${table}` : `Your order for ${table}`;
+                    resetCart();
+                    updateCategoryTabs();
+                    displayMenuItems('all');
+                    myOrdersButton.style.display = 'flex';
+                    showSection('menuSection');
+                    // Show back to admin button
+                    backToAdminBtn.style.display = 'flex';
+                });
+            });
+            document.querySelectorAll('.delete-table').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const table = this.dataset.table;
+                    if (confirm(`Delete table "${table}"?`)) {
+                        state.tables = state.tables.filter(t => t !== table);
+                        deleteTableFirestore(table);
+                        loadTablesForAdmin();
+                        if (adminPanel.style.display === 'flex') loadTablesForAdminModal();
+                        showNotification(`Table "${table}" deleted.`);
+                    }
+                });
+            });
+        }
+
+        function loadTablesForAdminModal() {
+            const container = document.getElementById('tablesListContainerModal');
+            if (!container) return;
+            container.innerHTML = '';
+            if (state.tables.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: var(--gray); padding: 20px;">No tables added yet.</p>';
+                return;
+            }
+            state.tables.sort().forEach(tableName => {
+                const el = document.createElement('div'); el.className = 'category-item';
+                el.innerHTML = `
+                    <div style="display:flex; align-items:center;">
+                        <i class="fas fa-chair"></i>
+                        <span class="category-item-name">${tableName}</span>
+                    </div>
+                    <div class="admin-card-actions">
+                        <button class="admin-small-btn btn-success order-for-table-modal" data-table="${tableName}"><i class="fas fa-shopping-cart"></i> Order</button>
+                        <button class="admin-small-btn btn-danger delete-table-modal" data-table="${tableName}"><i class="fas fa-trash"></i></button>
+                    </div>
+                `;
+                container.appendChild(el);
+            });
+            document.querySelectorAll('.order-for-table-modal').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const table = this.dataset.table;
+                    state.currentTable = table;
+                    tableInfo.innerHTML = `<i class="fas fa-chair"></i> ${table}`;
+                    menuSubtitle.textContent = state.currentLanguage === 'el' ? `Επιλέξτε είδη για να προσθέσετε στην παραγγελία σας για ${table}` : `Select items to add to your order for ${table}`;
+                    cartSubtitle.textContent = state.currentLanguage === 'el' ? `Η παραγγελία σας για ${table}` : `Your order for ${table}`;
+                    resetCart();
+                    updateCategoryTabs();
+                    displayMenuItems('all');
+                    myOrdersButton.style.display = 'flex';
+                    showSection('menuSection');
+                    backToAdminBtn.style.display = 'flex';
+                    adminPanel.style.display = 'none'; // close modal
+                });
+            });
+            document.querySelectorAll('.delete-table-modal').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const table = this.dataset.table;
+                    if (confirm(`Delete table "${table}"?`)) {
+                        state.tables = state.tables.filter(t => t !== table);
+                        deleteTableFirestore(table);
+                        loadTablesForAdmin();
+                        loadTablesForAdminModal();
+                        showNotification(`Table "${table}" deleted.`);
+                    }
+                });
+            });
+        }
+
+        async function addTable() {
+            const input = document.getElementById('newTableName');
+            const name = input.value.trim();
+            if (!name) {
+                showNotification('Please enter a table name.');
+                return;
+            }
+            if (state.tables.includes(name)) {
+                showNotification('Table already exists.');
+                return;
+            }
+            state.tables.push(name);
+            await saveTable(name);
+            input.value = '';
+            loadTablesForAdmin();
+            if (adminPanel.style.display === 'flex') loadTablesForAdminModal();
+            showNotification(`Table "${name}" added.`);
+        }
+
+        async function addTableModal() {
+            const input = document.getElementById('newTableNameModal');
+            const name = input.value.trim();
+            if (!name) {
+                showNotification('Please enter a table name.');
+                return;
+            }
+            if (state.tables.includes(name)) {
+                showNotification('Table already exists.');
+                return;
+            }
+            state.tables.push(name);
+            await saveTable(name);
+            input.value = '';
+            loadTablesForAdmin();
+            loadTablesForAdminModal();
+            showNotification(`Table "${name}" added.`);
+        }
+
+        // ========== EDIT ORDER FUNCTIONS ==========
+        function openEditOrderModal(order) {
+            state.currentEditOrder = JSON.parse(JSON.stringify(order)); // clone
+            editOrderNumber.textContent = order.orderNumber;
+            renderEditOrderItems();
+            editOrderModal.style.display = 'flex';
+        }
+
+        function renderEditOrderItems() {
+            if (!state.currentEditOrder) return;
+            const list = editOrderItemsList;
+            list.innerHTML = '';
+            let total = 0;
+            state.currentEditOrder.items.forEach((item, index) => {
+                total += item.price * item.quantity;
+                const div = document.createElement('div'); div.className = 'edit-order-item';
+                let optionsHtml = '';
+                if (item.selectedOptions && item.selectedOptions.length) {
+                    optionsHtml = '<div class="edit-order-item-options">';
+                    item.selectedOptions.forEach(opt => {
+                        if (opt.isComment) optionsHtml += `<div><i class="fas fa-comment"></i> ${opt.groupName}: "${opt.choiceName}"</div>`;
+                        else optionsHtml += `<div>• ${opt.groupName}: ${opt.choiceName} ${opt.price>0?`(+$${opt.price.toFixed(2)})`:opt.price<0?`(-$${Math.abs(opt.price).toFixed(2)})`:''}</div>`;
+                    });
+                    optionsHtml += '</div>';
+                }
+                div.innerHTML = `
+                    <div class="edit-order-item-info">
+                        <div class="edit-order-item-name">${item.name}</div>
+                        ${optionsHtml}
+                    </div>
+                    <div class="edit-order-item-controls">
+                        <button class="quantity-btn decrease-edit" data-index="${index}"><i class="fas fa-minus"></i></button>
+                        <span class="edit-order-item-quantity">${item.quantity}</span>
+                        <button class="quantity-btn increase-edit" data-index="${index}"><i class="fas fa-plus"></i></button>
+                        <button class="remove-item" data-index="${index}"><i class="fas fa-trash"></i></button>
+                    </div>
+                    <div class="edit-order-item-price">$${(item.price * item.quantity).toFixed(2)}</div>
+                `;
+                list.appendChild(div);
+            });
+            editOrderTotal.textContent = total.toFixed(2);
+
+            // Add event listeners
+            list.querySelectorAll('.decrease-edit').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const idx = parseInt(this.dataset.index);
+                    if (state.currentEditOrder.items[idx].quantity > 1) {
+                        state.currentEditOrder.items[idx].quantity--;
+                    } else {
+                        state.currentEditOrder.items.splice(idx, 1);
+                    }
+                    renderEditOrderItems();
+                });
+            });
+            list.querySelectorAll('.increase-edit').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const idx = parseInt(this.dataset.index);
+                    state.currentEditOrder.items[idx].quantity++;
+                    renderEditOrderItems();
+                });
+            });
+            list.querySelectorAll('.remove-item').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const idx = parseInt(this.dataset.index);
+                    state.currentEditOrder.items.splice(idx, 1);
+                    renderEditOrderItems();
+                });
+            });
+        }
+
+        async function saveEditedOrder() {
+            if (!state.currentEditOrder) return;
+            // Recalculate total
+            const newTotal = state.currentEditOrder.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+            state.currentEditOrder.total = newTotal;
+            // Find the order in state.orders and update
+            const idx = state.orders.findIndex(o => o.orderNumber === state.currentEditOrder.orderNumber);
+            if (idx !== -1) {
+                state.orders[idx] = state.currentEditOrder;
+                await saveOrder(state.currentEditOrder);
+                // Recalculate cumulative stats
+                recalcCumulativeStats();
+                loadOrdersForAdmin();
+                if (adminPanel.style.display === 'flex') loadOrdersForAdminModal();
+                showNotification(`Order #${state.currentEditOrder.orderNumber} updated.`);
+            }
+            editOrderModal.style.display = 'none';
+            state.currentEditOrder = null;
+        }
+
+        function recalcCumulativeStats() {
+            const totalOrders = state.orders.length;
+            const totalRevenue = state.orders.reduce((sum, o) => sum + o.total, 0);
+            state.cumulativeStats = { totalOrders, totalRevenue };
+            saveCumulativeStats();
+        }
+
+        // ========== ADMIN DASHBOARD (updated with tables and edit order) ==========
         function loadAdminDashboardData() {
             document.getElementById('adminRestaurantName').value = state.restaurantInfo.name;
             document.getElementById('adminTaxRate').value = state.restaurantInfo.taxRate;
@@ -2593,10 +3009,11 @@ VIP Table</textarea>
             loadMenuItemsForAdminEn();
             loadCategoriesForAdmin();
             loadOrdersForAdmin();
-            loadSystemStats(); // uses cumulativeStats
+            loadSystemStats();
             loadCustomizationSettings();
-            loadSoundSettingsUI(); // updated to include new order sound
+            loadSoundSettingsUI();
             loadHelpRequestsForAdmin();
+            loadTablesForAdmin(); // new
 
             document.querySelectorAll('#adminDashboardSection .admin-tab').forEach(tab => {
                 tab.addEventListener('click', function() {
@@ -2611,6 +3028,7 @@ VIP Table</textarea>
                     if (tid==='helpRequests') { loadHelpRequestsForAdmin(); }
                     if (tid==='sound') setTimeout(loadSoundSettingsUI,50);
                     if (tid==='menuEn') setTimeout(()=>{ loadMenuItemsForAdminEn(); makeAdminGridDraggable('menuItemsListEn'); },50);
+                    if (tid==='tables') setTimeout(loadTablesForAdmin,50);
                 });
             });
             document.getElementById('uploadLogoBtn').addEventListener('click', ()=>document.getElementById('logoUpload').click());
@@ -2636,7 +3054,6 @@ VIP Table</textarea>
             document.getElementById('exportDataBtn').addEventListener('click', exportData);
             document.getElementById('importDataBtn').addEventListener('click', ()=> document.getElementById('importDataInput').click());
             document.getElementById('importDataInput').addEventListener('change', (e)=> showAdminChangePrompt(()=>importData(e)));
-            // Delete orders by table now uses adminAccessCode prompt
             document.getElementById('deleteOrdersForTableBtn').addEventListener('click', function() {
                 const sel = document.getElementById('tableSelectForDelete');
                 if (sel.value) {
@@ -2661,10 +3078,18 @@ VIP Table</textarea>
                 showNotification('All resolved help requests deleted.');
                 updatePendingBadges();
             });
-            // ========== ATTACH EVENT FOR NEW VERTICAL ORDERS BUTTON ==========
             document.getElementById('openOrdersVerticalBtn').addEventListener('click', openOrdersVerticalView);
-            // ========== ATTACH EVENT FOR NEW VERTICAL HELP BUTTON ==========
             document.getElementById('openHelpVerticalBtn').addEventListener('click', openHelpVerticalView);
+            // Tables management buttons
+            document.getElementById('addTableBtn').addEventListener('click', ()=> showAdminChangePrompt(addTable));
+            // Back to admin button
+            backToAdminBtn.addEventListener('click', function() {
+                state.currentTable = null;
+                showSection('adminDashboardSection');
+                backToAdminBtn.style.display = 'none';
+                cartFloating.style.display = 'none';
+                updateRequestPayButton();
+            });
 
             adminDashboardSection.addEventListener('click', e => {
                 if (e.target.classList.contains('update-status') || e.target.closest('.update-status')) {
@@ -2678,6 +3103,12 @@ VIP Table</textarea>
                     const requestId = btn.dataset.requestId;
                     updateHelpRequestStatus(requestId, 'resolved');
                 }
+                if (e.target.classList.contains('edit-order-btn') || e.target.closest('.edit-order-btn')) {
+                    const btn = e.target.classList.contains('edit-order-btn')?e.target:e.target.closest('.edit-order-btn');
+                    const orderId = btn.dataset.orderId;
+                    const order = state.orders.find(o => o.orderNumber === orderId);
+                    if (order) openEditOrderModal(order);
+                }
             });
             setTimeout(()=>{ 
                 makeAdminGridDraggable('menuItemsList'); 
@@ -2686,6 +3117,7 @@ VIP Table</textarea>
                 populateTableSelect('tableSelectForDelete'); 
             },500);
         }
+
         function updateLogoPreview() {
             const p = document.getElementById('logoPreview'); const p2 = document.getElementById('logoPreviewModal');
             if (state.restaurantInfo.logoImage) { p.innerHTML = `<img src="${state.restaurantInfo.logoImage}" alt="Restaurant Logo">`; if (p2) p2.innerHTML = `<img src="${state.restaurantInfo.logoImage}" alt="Restaurant Logo">`; }
@@ -2708,7 +3140,7 @@ VIP Table</textarea>
             await saveRestaurantInfo();
         }
 
-        // --- MENU ADMIN (Greek) ---
+        // --- MENU ADMIN (Greek) --- (unchanged)
         function loadMenuItemsForAdmin() {
             const list = document.getElementById('menuItemsList'); list.innerHTML = '';
             if (state.menuItems.length===0) { list.innerHTML = '<p style="text-align: center; color: var(--gray);">No menu items found.</p>'; return; }
@@ -2877,7 +3309,7 @@ VIP Table</textarea>
             await deleteMenuItemFirestore(id);
         }
 
-        // --- MENU ADMIN (English) ---
+        // --- MENU ADMIN (English) --- (unchanged)
         function loadMenuItemsForAdminEn() {
             const list = document.getElementById('menuItemsListEn'); if (!list) return;
             list.innerHTML = '';
@@ -3125,7 +3557,7 @@ VIP Table</textarea>
             await deleteMenuItemFirestore(id);
         }
 
-        // --- CATEGORY ADMIN ---
+        // --- CATEGORY ADMIN --- (unchanged)
         function loadCategoriesForAdmin() {
             const con = document.getElementById('categoriesListContainer'); con.innerHTML = '';
             if (state.categories.length===0) { con.innerHTML = '<p style="text-align:center; color:var(--gray); padding:20px;">No categories added yet.</p>'; return; }
@@ -3163,7 +3595,7 @@ VIP Table</textarea>
         }
         function getCategoryDisplayName(id) { const c = state.categories.find(c=>c.id===id); return c ? c.displayName : id; }
 
-        // --- ORDER ADMIN (with both filters) ---
+        // --- ORDER ADMIN (with edit button) ---
         function loadOrdersForAdmin() {
             const list = document.getElementById('adminOrdersList');
             const statusFilter = document.getElementById('orderStatusFilter').value;
@@ -3181,7 +3613,15 @@ VIP Table</textarea>
             filtered.forEach(o => {
                 const card = document.createElement('div'); card.className = 'admin-card'; card.style.marginBottom = '15px';
                 const date = new Date(o.timestamp).toLocaleString();
-                let badge = ''; switch(o.status) { case 'pending': badge='<span class="order-status-badge status-pending">Pending</span>'; break; case 'preparing': badge='<span class="order-status-badge status-preparing">Preparing</span>'; break; case 'ready': badge='<span class="order-status-badge status-ready">Ready</span>'; break; case 'served': badge='<span class="order-status-badge status-served">Served</span>'; break; case 'cancelled': badge='<span class="order-status-badge status-cancelled">Cancelled</span>'; }
+                let badge = ''; 
+                switch(o.status) { 
+                    case 'pending': badge='<span class="order-status-badge status-pending">Pending</span>'; break; 
+                    case 'preparing': badge='<span class="order-status-badge status-preparing">Preparing</span>'; break; 
+                    case 'ready': badge='<span class="order-status-badge status-ready">Ready</span>'; break; 
+                    case 'served': badge='<span class="order-status-badge status-served">Served</span>'; break; 
+                    case 'cancelled': badge='<span class="order-status-badge status-cancelled">Cancelled</span>'; 
+                    case 'payed': badge='<span class="order-status-badge status-payed">Payed</span>';
+                }
                 let itemsHtml = '';
                 o.items.forEach(item => {
                     itemsHtml += `<div style="margin-bottom:8px;"><div style="display:flex; justify-content:space-between;"><span><strong>${item.quantity}x ${item.name}</strong></span><span style="color:var(--primary);">$${(item.price*item.quantity).toFixed(2)}</span></div>`;
@@ -3195,7 +3635,7 @@ VIP Table</textarea>
                     }
                     itemsHtml += '</div>';
                 });
-                card.innerHTML = `<div class="admin-card-header"><div><div class="admin-card-title">Order #${o.orderNumber}</div><div style="font-size:12px; color:var(--gray);">${date}</div></div><div>${badge}</div></div><p style="margin-bottom:10px; font-size:14px;"><strong>Table:</strong> ${o.table}<br><strong>Items:</strong></p><div style="margin-bottom:15px;">${itemsHtml}</div><p style="margin-bottom:10px; font-size:14px;"><strong>Total:</strong> $${o.total.toFixed(2)}<br><strong>Payment:</strong> ${o.paymentMethod==='card'?'Card':'Cash'} (${o.paymentTime==='now'?'Pay Now':'Pay Later'})</p><div style="display:flex; gap:10px; margin-top:15px;"><select class="admin-select" style="flex:1;" data-order-id="${o.orderNumber}"><option value="pending" ${o.status==='pending'?'selected':''}>Pending</option><option value="preparing" ${o.status==='preparing'?'selected':''}>Preparing</option><option value="ready" ${o.status==='ready'?'selected':''}>Ready</option><option value="served" ${o.status==='served'?'selected':''}>Served</option><option value="cancelled" ${o.status==='cancelled'?'selected':''}>Cancelled</option></select><button class="btn btn-primary btn-small update-status" data-order-id="${o.orderNumber}" style="padding:8px 15px;">Update</button></div>`;
+                card.innerHTML = `<div class="admin-card-header"><div><div class="admin-card-title">Order #${o.orderNumber}</div><div style="font-size:12px; color:var(--gray);">${date}</div></div><div>${badge}</div></div><p style="margin-bottom:10px; font-size:14px;"><strong>Table:</strong> ${o.table}<br><strong>Items:</strong></p><div style="margin-bottom:15px;">${itemsHtml}</div><p style="margin-bottom:10px; font-size:14px;"><strong>Total:</strong> $${o.total.toFixed(2)}<br><strong>Payment:</strong> ${o.paymentMethod==='card'?'Card':'Cash'} (${o.paymentTime==='now'?'Pay Now':'Pay Later'})</p><div style="display:flex; gap:10px; margin-top:15px;"><select class="admin-select" style="flex:1;" data-order-id="${o.orderNumber}"><option value="pending" ${o.status==='pending'?'selected':''}>Pending</option><option value="preparing" ${o.status==='preparing'?'selected':''}>Preparing</option><option value="ready" ${o.status==='ready'?'selected':''}>Ready</option><option value="served" ${o.status==='served'?'selected':''}>Served</option><option value="cancelled" ${o.status==='cancelled'?'selected':''}>Cancelled</option><option value="payed" ${o.status==='payed'?'selected':''}>Payed</option></select><button class="btn btn-primary btn-small update-status" data-order-id="${o.orderNumber}" style="padding:8px 15px;">Update</button><button class="btn btn-secondary btn-small edit-order-btn" data-order-id="${o.orderNumber}" style="padding:8px 15px;"><i class="fas fa-edit"></i> Edit</button></div>`;
                 list.appendChild(card);
             });
             populateTableSelect('tableSelectForDelete');
@@ -3205,7 +3645,7 @@ VIP Table</textarea>
             const idx = state.orders.findIndex(o=>o.orderNumber===orderId);
             if (idx!==-1) {
                 state.orders[idx].status = newStatus;
-                updatePendingBadges(); // Update badges
+                updatePendingBadges();
                 loadOrdersForAdmin();
                 if (state.currentTable === state.orders[idx].table) loadMyOrders();
                 showNotification(`Order #${orderId} status updated.`);
@@ -3216,20 +3656,19 @@ VIP Table</textarea>
             if (!confirm("Clear ALL orders? This will also reset cumulative statistics.")) return;
             const toDelete = [...state.orders];
             state.orders = [];
-            // Reset cumulative stats
             state.cumulativeStats = { totalOrders: 0, totalRevenue: 0 };
             await saveCumulativeStats();
-            updatePendingBadges(); // Update badges
+            updatePendingBadges();
             populateTableFilter();
             populateTableFilterModal();
             loadOrdersForAdmin(); loadMyOrders();
-            loadSystemStats(); // refresh stats display
+            loadSystemStats();
             populateTableSelect('tableSelectForDelete'); populateTableSelect('tableSelectForDeleteModal');
             showNotification("All orders cleared and statistics reset.");
             await Promise.all(toDelete.map(o=>deleteOrderFirestore(o.orderNumber)));
         }
 
-        // --- HELP REQUESTS ADMIN ---
+        // --- HELP REQUESTS ADMIN (updated with payment request icon) ---
         function loadHelpRequestsForAdmin() {
             const list = document.getElementById('adminHelpRequestsList');
             const filter = document.getElementById('helpRequestStatusFilter').value;
@@ -3244,9 +3683,10 @@ VIP Table</textarea>
                 const card = document.createElement('div'); card.className = 'help-request-card';
                 const date = new Date(r.timestamp).toLocaleString();
                 const badge = r.status === 'pending' ? '<span class="help-badge-pending">Pending</span>' : '<span class="help-badge-resolved">Resolved</span>';
+                const icon = r.requestType === 'payment' ? '💰' : '🆘';
                 card.innerHTML = `
                     <div class="help-request-header">
-                        <div class="help-request-table"><i class="fas fa-chair"></i> ${r.table}</div>
+                        <div class="help-request-table">${icon} ${r.table}</div>
                         <div>${badge}</div>
                     </div>
                     <div class="help-request-time">${date}</div>
@@ -3286,7 +3726,7 @@ VIP Table</textarea>
             }
         }
 
-        // --- SYSTEM STATS (using cumulativeStats) ---
+        // --- SYSTEM STATS (unchanged) ---
         function loadSystemStats() {
             const stats = document.getElementById('systemStats');
             const total = state.cumulativeStats.totalOrders;
@@ -3297,10 +3737,11 @@ VIP Table</textarea>
             const ready = state.orders.filter(o=>o.status==='ready').length;
             const served = state.orders.filter(o=>o.status==='served').length;
             const cancelled = state.orders.filter(o=>o.status==='cancelled').length;
-            stats.innerHTML = `<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px,1fr)); gap:15px;"><div style="background-color:var(--light); padding:15px; border-radius:8px;"><div style="font-size:24px; font-weight:600; color:var(--primary);">${total}</div><div style="font-size:14px; color:var(--gray);">Total Orders (Lifetime)</div></div><div style="background-color:var(--light); padding:15px; border-radius:8px;"><div style="font-size:24px; font-weight:600; color:var(--primary);">$${revenue.toFixed(2)}</div><div style="font-size:14px; color:var(--gray);">Total Revenue (Lifetime)</div></div><div style="background-color:var(--light); padding:15px; border-radius:8px;"><div style="font-size:24px; font-weight:600; color:var(--primary);">$${avg.toFixed(2)}</div><div style="font-size:14px; color:var(--gray);">Average Order</div></div><div style="background-color:var(--light); padding:15px; border-radius:8px;"><div style="font-size:24px; font-weight:600; color:var(--primary);">${state.menuItems.length}</div><div style="font-size:14px; color:var(--gray);">Menu Items</div></div><div style="background-color:var(--light); padding:15px; border-radius:8px;"><div style="font-size:24px; font-weight:600; color:var(--primary);">${state.categories.length}</div><div style="font-size:14px; color:var(--gray);">Categories</div></div></div><div style="margin-top:20px;"><h5 style="margin-bottom:10px;">Order Status Distribution (Current Orders)</h5><div style="display:flex; gap:10px; flex-wrap:wrap;"><div style="display:flex; align-items:center; gap:5px;"><div style="width:12px; height:12px; background-color:#fff3cd; border-radius:2px;"></div><span>Pending: ${pending}</span></div><div style="display:flex; align-items:center; gap:5px;"><div style="width:12px; height:12px; background-color:#d1ecf1; border-radius:2px;"></div><span>Preparing: ${prep}</span></div><div style="display:flex; align-items:center; gap:5px;"><div style="width:12px; height:12px; background-color:#d4edda; border-radius:2px;"></div><span>Ready: ${ready}</span></div><div style="display:flex; align-items:center; gap:5px;"><div style="width:12px; height:12px; background-color:#cce5ff; border-radius:2px;"></div><span>Served: ${served}</span></div><div style="display:flex; align-items:center; gap:5px;"><div style="width:12px; height:12px; background-color:#f8d7da; border-radius:2px;"></div><span>Cancelled: ${cancelled}</span></div></div></div>`;
+            const payed = state.orders.filter(o=>o.status==='payed').length;
+            stats.innerHTML = `<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px,1fr)); gap:15px;"><div style="background-color:var(--light); padding:15px; border-radius:8px;"><div style="font-size:24px; font-weight:600; color:var(--primary);">${total}</div><div style="font-size:14px; color:var(--gray);">Total Orders (Lifetime)</div></div><div style="background-color:var(--light); padding:15px; border-radius:8px;"><div style="font-size:24px; font-weight:600; color:var(--primary);">$${revenue.toFixed(2)}</div><div style="font-size:14px; color:var(--gray);">Total Revenue (Lifetime)</div></div><div style="background-color:var(--light); padding:15px; border-radius:8px;"><div style="font-size:24px; font-weight:600; color:var(--primary);">$${avg.toFixed(2)}</div><div style="font-size:14px; color:var(--gray);">Average Order</div></div><div style="background-color:var(--light); padding:15px; border-radius:8px;"><div style="font-size:24px; font-weight:600; color:var(--primary);">${state.menuItems.length}</div><div style="font-size:14px; color:var(--gray);">Menu Items</div></div><div style="background-color:var(--light); padding:15px; border-radius:8px;"><div style="font-size:24px; font-weight:600; color:var(--primary);">${state.categories.length}</div><div style="font-size:14px; color:var(--gray);">Categories</div></div></div><div style="margin-top:20px;"><h5 style="margin-bottom:10px;">Order Status Distribution (Current Orders)</h5><div style="display:flex; gap:10px; flex-wrap:wrap;"><div style="display:flex; align-items:center; gap:5px;"><div style="width:12px; height:12px; background-color:#fff3cd; border-radius:2px;"></div><span>Pending: ${pending}</span></div><div style="display:flex; align-items:center; gap:5px;"><div style="width:12px; height:12px; background-color:#d1ecf1; border-radius:2px;"></div><span>Preparing: ${prep}</span></div><div style="display:flex; align-items:center; gap:5px;"><div style="width:12px; height:12px; background-color:#d4edda; border-radius:2px;"></div><span>Ready: ${ready}</span></div><div style="display:flex; align-items:center; gap:5px;"><div style="width:12px; height:12px; background-color:#cce5ff; border-radius:2px;"></div><span>Served: ${served}</span></div><div style="display:flex; align-items:center; gap:5px;"><div style="width:12px; height:12px; background-color:#f8d7da; border-radius:2px;"></div><span>Cancelled: ${cancelled}</span></div><div style="display:flex; align-items:center; gap:5px;"><div style="width:12px; height:12px; background-color:#cce5ff; border-radius:2px;"></div><span>Payed: ${payed}</span></div></div></div>`;
         }
         function exportData() {
-            const data = { restaurantInfo: state.restaurantInfo, menuItems: state.menuItems, orders: state.orders, categories: state.categories, customization: state.customization, soundEffects: state.soundEffects, helpRequests: state.helpRequests, cumulativeStats: state.cumulativeStats, exportDate: new Date().toISOString() };
+            const data = { restaurantInfo: state.restaurantInfo, menuItems: state.menuItems, orders: state.orders, categories: state.categories, customization: state.customization, soundEffects: state.soundEffects, helpRequests: state.helpRequests, cumulativeStats: state.cumulativeStats, tables: state.tables, exportDate: new Date().toISOString() };
             const str = JSON.stringify(data,null,2); const uri = 'data:application/json;charset=utf-8,'+encodeURIComponent(str);
             const a = document.createElement('a'); a.href = uri; a.download = `dineeasy-backup-${new Date().toISOString().split('T')[0]}.json`; a.click(); showNotification("Data exported successfully.");
         }
@@ -3319,6 +3760,7 @@ VIP Table</textarea>
                         if (d.soundEffects) state.soundEffects = d.soundEffects;
                         if (d.helpRequests) state.helpRequests = d.helpRequests;
                         if (d.cumulativeStats) state.cumulativeStats = d.cumulativeStats;
+                        if (d.tables) state.tables = d.tables;
                         await Promise.all(state.menuItems.map(i=>saveMenuItem(i)));
                         await saveCategories();
                         await Promise.all(state.orders.map(o=>saveOrder(o)));
@@ -3327,15 +3769,16 @@ VIP Table</textarea>
                         await saveSoundEffects();
                         await Promise.all(state.helpRequests.map(r=>saveHelpRequest(r)));
                         await saveCumulativeStats();
+                        await Promise.all(state.tables.map(t=>saveTable(t)));
                         updateRestaurantUI(); displayMenuItems('all'); updateCategoryTabs(); applyCustomization();
-                        loadMenuItemsForAdmin(); loadMenuItemsForAdminEn(); loadCategoriesForAdmin(); loadOrdersForAdmin(); loadSystemStats(); loadHelpRequestsForAdmin();
+                        loadMenuItemsForAdmin(); loadMenuItemsForAdminEn(); loadCategoriesForAdmin(); loadOrdersForAdmin(); loadSystemStats(); loadHelpRequestsForAdmin(); loadTablesForAdmin();
                         showNotification("Data imported successfully.");
                     }
                 } catch { showNotification("Error importing data. Invalid file format."); }
             }; reader.readAsText(file); e.target.value = '';
         }
 
-        // --- CUSTOMIZATION ---
+        // --- CUSTOMIZATION --- (unchanged)
         function loadCustomizationSettings() {}
         function initializeCustomizationTab() {
             const g = document.getElementById('themeGallery'); g.innerHTML = '';
@@ -3394,7 +3837,7 @@ VIP Table</textarea>
         function darkenColor(c,p) { const n = parseInt(c.replace("#",""),16); const a = Math.round(2.55*p); const r = (n>>16)-a, g = (n>>8&0x00FF)-a, b = (n&0x0000FF)-a; return "#" + (0x1000000 + (r<255?r<1?0:r:255)*0x10000 + (g<255?g<1?0:g:255)*0x100 + (b<255?b<1?0:b:255)).toString(16).slice(1); }
         function getContrastColor(h) { const r=parseInt(h.substr(1,2),16), g=parseInt(h.substr(3,2),16), b=parseInt(h.substr(5,2),16), yiq=((r*299)+(g*587)+(b*114))/1000; return yiq>=128?'#000000':'#ffffff'; }
 
-        // --- SOUND EFFECTS ADMIN UI (updated with newOrderSound, fixed ID mapping) ---
+        // --- SOUND EFFECTS ADMIN UI (unchanged) ---
         function loadSoundSettingsUI() {
             const enabledCheck = document.getElementById('soundEffectsEnabled');
             if (enabledCheck) enabledCheck.checked = state.soundEffects.enabled;
@@ -3423,7 +3866,6 @@ VIP Table</textarea>
                 newOrderPreview.innerHTML = '<div class="image-preview-placeholder"><i class="fas fa-music"></i><p>No sound uploaded</p></div>';
             }
 
-            // Helper to get correct element IDs
             function getSoundIds(type) {
                 if (type === 'NewOrder') {
                     return {
@@ -3527,7 +3969,7 @@ VIP Table</textarea>
             }
         }
 
-        // --- MODAL ADMIN ---
+        // --- MODAL ADMIN (updated with tables and edit order) ---
         function setupAdminPanel() {
             adminClose.addEventListener('click', ()=> adminPanel.style.display = 'none');
             document.querySelectorAll('#adminPanel .admin-tab').forEach(tab => {
@@ -3543,6 +3985,7 @@ VIP Table</textarea>
                     if (tid==='categories') setTimeout(()=>makeCategoriesDraggable('categoriesListContainerModal'),200);
                     if (tid==='orders') { loadOrdersForAdminModal(); populateTableSelect('tableSelectForDeleteModal'); }
                     if (tid==='helpRequests') { loadHelpRequestsForAdminModal(); }
+                    if (tid==='tablesModal') { loadTablesForAdminModal(); }
                     if (tid==='sound') { 
                         const modalEnabled = document.getElementById('soundEffectsEnabledModal');
                         if (modalEnabled) modalEnabled.checked = state.soundEffects.enabled;
@@ -3562,7 +4005,6 @@ VIP Table</textarea>
                 const tableNames = textarea.value.split('\n').map(s => s.trim()).filter(s => s.length > 0);
                 generateTableQRCodePDF(tableNames);
             });
-            // Delete orders by table in modal now uses adminAccessCode prompt
             document.getElementById('deleteOrdersForTableBtnModal').addEventListener('click', function() {
                 const sel = document.getElementById('tableSelectForDeleteModal');
                 if (sel.value) {
@@ -3573,11 +4015,12 @@ VIP Table</textarea>
                 }
             });
             document.getElementById('helpRequestStatusFilterModal').addEventListener('change', loadHelpRequestsForAdminModal);
-            // ========== ATTACH EVENT FOR VERTICAL ORDERS BUTTON IN MODAL ==========
             document.getElementById('openOrdersVerticalBtnModal').addEventListener('click', openOrdersVerticalView);
-            // ========== ATTACH EVENT FOR VERTICAL HELP BUTTON IN MODAL ==========
             document.getElementById('openHelpVerticalBtnModal').addEventListener('click', openHelpVerticalView);
+            // Tables modal buttons
+            document.getElementById('addTableBtnModal').addEventListener('click', ()=> showAdminChangePrompt(addTableModal));
         }
+
         function loadMenuItemsForAdminModal() {
             const list = document.getElementById('menuItemsListModal'); if (!list) return;
             list.innerHTML = '';
@@ -3585,8 +4028,9 @@ VIP Table</textarea>
             const sorted = [...state.menuItems].sort((a,b)=>(a.displayOrder||0)-(b.displayOrder||0));
             sorted.forEach(item => {
                 const card = document.createElement('div'); card.className = 'admin-card'; card.setAttribute('draggable','true'); card.dataset.itemId = item.id;
-                const img = item.image ? `<div style="height:120px; background-image:url('${item.image}'); ..."></div>` : `<div style="height:120px; background-color:var(--light-gray); ..."><i class="fas fa-utensils"></i></div>`;
-                card.innerHTML = `<div style="display:flex; align-items:center; margin-bottom:5px;"><i class="fas fa-grip-vertical drag-handle"></i></div>${img}<div class="admin-card-header"><div class="admin-card-title">${item.name}</div><div class="admin-card-actions"><button class="admin-small-btn btn-primary edit-item-modal" data-id="${item.id}"><i class="fas fa-edit"></i></button><button class="admin-small-btn btn-secondary duplicate-item-modal" data-id="${item.id}"><i class="fas fa-copy"></i></button><button class="admin-small-btn btn-danger delete-item-modal" data-id="${item.id}"><i class="fas fa-trash"></i></button></div></div><p style="margin-bottom:10px; font-size:14px;">${item.description}</p> ...`;
+                const img = item.image ? `<div style="height:120px; background-image:url('${item.image}'); background-size:cover; background-position:center; border-radius:8px; margin-bottom:10px;"></div>` : `<div style="height:120px; background-color:var(--light-gray); border-radius:8px; margin-bottom:10px; display:flex; align-items:center; justify-content:center; color:var(--gray);"><i class="fas fa-utensils"></i></div>`;
+                card.innerHTML = `<div style="display:flex; align-items:center; margin-bottom:5px;"><i class="fas fa-grip-vertical drag-handle"></i></div>${img}<div class="admin-card-header"><div class="admin-card-title">${item.name}</div><div class="admin-card-actions"><button class="admin-small-btn btn-primary edit-item-modal" data-id="${item.id}"><i class="fas fa-edit"></i></button><button class="admin-small-btn btn-secondary duplicate-item-modal" data-id="${item.id}"><i class="fas fa-copy"></i></button><button class="admin-small-btn btn-danger delete-item-modal" data-id="${item.id}"><i class="fas fa-trash"></i></button></div></div><p style="margin-bottom:10px; font-size:14px;">${item.description}</p><div style="display:flex; justify-content:space-between; align-items:center;"><span style="font-weight:600; color:var(--primary);">$${item.price.toFixed(2)}</span><span style="font-size:12px; color:var(--gray);">${getCategoryDisplayName(item.category)}</span></div><div class="tag-display">${item.tags.map(t=>`<span class="tag-item">${t}</span>`).join('')}</div>`;
+                if (item.options?.length) card.innerHTML += `<div style="margin-top:10px; font-size:12px; color:var(--secondary);"><i class="fas fa-tasks"></i> ${item.options.length} option group(s)</div>`;
                 list.appendChild(card);
             });
             document.querySelectorAll('.edit-item-modal').forEach(b=> b.addEventListener('click', function() { const id = parseInt(this.dataset.id); openEditMenuItemForm(id); adminPanel.style.display = 'none'; }));
@@ -3594,6 +4038,7 @@ VIP Table</textarea>
             document.querySelectorAll('.delete-item-modal').forEach(b=> b.addEventListener('click', function() { const id = parseInt(this.dataset.id); showAdminChangePrompt(()=>deleteMenuItemOptimistic(id)); }));
             makeAdminGridDraggable('menuItemsListModal');
         }
+
         function loadMenuItemsForAdminModalEn() {
             const list = document.getElementById('menuItemsListModalEn'); if (!list) return;
             list.innerHTML = '';
@@ -3614,6 +4059,7 @@ VIP Table</textarea>
             document.querySelectorAll('.delete-item-modal-en').forEach(b=> b.addEventListener('click', function() { const id = parseInt(this.dataset.id); showAdminChangePrompt(()=>deleteMenuItemOptimisticEn(id)); }));
             makeAdminGridDraggable('menuItemsListModalEn');
         }
+
         function loadCategoriesForAdminModal() {
             const con = document.getElementById('categoriesListContainerModal'); if (!con) return;
             con.innerHTML = '';
@@ -3627,6 +4073,7 @@ VIP Table</textarea>
             document.querySelectorAll('.delete-category-modal').forEach(b=> b.addEventListener('click', function() { const id = this.dataset.id; showAdminChangePrompt(()=>deleteCategoryOptimistic(id)); }));
             makeCategoriesDraggable('categoriesListContainerModal');
         }
+
         function loadOrdersForAdminModal() {
             const list = document.getElementById('adminOrdersListModal');
             const statusFilter = document.getElementById('orderStatusFilterModal').value;
@@ -3644,7 +4091,15 @@ VIP Table</textarea>
             filtered.forEach(o => {
                 const card = document.createElement('div'); card.className = 'admin-card'; card.style.marginBottom = '15px';
                 const date = new Date(o.timestamp).toLocaleString();
-                let badge = ''; switch(o.status) { case 'pending': badge='<span class="order-status-badge status-pending">Pending</span>'; break; case 'preparing': badge='<span class="order-status-badge status-preparing">Preparing</span>'; break; case 'ready': badge='<span class="order-status-badge status-ready">Ready</span>'; break; case 'served': badge='<span class="order-status-badge status-served">Served</span>'; break; case 'cancelled': badge='<span class="order-status-badge status-cancelled">Cancelled</span>'; }
+                let badge = ''; 
+                switch(o.status) { 
+                    case 'pending': badge='<span class="order-status-badge status-pending">Pending</span>'; break; 
+                    case 'preparing': badge='<span class="order-status-badge status-preparing">Preparing</span>'; break; 
+                    case 'ready': badge='<span class="order-status-badge status-ready">Ready</span>'; break; 
+                    case 'served': badge='<span class="order-status-badge status-served">Served</span>'; break; 
+                    case 'cancelled': badge='<span class="order-status-badge status-cancelled">Cancelled</span>'; 
+                    case 'payed': badge='<span class="order-status-badge status-payed">Payed</span>';
+                }
                 let itemsHtml = '';
                 o.items.forEach(item => {
                     itemsHtml += `<div style="margin-bottom:8px;"><div style="display:flex; justify-content:space-between;"><span><strong>${item.quantity}x ${item.name}</strong></span><span style="color:var(--primary);">$${(item.price*item.quantity).toFixed(2)}</span></div>`;
@@ -3658,12 +4113,18 @@ VIP Table</textarea>
                     }
                     itemsHtml += '</div>';
                 });
-                card.innerHTML = `<div class="admin-card-header"><div><div class="admin-card-title">Order #${o.orderNumber}</div><div style="font-size:12px; color:var(--gray);">${date}</div></div><div>${badge}</div></div><p style="margin-bottom:10px; font-size:14px;"><strong>Table:</strong> ${o.table}<br><strong>Items:</strong></p><div style="margin-bottom:15px;">${itemsHtml}</div><p style="margin-bottom:10px; font-size:14px;"><strong>Total:</strong> $${o.total.toFixed(2)}<br><strong>Payment:</strong> ${o.paymentMethod==='card'?'Card':'Cash'} (${o.paymentTime==='now'?'Pay Now':'Pay Later'})</p><div style="display:flex; gap:10px; margin-top:15px;"><select class="admin-select" style="flex:1;" data-order-id="${o.orderNumber}"><option value="pending" ${o.status==='pending'?'selected':''}>Pending</option><option value="preparing" ${o.status==='preparing'?'selected':''}>Preparing</option><option value="ready" ${o.status==='ready'?'selected':''}>Ready</option><option value="served" ${o.status==='served'?'selected':''}>Served</option><option value="cancelled" ${o.status==='cancelled'?'selected':''}>Cancelled</option></select><button class="btn btn-primary btn-small update-status-modal" data-order-id="${o.orderNumber}" style="padding:8px 15px;">Update</button></div>`;
+                card.innerHTML = `<div class="admin-card-header"><div><div class="admin-card-title">Order #${o.orderNumber}</div><div style="font-size:12px; color:var(--gray);">${date}</div></div><div>${badge}</div></div><p style="margin-bottom:10px; font-size:14px;"><strong>Table:</strong> ${o.table}<br><strong>Items:</strong></p><div style="margin-bottom:15px;">${itemsHtml}</div><p style="margin-bottom:10px; font-size:14px;"><strong>Total:</strong> $${o.total.toFixed(2)}<br><strong>Payment:</strong> ${o.paymentMethod==='card'?'Card':'Cash'} (${o.paymentTime==='now'?'Pay Now':'Pay Later'})</p><div style="display:flex; gap:10px; margin-top:15px;"><select class="admin-select" style="flex:1;" data-order-id="${o.orderNumber}"><option value="pending" ${o.status==='pending'?'selected':''}>Pending</option><option value="preparing" ${o.status==='preparing'?'selected':''}>Preparing</option><option value="ready" ${o.status==='ready'?'selected':''}>Ready</option><option value="served" ${o.status==='served'?'selected':''}>Served</option><option value="cancelled" ${o.status==='cancelled'?'selected':''}>Cancelled</option><option value="payed" ${o.status==='payed'?'selected':''}>Payed</option></select><button class="btn btn-primary btn-small update-status-modal" data-order-id="${o.orderNumber}" style="padding:8px 15px;">Update</button><button class="btn btn-secondary btn-small edit-order-btn-modal" data-order-id="${o.orderNumber}" style="padding:8px 15px;"><i class="fas fa-edit"></i> Edit</button></div>`;
                 list.appendChild(card);
             });
             populateTableSelect('tableSelectForDeleteModal');
             document.querySelectorAll('.update-status-modal').forEach(b=> b.addEventListener('click', function() { const oid = this.dataset.orderId; const sel = document.querySelector(`select[data-order-id="${oid}"]`); if (sel && oid) updateOrderStatusOptimistic(oid, sel.value); }));
+            document.querySelectorAll('.edit-order-btn-modal').forEach(b=> b.addEventListener('click', function() {
+                const orderId = this.dataset.orderId;
+                const order = state.orders.find(o => o.orderNumber === orderId);
+                if (order) openEditOrderModal(order);
+            }));
         }
+
         function loadHelpRequestsForAdminModal() {
             const list = document.getElementById('adminHelpRequestsListModal');
             if (!list) return;
@@ -3679,9 +4140,10 @@ VIP Table</textarea>
                 const card = document.createElement('div'); card.className = 'help-request-card';
                 const date = new Date(r.timestamp).toLocaleString();
                 const badge = r.status === 'pending' ? '<span class="help-badge-pending">Pending</span>' : '<span class="help-badge-resolved">Resolved</span>';
+                const icon = r.requestType === 'payment' ? '💰' : '🆘';
                 card.innerHTML = `
                     <div class="help-request-header">
-                        <div class="help-request-table"><i class="fas fa-chair"></i> ${r.table}</div>
+                        <div class="help-request-table">${icon} ${r.table}</div>
                         <div>${badge}</div>
                     </div>
                     <div class="help-request-time">${date}</div>
@@ -3710,6 +4172,7 @@ VIP Table</textarea>
                 });
             });
         }
+
         function initializeModalCustomizationTab() {
             const g = document.getElementById('themeGalleryModal'); if (!g) return;
             g.innerHTML = '';
@@ -3743,7 +4206,7 @@ VIP Table</textarea>
             autoLoginFromUrl();
             document.getElementById('languageToggleBtn').addEventListener('click', toggleLanguage);
             document.querySelectorAll('.table-btn').forEach(btn => btn.addEventListener('click', function() { selectTable(this.dataset.table, false); }));
-            cartFloating.addEventListener('click', function() { if (!state.isAdminMode) showSection('cartSection'); });
+            cartFloating.addEventListener('click', function() { if (!state.isAdminMode || (state.currentTable && state.currentTable !== "Admin")) showSection('cartSection'); });
             document.getElementById('backToMenuBtn').addEventListener('click', ()=> showSection('menuSection'));
             document.getElementById('proceedToPaymentBtn').addEventListener('click', function() { if (state.cart.length===0) { showNotification(state.currentLanguage === 'el' ? 'Παρακαλώ προσθέστε είδη στο καλάθι σας πριν προχωρήσετε στην πληρωμή' : 'Please add items to your cart before proceeding to payment'); return; } updatePaymentSummary(); showSection('paymentSection'); });
             document.getElementById('backToCartBtn').addEventListener('click', ()=> showSection('cartSection'));
@@ -3755,9 +4218,8 @@ VIP Table</textarea>
             });
             document.getElementById('confirmPaymentBtn').addEventListener('click', placeOrderOptimistic);
             
-            // ========== MODIFIED: New Order button goes to menu, not scanner ==========
             document.getElementById('newOrderBtn').addEventListener('click', function() {
-                resetCart(); // Clear cart
+                resetCart();
                 state.selectedPaymentMethod = null;
                 state.selectedPaymentTime = null;
                 document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
@@ -3772,6 +4234,7 @@ VIP Table</textarea>
             document.getElementById('viewMenuBtn').addEventListener('click', function() { resetCart(); state.selectedPaymentMethod = null; state.selectedPaymentTime = null; document.querySelectorAll('.option-card').forEach(c=>c.classList.remove('selected')); if (state.currentTable) menuSubtitle.textContent = state.currentLanguage === 'el' ? `Ξεκινήστε μια νέα παραγγελία για ${state.currentTable}` : `Start a new order for ${state.currentTable}`; showSection('menuSection'); showNotification(state.currentLanguage === 'el' ? 'Έτοιμοι για νέα παραγγελία!' : 'Ready for a new order!'); });
             document.getElementById('needHelpBtn').addEventListener('click', showHelpNotification);
             headerHelpButton.addEventListener('click', showHelpNotification);
+            requestPayBtn.addEventListener('click', requestPay);
             myOrdersButton.addEventListener('click', function() { loadMyOrders(); showSection('myOrdersSection'); });
             document.getElementById('backToMenuFromOrdersBtn').addEventListener('click', ()=> showSection('menuSection'));
             document.getElementById('placeNewOrderBtn').addEventListener('click', function() { resetCart(); showSection('menuSection'); });
@@ -3786,7 +4249,6 @@ VIP Table</textarea>
                 }
                 showAdminCodePrompt();
             });
-            // Updated submitAdminCodeBtn to handle pending admin code actions
             submitAdminCodeBtn.addEventListener('click', function() { 
                 if (adminCodeInput.value === state.adminAccessCode) { 
                     adminCodePrompt.style.display = 'none'; 
@@ -3824,6 +4286,12 @@ VIP Table</textarea>
                 } 
             });
             cancelChangeBtn.addEventListener('click', function() { adminChangePrompt.style.display = 'none'; adminChangeCodeInput.value = ''; state.pendingAdminAction = null; showNotification(state.currentLanguage === 'el' ? "Οι αλλαγές ακυρώθηκαν." : "Changes cancelled."); });
+            // Edit order modal buttons
+            cancelEditOrderBtn.addEventListener('click', function() {
+                editOrderModal.style.display = 'none';
+                state.currentEditOrder = null;
+            });
+            saveEditOrderBtn.addEventListener('click', saveEditedOrder);
             setupAdminPanel();
         }
 
@@ -3839,7 +4307,6 @@ VIP Table</textarea>
                 status: 'pending', timestamp: new Date().toISOString(), customerNotes: ""
             };
             state.orders.push(order);
-            // Update cumulative stats
             state.cumulativeStats.totalOrders++;
             state.cumulativeStats.totalRevenue += order.total;
             await saveCumulativeStats();
