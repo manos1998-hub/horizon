@@ -2798,6 +2798,7 @@ VIP Table</textarea>
         }
 
         // ========== NEW FUNCTION: OPEN CUSTOMER ORDER VIEW (TAKE AWAY) with column colors and ascending order ==========
+        // FIXED: more flexible table name detection (both "take" and "away" must appear somewhere)
         function openCustomerOrderView() {
             const winHtml = '<!DOCTYPE html>' +
             '<html>' +
@@ -2868,7 +2869,12 @@ VIP Table</textarea>
                     '}' +
                     '' +
                     'function renderOrders(orders) {' +
-                        'const takeaway = orders.filter(o => o.table && o.table.toLowerCase().includes("take away"));' +
+                        '// Flexible filter: table name must contain both "take" and "away" (case‑insensitive)' +
+                        'const takeaway = orders.filter(o => {' +
+                            'if (!o.table) return false;' +
+                            'const tbl = o.table.toLowerCase();' +
+                            'return tbl.includes("take") && tbl.includes("away");' +
+                        '});' +
                         '// sort all takeaway orders ascending (oldest first)' +
                         'takeaway.sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp));' +
                         'const preparing = takeaway.filter(o => o.status === "preparing");' +
@@ -3261,7 +3267,7 @@ VIP Table</textarea>
             });
             document.getElementById('openOrdersVerticalBtn').addEventListener('click', openOrdersVerticalView);
             document.getElementById('openHelpVerticalBtn').addEventListener('click', openHelpVerticalView); // NEW
-            document.getElementById('openCustomerOrderViewBtn').addEventListener('click', openCustomerOrderView); // NEW
+            document.getElementById('openCustomerOrderViewBtn').addEventListener('click', openCustomerOrderView); // FIXED
             document.getElementById('addTableBtn').addEventListener('click', ()=> showAdminChangePrompt(addTable));
             backToAdminBtn.addEventListener('click', function() {
                 state.currentTable = null;
@@ -4227,7 +4233,7 @@ VIP Table</textarea>
             document.getElementById('helpRequestStatusFilterModal').addEventListener('change', loadHelpRequestsForAdminModal);
             document.getElementById('openOrdersVerticalBtnModal').addEventListener('click', openOrdersVerticalView);
             document.getElementById('openHelpVerticalBtnModal').addEventListener('click', openHelpVerticalView); // NEW
-            document.getElementById('openCustomerOrderViewBtnModal').addEventListener('click', openCustomerOrderView); // NEW
+            document.getElementById('openCustomerOrderViewBtnModal').addEventListener('click', openCustomerOrderView); // FIXED
             document.getElementById('addTableBtnModal').addEventListener('click', ()=> showAdminChangePrompt(addTableModal));
         }
 
