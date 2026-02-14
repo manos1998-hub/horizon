@@ -1232,7 +1232,7 @@ VIP Table</textarea>
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // ========== STATE (updated with cumulativeStats) ==========
+        // ========== STATE (updated with cumulativeStats and pendingAdminCodeAction) ==========
         const state = {
             currentTable: null,
             cart: [],
@@ -1256,6 +1256,7 @@ VIP Table</textarea>
             categories: [],
             isAdminMode: false,
             pendingAdminAction: null,
+            pendingAdminCodeAction: null, // new for actions requiring adminAccessCode
             currentImageUpload: null,
             customization: {
                 primary: "#e63946",
@@ -2579,7 +2580,7 @@ VIP Table</textarea>
             }
         }
 
-        // ========== ADMIN DASHBOARD (updated with cumulativeStats) ==========
+        // ========== ADMIN DASHBOARD (updated with cumulativeStats and delete orders by table using adminAccessCode) ==========
         function loadAdminDashboardData() {
             document.getElementById('adminRestaurantName').value = state.restaurantInfo.name;
             document.getElementById('adminTaxRate').value = state.restaurantInfo.taxRate;
@@ -2633,10 +2634,15 @@ VIP Table</textarea>
             document.getElementById('exportDataBtn').addEventListener('click', exportData);
             document.getElementById('importDataBtn').addEventListener('click', ()=> document.getElementById('importDataInput').click());
             document.getElementById('importDataInput').addEventListener('change', (e)=> showAdminChangePrompt(()=>importData(e)));
+            // Delete orders by table now uses adminAccessCode prompt
             document.getElementById('deleteOrdersForTableBtn').addEventListener('click', function() {
                 const sel = document.getElementById('tableSelectForDelete');
-                if (sel.value) showAdminChangePrompt(()=>deleteOrdersForTable(sel.value));
-                else showNotification('Please select a table.');
+                if (sel.value) {
+                    state.pendingAdminCodeAction = async () => { await deleteOrdersForTable(sel.value); };
+                    showAdminCodePrompt();
+                } else {
+                    showNotification('Please select a table.');
+                }
             });
             document.getElementById('generateQRPDFBtn').addEventListener('click', function() {
                 const textarea = document.getElementById('tableNamesForQR');
@@ -3554,10 +3560,15 @@ VIP Table</textarea>
                 const tableNames = textarea.value.split('\n').map(s => s.trim()).filter(s => s.length > 0);
                 generateTableQRCodePDF(tableNames);
             });
+            // Delete orders by table in modal now uses adminAccessCode prompt
             document.getElementById('deleteOrdersForTableBtnModal').addEventListener('click', function() {
                 const sel = document.getElementById('tableSelectForDeleteModal');
-                if (sel.value) showAdminChangePrompt(()=>deleteOrdersForTable(sel.value));
-                else showNotification('Please select a table.');
+                if (sel.value) {
+                    state.pendingAdminCodeAction = async () => { await deleteOrdersForTable(sel.value); };
+                    showAdminCodePrompt();
+                } else {
+                    showNotification('Please select a table.');
+                }
             });
             document.getElementById('helpRequestStatusFilterModal').addEventListener('change', loadHelpRequestsForAdminModal);
             // ========== ATTACH EVENT FOR VERTICAL ORDERS BUTTON IN MODAL ==========
@@ -3773,18 +3784,29 @@ VIP Table</textarea>
                 }
                 showAdminCodePrompt();
             });
+            // Updated submitAdminCodeBtn to handle pending admin code actions
             submitAdminCodeBtn.addEventListener('click', function() { 
                 if (adminCodeInput.value === state.adminAccessCode) { 
                     adminCodePrompt.style.display = 'none'; 
                     adminCodeInput.value = ''; 
-                    enterAdminMode(); 
+                    if (state.pendingAdminCodeAction) {
+                        state.pendingAdminCodeAction();
+                        state.pendingAdminCodeAction = null;
+                    } else {
+                        enterAdminMode();
+                    }
                 } else { 
                     showNotification(state.currentLanguage === 'el' ? "Λάθος κωδικός διαχειριστή." : "Incorrect administrator code."); 
                     adminCodeInput.value = ''; 
                     adminCodeInput.focus(); 
                 } 
             });
-            cancelAdminCodeBtn.addEventListener('click', function() { adminCodePrompt.style.display = 'none'; adminCodeInput.value = ''; showSection('scannerSection'); });
+            cancelAdminCodeBtn.addEventListener('click', function() { 
+                adminCodePrompt.style.display = 'none'; 
+                adminCodeInput.value = ''; 
+                state.pendingAdminCodeAction = null; 
+                showSection('scannerSection'); 
+            });
             submitChangeCodeBtn.addEventListener('click', function() { 
                 if (adminChangeCodeInput.value === state.adminChangeCode) { 
                     adminChangePrompt.style.display = 'none'; 
