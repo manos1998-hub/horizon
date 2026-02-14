@@ -2167,18 +2167,17 @@ VIP Table</textarea>
             }
         }
 
-        // ========== REQUEST PAY BUTTON ==========
+        // ========== REQUEST PAY BUTTON (UPDATED LOGIC) ==========
         function updateRequestPayButton() {
             if (!state.currentTable || state.currentTable === "Admin" || state.isAdminMode) {
                 requestPayBtn.style.display = 'none';
                 return;
             }
-            // Check if there is any active order (not payed, not served, not cancelled) with paymentTime='later'
+            // Show button if there is any order with paymentTime='later' and status not 'payed' and not 'cancelled'
             const activeOrders = state.orders.filter(o => 
                 o.table === state.currentTable && 
                 o.paymentTime === 'later' && 
                 o.status !== 'payed' && 
-                o.status !== 'served' && 
                 o.status !== 'cancelled'
             );
             if (activeOrders.length > 0) {
@@ -4295,6 +4294,7 @@ VIP Table</textarea>
             setupAdminPanel();
         }
 
+        // ========== UPDATED PLACE ORDER FUNCTION with admin return logic ==========
         window.placeOrderOptimistic = async function() {
             if (!state.selectedPaymentMethod || !state.selectedPaymentTime) { showNotification(state.currentLanguage === 'el' ? 'Παρακαλώ επιλέξτε τρόπο και χρόνο πληρωμής' : 'Please select payment method and time'); return; }
             if (state.cart.length === 0) { showNotification(state.currentLanguage === 'el' ? 'Το καλάθι είναι άδειο' : 'Cart is empty'); return; }
@@ -4311,11 +4311,30 @@ VIP Table</textarea>
             state.cumulativeStats.totalRevenue += order.total;
             await saveCumulativeStats();
             showOrderConfirmation(order);
-            showSection('confirmationSection');
-            resetCart();
-            showNotification(state.currentLanguage === 'el' ? `Η παραγγελία #${orderNumber} επιβεβαιώθηκε!` : `Order #${orderNumber} confirmed!`);
+            // Play checkout sound
             playSound(state.soundEffects.checkoutSound);
             await saveOrder(order);
+            
+            // If in admin mode and current table is not "Admin", return to admin dashboard immediately
+            if (state.isAdminMode && state.currentTable && state.currentTable !== "Admin") {
+                // Simulate back to admin click
+                state.currentTable = null;
+                showSection('adminDashboardSection');
+                backToAdminBtn.style.display = 'none';
+                cartFloating.style.display = 'none';
+                updateRequestPayButton();
+                // Also update table info
+                tableInfo.innerHTML = `<i class="fas fa-qrcode"></i> ${state.currentLanguage === 'el' ? 'Σαρώστε QR για έναρξη' : 'Scan QR to start'}`;
+                // Hide my orders button
+                myOrdersButton.style.display = 'none';
+                // Show admin floating icon (since we're in admin mode with no table)
+                adminFloating.style.display = 'flex';
+            } else {
+                // Normal flow: show confirmation section
+                showSection('confirmationSection');
+                resetCart();
+            }
+            showNotification(state.currentLanguage === 'el' ? `Η παραγγελία #${orderNumber} επιβεβαιώθηκε!` : `Order #${orderNumber} confirmed!`);
         };
 
         initApp();
