@@ -2798,7 +2798,7 @@ VIP Table</textarea>
         }
 
         // ========== NEW FUNCTION: OPEN CUSTOMER ORDER VIEW (TAKE AWAY) with column colors and ascending order ==========
-        // FIXED: more flexible table name detection (both "take" and "away" must appear somewhere)
+       // ========== NEW FUNCTION: OPEN CUSTOMER ORDER VIEW (TAKE AWAY) with column colors and ascending order ==========
         function openCustomerOrderView() {
             const winHtml = '<!DOCTYPE html>' +
             '<html>' +
@@ -2869,12 +2869,7 @@ VIP Table</textarea>
                     '}' +
                     '' +
                     'function renderOrders(orders) {' +
-                        '// Flexible filter: table name must contain both "take" and "away" (case‑insensitive)' +
-                        'const takeaway = orders.filter(o => {' +
-                            'if (!o.table) return false;' +
-                            'const tbl = o.table.toLowerCase();' +
-                            'return tbl.includes("take") && tbl.includes("away");' +
-                        '});' +
+                        'const takeaway = orders.filter(o => o.table && o.table.toLowerCase().includes("take away"));' +
                         '// sort all takeaway orders ascending (oldest first)' +
                         'takeaway.sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp));' +
                         'const preparing = takeaway.filter(o => o.status === "preparing");' +
