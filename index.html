@@ -2249,337 +2249,336 @@ VIP Table</textarea>
         }
 
         // ========== NEW FUNCTION: OPEN VERTICAL ORDERS VIEW IN SEPARATE WINDOW (with status filter) ==========
-        // ========== CORRECTED: OPEN VERTICAL ORDERS VIEW ==========
-function openOrdersVerticalView() {
-    const winHtml = `<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Vertical Orders View</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body { font-family: "Poppins", sans-serif; background: #f8f9fa; margin: 0; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        h2 { color: #e63946; border-bottom: 2px solid #e9ecef; padding-bottom: 10px; margin-top: 0; }
-        .toolbar { margin-bottom: 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-        .toolbar select { padding: 8px; border-radius: 6px; border: 1px solid #ced4da; flex: 0 0 200px; }
-        button { padding: 8px 16px; border: none; border-radius: 6px; font-weight: 500; cursor: pointer; background: #e63946; color: white; transition: 0.2s; }
-        button:hover { background: #c1121f; }
-        button.secondary { background: #6c757d; }
-        button.secondary:hover { background: #495057; }
-        .orders-list { display: flex; flex-direction: column; gap: 20px; }
-        .order-card { background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); padding: 20px; border-left: 4px solid #e63946; }
-        .order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; }
-        .order-title { font-size: 18px; font-weight: 600; color: #212529; }
-        .order-time { font-size: 14px; color: #6c757d; }
-        .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 500; }
-        .status-pending { background: #fff3cd; color: #856404; }
-        .status-preparing { background: #d1ecf1; color: #0c5460; }
-        .status-ready { background: #d4edda; color: #155724; }
-        .status-served { background: #cce5ff; color: #004085; }
-        .status-cancelled { background: #f8d7da; color: #721c24; }
-        .order-body { margin-bottom: 15px; }
-        .order-items { margin: 10px 0; padding-left: 15px; }
-        .order-item { display: flex; justify-content: space-between; margin-bottom: 8px; }
-        .item-name { font-weight: 500; }
-        .item-price { color: #e63946; font-weight: 600; }
-        .order-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e9ecef; padding-top: 15px; font-weight: 600; }
-        .order-total { font-size: 18px; color: #e63946; }
-        .payment-info { font-size: 14px; color: #6c757d; }
-        .order-actions { margin-top: 15px; display: flex; gap: 10px; align-items: center; }
-        .order-actions select { padding: 8px; border-radius: 6px; border: 1px solid #ced4da; flex: 1; }
-        .order-actions button { background: #457b9d; }
-        .order-actions button:hover { background: #2c5a7a; }
-        .no-orders { text-align: center; padding: 60px 20px; color: #6c757d; }
-        .no-orders i { font-size: 60px; margin-bottom: 20px; opacity: 0.5; }
-    </style>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"><\/script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"><\/script>
-</head>
-<body>
-    <div class="container">
-        <h2><i class="fas fa-clipboard-list"></i> Vertical Orders View</h2>
-        <div class="toolbar">
-            <select id="statusFilter">
-                <option value="all">All Orders</option>
-                <option value="pending">Pending</option>
-                <option value="preparing">Preparing</option>
-                <option value="ready">Ready</option>
-                <option value="served">Served</option>
-                <option value="cancelled">Cancelled</option>
-            </select>
-            <button id="refreshBtn"><i class="fas fa-sync-alt"></i> Refresh</button>
-            <button class="secondary" onclick="window.close()"><i class="fas fa-times"></i> Close</button>
-        </div>
-        <div id="ordersList" class="orders-list">
-            <div class="no-orders"><i class="fas fa-spinner fa-pulse"></i><p>Loading orders...</p></div>
-        </div>
-    </div>
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyCtO20G2Ssl9cvB6CP1xfCh2Ldf4GMdGUg",
-            authDomain: "foodmenu-b1fc2.firebaseapp.com",
-            projectId: "foodmenu-b1fc2",
-            storageBucket: "foodmenu-b1fc2.firebasestorage.app",
-            messagingSenderId: "730100337020",
-            appId: "1:730100337020:web:dd3dc58846c8207a693cf9"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
-        function formatDate(iso) {
-            const d = new Date(iso);
-            return d.toLocaleString();
-        }
-
-        async function updateOrderStatus(orderId, newStatus) {
-            try {
-                await db.collection("orders").doc(orderId).update({ status: newStatus });
-            } catch (err) {
-                console.error("Error updating order:", err);
-                alert("Failed to update order status.");
-            }
-        }
-
-        function renderOrders(orders) {
-            const list = document.getElementById("ordersList");
-            const filter = document.getElementById("statusFilter").value;
-            let filtered = orders;
-            if (filter !== "all") {
-                filtered = orders.filter(o => o.status === filter);
-            }
-            if (filtered.length === 0) {
-                list.innerHTML = '<div class="no-orders"><i class="fas fa-clipboard-list"></i><p>No orders found.</p></div>';
-                return;
-            }
-            filtered.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
-            let html = "";
-            filtered.forEach(o => {
-                let badgeClass = "";
-                let badgeText = o.status;
-                if (o.status === "pending") badgeClass = "status-pending";
-                else if (o.status === "preparing") badgeClass = "status-preparing";
-                else if (o.status === "ready") badgeClass = "status-ready";
-                else if (o.status === "served") badgeClass = "status-served";
-                else if (o.status === "cancelled") badgeClass = "status-cancelled";
-
-                let itemsHtml = "";
-                o.items.forEach(item => {
-                    let optionsHtml = "";
-                    if (item.selectedOptions && item.selectedOptions.length) {
-                        optionsHtml = '<div style="margin-left:20px; font-size:12px; color:#6c757d;">';
-                        item.selectedOptions.forEach(opt => {
-                            if (opt.isComment) {
-                                optionsHtml += '<i class="fas fa-comment"></i> ' + opt.groupName + ': "' + opt.choiceName + '"';
-                            } else {
-                                optionsHtml += '• ' + opt.groupName + ': ' + opt.choiceName;
-                                if (opt.price > 0) optionsHtml += ' (+$' + opt.price.toFixed(2) + ')';
-                                else if (opt.price < 0) optionsHtml += ' (-$' + Math.abs(opt.price).toFixed(2) + ')';
-                            }
-                            optionsHtml += '<br>';
-                        });
-                        optionsHtml += '</div>';
-                    }
-                    itemsHtml += '<div class="order-item"><div><span class="item-name">' + item.quantity + 'x ' + item.name + '</span>' + optionsHtml + '</div><span class="item-price">$' + (item.price * item.quantity).toFixed(2) + '</span></div>';
-                });
-
-                html += '<div class="order-card">' +
-                    '<div class="order-header"><div><span class="order-title">Order #' + o.orderNumber + '</span> <span class="order-time">' + formatDate(o.timestamp) + '</span></div><span class="status-badge ' + badgeClass + '">' + badgeText.charAt(0).toUpperCase() + badgeText.slice(1) + '</span></div>' +
-                    '<div class="order-body"><div><strong>Table:</strong> ' + o.table + '</div><div class="order-items">' + itemsHtml + '</div></div>' +
-                    '<div class="order-footer"><div class="payment-info">' + (o.paymentMethod === "card" ? "Card" : "Cash") + ' • ' + (o.paymentTime === "now" ? "Pay Now" : "Pay Later") + '</div><div class="order-total">Total: $' + o.total.toFixed(2) + '</div></div>' +
-                    '<div class="order-actions">' +
-                        '<select id="status-' + o.orderNumber + '">' +
-                            '<option value="pending"' + (o.status === "pending" ? ' selected' : '') + '>Pending</option>' +
-                            '<option value="preparing"' + (o.status === "preparing" ? ' selected' : '') + '>Preparing</option>' +
-                            '<option value="ready"' + (o.status === "ready" ? ' selected' : '') + '>Ready</option>' +
-                            '<option value="served"' + (o.status === "served" ? ' selected' : '') + '>Served</option>' +
-                            '<option value="cancelled"' + (o.status === "cancelled" ? ' selected' : '') + '>Cancelled</option>' +
+        function openOrdersVerticalView() {
+            // Build a simple HTML string for the new window – now with status filter
+            const winHtml = '<!DOCTYPE html>' +
+            '<html>' +
+            '<head>' +
+                '<meta charset="UTF-8">' +
+                '<title>Vertical Orders View</title>' +
+                '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">' +
+                '<style>' +
+                    'body { font-family: "Poppins", sans-serif; background: #f8f9fa; margin: 0; padding: 20px; }' +
+                    '.container { max-width: 1200px; margin: 0 auto; }' +
+                    'h2 { color: #e63946; border-bottom: 2px solid #e9ecef; padding-bottom: 10px; margin-top: 0; }' +
+                    '.toolbar { margin-bottom: 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }' +
+                    '.toolbar select { padding: 8px; border-radius: 6px; border: 1px solid #ced4da; flex: 0 0 200px; }' +
+                    'button { padding: 8px 16px; border: none; border-radius: 6px; font-weight: 500; cursor: pointer; background: #e63946; color: white; transition: 0.2s; }' +
+                    'button:hover { background: #c1121f; }' +
+                    'button.secondary { background: #6c757d; }' +
+                    'button.secondary:hover { background: #495057; }' +
+                    '.orders-list { display: flex; flex-direction: column; gap: 20px; }' +
+                    '.order-card { background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); padding: 20px; border-left: 4px solid #e63946; }' +
+                    '.order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; }' +
+                    '.order-title { font-size: 18px; font-weight: 600; color: #212529; }' +
+                    '.order-time { font-size: 14px; color: #6c757d; }' +
+                    '.status-badge { padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 500; }' +
+                    '.status-pending { background: #fff3cd; color: #856404; }' +
+                    '.status-preparing { background: #d1ecf1; color: #0c5460; }' +
+                    '.status-ready { background: #d4edda; color: #155724; }' +
+                    '.status-served { background: #cce5ff; color: #004085; }' +
+                    '.status-cancelled { background: #f8d7da; color: #721c24; }' +
+                    '.order-body { margin-bottom: 15px; }' +
+                    '.order-items { margin: 10px 0; padding-left: 15px; }' +
+                    '.order-item { display: flex; justify-content: space-between; margin-bottom: 8px; }' +
+                    '.item-name { font-weight: 500; }' +
+                    '.item-price { color: #e63946; font-weight: 600; }' +
+                    '.order-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e9ecef; padding-top: 15px; font-weight: 600; }' +
+                    '.order-total { font-size: 18px; color: #e63946; }' +
+                    '.payment-info { font-size: 14px; color: #6c757d; }' +
+                    '.order-actions { margin-top: 15px; display: flex; gap: 10px; align-items: center; }' +
+                    '.order-actions select { padding: 8px; border-radius: 6px; border: 1px solid #ced4da; flex: 1; }' +
+                    '.order-actions button { background: #457b9d; }' +
+                    '.order-actions button:hover { background: #2c5a7a; }' +
+                    '.no-orders { text-align: center; padding: 60px 20px; color: #6c757d; }' +
+                    '.no-orders i { font-size: 60px; margin-bottom: 20px; opacity: 0.5; }' +
+                '</style>' +
+                '<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"><\/script>' +
+                '<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"><\/script>' +
+            '</head>' +
+            '<body>' +
+                '<div class="container">' +
+                    '<h2><i class="fas fa-clipboard-list"></i> Vertical Orders View</h2>' +
+                    '<div class="toolbar">' +
+                        '<select id="statusFilter">' +
+                            '<option value="all">All Orders</option>' +
+                            '<option value="pending">Pending</option>' +
+                            '<option value="preparing">Preparing</option>' +
+                            '<option value="ready">Ready</option>' +
+                            '<option value="served">Served</option>' +
+                            '<option value="cancelled">Cancelled</option>' +
                         '</select>' +
-                        '<button onclick="updateOrderStatus(\'' + o.orderNumber + '\', document.getElementById(\'status-' + o.orderNumber + '\').value)"><i class="fas fa-save"></i> Update</button>' +
+                        '<button id="refreshBtn"><i class="fas fa-sync-alt"></i> Refresh</button>' +
+                        '<button class="secondary" onclick="window.close()"><i class="fas fa-times"></i> Close</button>' +
                     '</div>' +
-                '</div>';
-            });
-            list.innerHTML = html;
-        }
-
-        function loadOrders() {
-            db.collection("orders").onSnapshot(snap => {
-                const orders = snap.docs.map(doc => ({ orderNumber: doc.id, ...doc.data() }));
-                renderOrders(orders);
-            }, err => {
-                console.error("Firestore error", err);
-                document.getElementById("ordersList").innerHTML = '<div class="no-orders"><i class="fas fa-exclamation-triangle"></i><p>Error loading orders.</p></div>';
-            });
-        }
-
-        document.getElementById("statusFilter").addEventListener("change", () => {
-            db.collection("orders").get().then(snap => {
-                const orders = snap.docs.map(doc => ({ orderNumber: doc.id, ...doc.data() }));
-                renderOrders(orders);
-            });
-        });
-
-        document.getElementById("refreshBtn").addEventListener("click", () => { loadOrders(); });
-
-        loadOrders();
-    <\/script>
-</body>
-</html>`;
-    const win = window.open('', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
-    if (win) {
-        win.document.write(winHtml);
-        win.document.close();
-    } else {
-        showNotification('Pop‑up blocked. Please allow pop‑ups for this site.');
-    }
-}
-
-// ========== CORRECTED: OPEN VERTICAL HELP REQUESTS VIEW ==========
-function openHelpVerticalView() {
-    const winHtml = `<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Vertical Help Requests View</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body { font-family: "Poppins", sans-serif; background: #f8f9fa; margin: 0; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        h2 { color: #e63946; border-bottom: 2px solid #e9ecef; padding-bottom: 10px; margin-top: 0; }
-        .toolbar { margin-bottom: 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-        .toolbar select { padding: 8px; border-radius: 6px; border: 1px solid #ced4da; flex: 0 0 200px; }
-        button { padding: 8px 16px; border: none; border-radius: 6px; font-weight: 500; cursor: pointer; background: #e63946; color: white; transition: 0.2s; }
-        button:hover { background: #c1121f; }
-        button.secondary { background: #6c757d; }
-        button.secondary:hover { background: #495057; }
-        .requests-list { display: flex; flex-direction: column; gap: 20px; }
-        .help-card { background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); padding: 20px; border-left: 4px solid #e9c46a; }
-        .help-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; }
-        .help-table { font-size: 18px; font-weight: 600; color: #212529; display: flex; align-items: center; gap: 8px; }
-        .help-time { font-size: 14px; color: #6c757d; }
-        .help-badge { padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 500; }
-        .help-badge-pending { background: #fff3cd; color: #856404; }
-        .help-badge-resolved { background: #d4edda; color: #155724; }
-        .help-actions { margin-top: 15px; display: flex; gap: 10px; }
-        .help-actions button { background: #457b9d; }
-        .help-actions button.resolve { background: #2a9d8f; }
-        .help-actions button.delete { background: #dc3545; }
-        .no-requests { text-align: center; padding: 60px 20px; color: #6c757d; }
-        .no-requests i { font-size: 60px; margin-bottom: 20px; opacity: 0.5; }
-    </style>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"><\/script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"><\/script>
-</head>
-<body>
-    <div class="container">
-        <h2><i class="fas fa-headset"></i> Vertical Help Requests View</h2>
-        <div class="toolbar">
-            <select id="statusFilter">
-                <option value="all">All Requests</option>
-                <option value="pending">Pending</option>
-                <option value="resolved">Resolved</option>
-            </select>
-            <button id="refreshBtn"><i class="fas fa-sync-alt"></i> Refresh</button>
-            <button class="secondary" onclick="window.close()"><i class="fas fa-times"></i> Close</button>
-        </div>
-        <div id="requestsList" class="requests-list">
-            <div class="no-requests"><i class="fas fa-spinner fa-pulse"></i><p>Loading help requests...</p></div>
-        </div>
-    </div>
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyCtO20G2Ssl9cvB6CP1xfCh2Ldf4GMdGUg",
-            authDomain: "foodmenu-b1fc2.firebaseapp.com",
-            projectId: "foodmenu-b1fc2",
-            storageBucket: "foodmenu-b1fc2.firebasestorage.app",
-            messagingSenderId: "730100337020",
-            appId: "1:730100337020:web:dd3dc58846c8207a693cf9"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
-        function formatDate(iso) {
-            const d = new Date(iso);
-            return d.toLocaleString();
-        }
-
-        async function updateHelpStatus(requestId, newStatus) {
-            try {
-                await db.collection("helpRequests").doc(requestId).update({ status: newStatus });
-            } catch (err) {
-                console.error("Error updating help request:", err);
-                alert("Failed to update request.");
-            }
-        }
-
-        async function deleteHelpRequest(requestId) {
-            if (!confirm("Delete this help request?")) return;
-            try {
-                await db.collection("helpRequests").doc(requestId).delete();
-            } catch (err) {
-                console.error("Error deleting help request:", err);
-                alert("Failed to delete request.");
-            }
-        }
-
-        function renderRequests(requests) {
-            const list = document.getElementById("requestsList");
-            const filter = document.getElementById("statusFilter").value;
-            let filtered = requests;
-            if (filter !== "all") {
-                filtered = requests.filter(r => r.status === filter);
-            }
-            filtered.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
-            if (filtered.length === 0) {
-                list.innerHTML = '<div class="no-requests"><i class="fas fa-headset"></i><p>No help requests found.</p></div>';
-                return;
-            }
-            let html = "";
-            filtered.forEach(r => {
-                const badgeClass = r.status === "pending" ? "help-badge-pending" : "help-badge-resolved";
-                html += '<div class="help-card">' +
-                    '<div class="help-header"><div class="help-table"><i class="fas fa-chair"></i> ' + r.table + '</div><span class="help-badge ' + badgeClass + '">' + r.status.charAt(0).toUpperCase() + r.status.slice(1) + '</span></div>' +
-                    '<div class="help-time">' + formatDate(r.timestamp) + '</div>' +
-                    '<div class="help-actions">' +
-                        (r.status === "pending" ? '<button class="resolve" onclick="updateHelpStatus(\'' + r.id + '\', \'resolved\')"><i class="fas fa-check"></i> Mark Resolved</button>' : '') +
-                        '<button class="delete" onclick="deleteHelpRequest(\'' + r.id + '\')"><i class="fas fa-trash"></i> Delete</button>' +
+                    '<div id="ordersList" class="orders-list">' +
+                        '<div class="no-orders"><i class="fas fa-spinner fa-pulse"></i><p>Loading orders...</p></div>' +
                     '</div>' +
-                '</div>';
-            });
-            list.innerHTML = html;
+                '</div>' +
+                '<script>' +
+                    'const firebaseConfig = {' +
+                        'apiKey: "AIzaSyCtO20G2Ssl9cvB6CP1xfCh2Ldf4GMdGUg",' +
+                        'authDomain: "foodmenu-b1fc2.firebaseapp.com",' +
+                        'projectId: "foodmenu-b1fc2",' +
+                        'storageBucket: "foodmenu-b1fc2.firebasestorage.app",' +
+                        'messagingSenderId: "730100337020",' +
+                        'appId: "1:730100337020:web:dd3dc58846c8207a693cf9"' +
+                    '};' +
+                    'firebase.initializeApp(firebaseConfig);' +
+                    'const db = firebase.firestore();' +
+                    '' +
+                    'function formatDate(iso) {' +
+                        'const d = new Date(iso);' +
+                        'return d.toLocaleString();' +
+                    '}' +
+                    '' +
+                    'async function updateOrderStatus(orderId, newStatus) {' +
+                        'try {' +
+                            'await db.collection("orders").doc(orderId).update({ status: newStatus });' +
+                        '} catch (err) {' +
+                            'console.error("Error updating order:", err);' +
+                            'alert("Failed to update order status.");' +
+                        '}' +
+                    '}' +
+                    '' +
+                    'function renderOrders(orders) {' +
+                        'const list = document.getElementById("ordersList");' +
+                        'const filter = document.getElementById("statusFilter").value;' +
+                        'let filtered = orders;' +
+                        'if (filter !== "all") {' +
+                            'filtered = orders.filter(o => o.status === filter);' +
+                        '}' +
+                        'if (filtered.length === 0) {' +
+                            'list.innerHTML = "<div class=\\"no-orders\\"><i class=\\"fas fa-clipboard-list\\"></i><p>No orders found.</p></div>";' +
+                            'return;' +
+                        '}' +
+                        'filtered.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));' +
+                        'let html = "";' +
+                        'filtered.forEach(o => {' +
+                            'let badgeClass = "";' +
+                            'let badgeText = o.status;' +
+                            'if (o.status === "pending") badgeClass = "status-pending";' +
+                            'else if (o.status === "preparing") badgeClass = "status-preparing";' +
+                            'else if (o.status === "ready") badgeClass = "status-ready";' +
+                            'else if (o.status === "served") badgeClass = "status-served";' +
+                            'else if (o.status === "cancelled") badgeClass = "status-cancelled";' +
+                            '' +
+                            'let itemsHtml = "";' +
+                            'o.items.forEach(item => {' +
+                                'let optionsHtml = "";' +
+                                'if (item.selectedOptions && item.selectedOptions.length) {' +
+                                    'optionsHtml = "<div style=\\"margin-left:20px; font-size:12px; color:#6c757d;\\">";' +
+                                    'item.selectedOptions.forEach(opt => {' +
+                                        'if (opt.isComment) {' +
+                                            'optionsHtml += "<i class=\\"fas fa-comment\\"></i> " + opt.groupName + ": \\"" + opt.choiceName + "\\"";' +
+                                        '} else {' +
+                                            'optionsHtml += "• " + opt.groupName + ": " + opt.choiceName;' +
+                                            'if (opt.price > 0) optionsHtml += " (+$" + opt.price.toFixed(2) + ")";' +
+                                            'else if (opt.price < 0) optionsHtml += " (-$" + Math.abs(opt.price).toFixed(2) + ")";' +
+                                        '}' +
+                                        'optionsHtml += "<br>";' +
+                                    '});' +
+                                    'optionsHtml += "</div>";' +
+                                '}' +
+                                'itemsHtml += "<div class=\\"order-item\\"><div><span class=\\"item-name\\">" + item.quantity + "x " + item.name + "</span>" + optionsHtml + "</div><span class=\\"item-price\\">$" + (item.price * item.quantity).toFixed(2) + "</span></div>";' +
+                            '});' +
+                            '' +
+                            'html += "<div class=\\"order-card\\">"' +
+                                '+ "<div class=\\"order-header\\"><div><span class=\\"order-title\\">Order #" + o.orderNumber + "</span> <span class=\\"order-time\\">" + formatDate(o.timestamp) + "</span></div><span class=\\"status-badge " + badgeClass + "\\">" + badgeText.charAt(0).toUpperCase() + badgeText.slice(1) + "</span></div>"' +
+                                '+ "<div class=\\"order-body\\"><div><strong>Table:</strong> " + o.table + "</div><div class=\\"order-items\\">" + itemsHtml + "</div></div>"' +
+                                '+ "<div class=\\"order-footer\\"><div class=\\"payment-info\\">" + (o.paymentMethod === "card" ? "Card" : "Cash") + " • " + (o.paymentTime === "now" ? "Pay Now" : "Pay Later") + "</div><div class=\\"order-total\\">Total: $" + o.total.toFixed(2) + "</div></div>"' +
+                                '+ "<div class=\\"order-actions\\"><select id=\\"status-" + o.orderNumber + "\\">"' +
+                                    '+ "<option value=\\"pending\\"" + (o.status === "pending" ? " selected" : "") + ">Pending</option>"' +
+                                    '+ "<option value=\\"preparing\\"" + (o.status === "preparing" ? " selected" : "") + ">Preparing</option>"' +
+                                    '+ "<option value=\\"ready\\"" + (o.status === "ready" ? " selected" : "") + ">Ready</option>"' +
+                                    '+ "<option value=\\"served\\"" + (o.status === "served" ? " selected" : "") + ">Served</option>"' +
+                                    '+ "<option value=\\"cancelled\\"" + (o.status === "cancelled" ? " selected" : "") + ">Cancelled</option>"' +
+                                '+ "</select>"' +
+                                '+ "<button onclick=\\"updateOrderStatus(\'" + o.orderNumber + "\', document.getElementById(\'status-" + o.orderNumber + "\').value)\\"><i class=\\"fas fa-save\\"></i> Update</button>"' +
+                            '+ "</div>"' +
+                            '+ "</div>";' +
+                        '});' +
+                        'list.innerHTML = html;' +
+                    '}' +
+                    '' +
+                    'function loadOrders() {' +
+                        'db.collection("orders").onSnapshot(snap => {' +
+                            'const orders = snap.docs.map(doc => ({ orderNumber: doc.id, ...doc.data() }));' +
+                            'renderOrders(orders);' +
+                        '}, err => {' +
+                            'console.error("Firestore error", err);' +
+                            'document.getElementById("ordersList").innerHTML = "<div class=\\"no-orders\\"><i class=\\"fas fa-exclamation-triangle\\"></i><p>Error loading orders.</p></div>";' +
+                        '});' +
+                    '}' +
+                    '' +
+                    'document.getElementById("statusFilter").addEventListener("change", () => {' +
+                        'db.collection("orders").get().then(snap => {' +
+                            'const orders = snap.docs.map(doc => ({ orderNumber: doc.id, ...doc.data() }));' +
+                            'renderOrders(orders);' +
+                        '});' +
+                    '});' +
+                    '' +
+                    'document.getElementById("refreshBtn").addEventListener("click", () => { loadOrders(); });' +
+                    '' +
+                    'loadOrders();' +
+                '<\/script>' +
+            '</body>' +
+            '</html>';
+            const win = window.open('', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
+            if (win) {
+                win.document.write(winHtml);
+                win.document.close();
+            } else {
+                showNotification('Pop‑up blocked. Please allow pop‑ups for this site.');
+            }
         }
 
-        function loadRequests() {
-            db.collection("helpRequests").onSnapshot(snap => {
-                const requests = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderRequests(requests);
-            }, err => {
-                console.error("Firestore error", err);
-                document.getElementById("requestsList").innerHTML = '<div class="no-requests"><i class="fas fa-exclamation-triangle"></i><p>Error loading help requests.</p></div>';
-            });
+        // ========== NEW FUNCTION: OPEN VERTICAL HELP REQUESTS VIEW IN SEPARATE WINDOW ==========
+        function openHelpVerticalView() {
+            const winHtml = '<!DOCTYPE html>' +
+            '<html>' +
+            '<head>' +
+                '<meta charset="UTF-8">' +
+                '<title>Vertical Help Requests View</title>' +
+                '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">' +
+                '<style>' +
+                    'body { font-family: "Poppins", sans-serif; background: #f8f9fa; margin: 0; padding: 20px; }' +
+                    '.container { max-width: 1200px; margin: 0 auto; }' +
+                    'h2 { color: #e63946; border-bottom: 2px solid #e9ecef; padding-bottom: 10px; margin-top: 0; }' +
+                    '.toolbar { margin-bottom: 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }' +
+                    '.toolbar select { padding: 8px; border-radius: 6px; border: 1px solid #ced4da; flex: 0 0 200px; }' +
+                    'button { padding: 8px 16px; border: none; border-radius: 6px; font-weight: 500; cursor: pointer; background: #e63946; color: white; transition: 0.2s; }' +
+                    'button:hover { background: #c1121f; }' +
+                    'button.secondary { background: #6c757d; }' +
+                    'button.secondary:hover { background: #495057; }' +
+                    '.requests-list { display: flex; flex-direction: column; gap: 20px; }' +
+                    '.help-card { background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); padding: 20px; border-left: 4px solid #e9c46a; }' +
+                    '.help-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; }' +
+                    '.help-table { font-size: 18px; font-weight: 600; color: #212529; display: flex; align-items: center; gap: 8px; }' +
+                    '.help-time { font-size: 14px; color: #6c757d; }' +
+                    '.help-badge { padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 500; }' +
+                    '.help-badge-pending { background: #fff3cd; color: #856404; }' +
+                    '.help-badge-resolved { background: #d4edda; color: #155724; }' +
+                    '.help-actions { margin-top: 15px; display: flex; gap: 10px; }' +
+                    '.help-actions button { background: #457b9d; }' +
+                    '.help-actions button.resolve { background: #2a9d8f; }' +
+                    '.help-actions button.delete { background: #dc3545; }' +
+                    '.no-requests { text-align: center; padding: 60px 20px; color: #6c757d; }' +
+                    '.no-requests i { font-size: 60px; margin-bottom: 20px; opacity: 0.5; }' +
+                '</style>' +
+                '<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"><\/script>' +
+                '<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"><\/script>' +
+            '</head>' +
+            '<body>' +
+                '<div class="container">' +
+                    '<h2><i class="fas fa-headset"></i> Vertical Help Requests View</h2>' +
+                    '<div class="toolbar">' +
+                        '<select id="statusFilter">' +
+                            '<option value="all">All Requests</option>' +
+                            '<option value="pending">Pending</option>' +
+                            '<option value="resolved">Resolved</option>' +
+                        '</select>' +
+                        '<button id="refreshBtn"><i class="fas fa-sync-alt"></i> Refresh</button>' +
+                        '<button class="secondary" onclick="window.close()"><i class="fas fa-times"></i> Close</button>' +
+                    '</div>' +
+                    '<div id="requestsList" class="requests-list">' +
+                        '<div class="no-requests"><i class="fas fa-spinner fa-pulse"></i><p>Loading help requests...</p></div>' +
+                    '</div>' +
+                '</div>' +
+                '<script>' +
+                    'const firebaseConfig = {' +
+                        'apiKey: "AIzaSyCtO20G2Ssl9cvB6CP1xfCh2Ldf4GMdGUg",' +
+                        'authDomain: "foodmenu-b1fc2.firebaseapp.com",' +
+                        'projectId: "foodmenu-b1fc2",' +
+                        'storageBucket: "foodmenu-b1fc2.firebasestorage.app",' +
+                        'messagingSenderId: "730100337020",' +
+                        'appId: "1:730100337020:web:dd3dc58846c8207a693cf9"' +
+                    '};' +
+                    'firebase.initializeApp(firebaseConfig);' +
+                    'const db = firebase.firestore();' +
+                    '' +
+                    'function formatDate(iso) {' +
+                        'const d = new Date(iso);' +
+                        'return d.toLocaleString();' +
+                    '}' +
+                    '' +
+                    'async function updateHelpStatus(requestId, newStatus) {' +
+                        'try {' +
+                            'await db.collection("helpRequests").doc(requestId).update({ status: newStatus });' +
+                        '} catch (err) {' +
+                            'console.error("Error updating help request:", err);' +
+                            'alert("Failed to update request.");' +
+                        '}' +
+                    '}' +
+                    '' +
+                    'async function deleteHelpRequest(requestId) {' +
+                        'if (!confirm("Delete this help request?")) return;' +
+                        'try {' +
+                            'await db.collection("helpRequests").doc(requestId).delete();' +
+                        '} catch (err) {' +
+                            'console.error("Error deleting help request:", err);' +
+                            'alert("Failed to delete request.");' +
+                        '}' +
+                    '}' +
+                    '' +
+                    'function renderRequests(requests) {' +
+                        'const list = document.getElementById("requestsList");' +
+                        'const filter = document.getElementById("statusFilter").value;' +
+                        'let filtered = requests;' +
+                        'if (filter !== "all") {' +
+                            'filtered = requests.filter(r => r.status === filter);' +
+                        '}' +
+                        'filtered.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));' +
+                        'if (filtered.length === 0) {' +
+                            'list.innerHTML = "<div class=\\"no-requests\\"><i class=\\"fas fa-headset\\"></i><p>No help requests found.</p></div>";' +
+                            'return;' +
+                        '}' +
+                        'let html = "";' +
+                        'filtered.forEach(r => {' +
+                            'const badgeClass = r.status === "pending" ? "help-badge-pending" : "help-badge-resolved";' +
+                            'html += "<div class=\\"help-card\\">"' +
+                                '+ "<div class=\\"help-header\\"><div class=\\"help-table\\"><i class=\\"fas fa-chair\\"></i> " + r.table + "</div><span class=\\"help-badge " + badgeClass + "\\">" + r.status.charAt(0).toUpperCase() + r.status.slice(1) + "</span></div>"' +
+                                '+ "<div class=\\"help-time\\">" + formatDate(r.timestamp) + "</div>"' +
+                                '+ "<div class=\\"help-actions\\">"' +
+                                    (r.status === "pending" ? '<button class="resolve" onclick="updateHelpStatus(\'' + r.id + '\', \'resolved\')"><i class="fas fa-check"></i> Mark Resolved</button>' : '') +
+                                    '<button class="delete" onclick="deleteHelpRequest(\'' + r.id + '\')"><i class="fas fa-trash"></i> Delete</button>' +
+                                '+ "</div>"' +
+                            '+ "</div>";' +
+                        '});' +
+                        'list.innerHTML = html;' +
+                    '}' +
+                    '' +
+                    'function loadRequests() {' +
+                        'db.collection("helpRequests").onSnapshot(snap => {' +
+                            'const requests = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));' +
+                            'renderRequests(requests);' +
+                        '}, err => {' +
+                            'console.error("Firestore error", err);' +
+                            'document.getElementById("requestsList").innerHTML = "<div class=\\"no-requests\\"><i class=\\"fas fa-exclamation-triangle\\"></i><p>Error loading help requests.</p></div>";' +
+                        '});' +
+                    '}' +
+                    '' +
+                    'document.getElementById("statusFilter").addEventListener("change", () => {' +
+                        'db.collection("helpRequests").get().then(snap => {' +
+                            'const requests = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));' +
+                            'renderRequests(requests);' +
+                        '});' +
+                    '});' +
+                    '' +
+                    'document.getElementById("refreshBtn").addEventListener("click", () => { loadRequests(); });' +
+                    '' +
+                    'loadRequests();' +
+                '<\/script>' +
+            '</body>' +
+            '</html>';
+            const win = window.open('', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
+            if (win) {
+                win.document.write(winHtml);
+                win.document.close();
+            } else {
+                showNotification('Pop‑up blocked. Please allow pop‑ups for this site.');
+            }
         }
-
-        document.getElementById("statusFilter").addEventListener("change", () => {
-            db.collection("helpRequests").get().then(snap => {
-                const requests = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderRequests(requests);
-            });
-        });
-
-        document.getElementById("refreshBtn").addEventListener("click", () => { loadRequests(); });
-
-        loadRequests();
-    <\/script>
-</body>
-</html>`;
-    const win = window.open('', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
-    if (win) {
-        win.document.write(winHtml);
-        win.document.close();
-    } else {
-        showNotification('Pop‑up blocked. Please allow pop‑ups for this site.');
-    }
-}
 
         // ========== ADMIN DASHBOARD (updated with cumulativeStats and delete orders by table using adminAccessCode) ==========
         function loadAdminDashboardData() {
