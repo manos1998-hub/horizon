@@ -2434,152 +2434,152 @@ VIP Table</textarea>
         }
 
         // ========== NEW FUNCTION: OPEN VERTICAL HELP REQUESTS VIEW IN SEPARATE WINDOW ==========
-        function openHelpVerticalView() {
-            const winHtml = '<!DOCTYPE html>' +
-            '<html>' +
-            '<head>' +
-                '<meta charset="UTF-8">' +
-                '<title>Vertical Help Requests View</title>' +
-                '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">' +
-                '<style>' +
-                    'body { font-family: "Poppins", sans-serif; background: #f8f9fa; margin: 0; padding: 20px; }' +
-                    '.container { max-width: 1200px; margin: 0 auto; }' +
-                    'h2 { color: #e63946; border-bottom: 2px solid #e9ecef; padding-bottom: 10px; margin-top: 0; }' +
-                    '.toolbar { margin-bottom: 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }' +
-                    '.toolbar select { padding: 8px; border-radius: 6px; border: 1px solid #ced4da; flex: 0 0 200px; }' +
-                    'button { padding: 8px 16px; border: none; border-radius: 6px; font-weight: 500; cursor: pointer; background: #e63946; color: white; transition: 0.2s; }' +
-                    'button:hover { background: #c1121f; }' +
-                    'button.secondary { background: #6c757d; }' +
-                    'button.secondary:hover { background: #495057; }' +
-                    '.requests-list { display: flex; flex-direction: column; gap: 20px; }' +
-                    '.help-card { background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); padding: 20px; border-left: 4px solid #e9c46a; }' +
-                    '.help-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; }' +
-                    '.help-table { font-size: 18px; font-weight: 600; color: #212529; display: flex; align-items: center; gap: 8px; }' +
-                    '.help-time { font-size: 14px; color: #6c757d; }' +
-                    '.help-badge { padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 500; }' +
-                    '.help-badge-pending { background: #fff3cd; color: #856404; }' +
-                    '.help-badge-resolved { background: #d4edda; color: #155724; }' +
-                    '.help-actions { margin-top: 15px; display: flex; gap: 10px; }' +
-                    '.help-actions button { background: #457b9d; }' +
-                    '.help-actions button.resolve { background: #2a9d8f; }' +
-                    '.help-actions button.delete { background: #dc3545; }' +
-                    '.no-requests { text-align: center; padding: 60px 20px; color: #6c757d; }' +
-                    '.no-requests i { font-size: 60px; margin-bottom: 20px; opacity: 0.5; }' +
-                '</style>' +
-                '<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"><\/script>' +
-                '<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"><\/script>' +
-            '</head>' +
-            '<body>' +
-                '<div class="container">' +
-                    '<h2><i class="fas fa-headset"></i> Vertical Help Requests View</h2>' +
-                    '<div class="toolbar">' +
-                        '<select id="statusFilter">' +
-                            '<option value="all">All Requests</option>' +
-                            '<option value="pending">Pending</option>' +
-                            '<option value="resolved">Resolved</option>' +
-                        '</select>' +
-                        '<button id="refreshBtn"><i class="fas fa-sync-alt"></i> Refresh</button>' +
-                        '<button class="secondary" onclick="window.close()"><i class="fas fa-times"></i> Close</button>' +
-                    '</div>' +
-                    '<div id="requestsList" class="requests-list">' +
-                        '<div class="no-requests"><i class="fas fa-spinner fa-pulse"></i><p>Loading help requests...</p></div>' +
-                    '</div>' +
-                '</div>' +
-                '<script>' +
-                    'const firebaseConfig = {' +
-                        'apiKey: "AIzaSyCtO20G2Ssl9cvB6CP1xfCh2Ldf4GMdGUg",' +
-                        'authDomain: "foodmenu-b1fc2.firebaseapp.com",' +
-                        'projectId: "foodmenu-b1fc2",' +
-                        'storageBucket: "foodmenu-b1fc2.firebasestorage.app",' +
-                        'messagingSenderId: "730100337020",' +
-                        'appId: "1:730100337020:web:dd3dc58846c8207a693cf9"' +
-                    '};' +
-                    'firebase.initializeApp(firebaseConfig);' +
-                    'const db = firebase.firestore();' +
-                    '' +
-                    'function formatDate(iso) {' +
-                        'const d = new Date(iso);' +
-                        'return d.toLocaleString();' +
-                    '}' +
-                    '' +
-                    'async function updateHelpStatus(requestId, newStatus) {' +
-                        'try {' +
-                            'await db.collection("helpRequests").doc(requestId).update({ status: newStatus });' +
-                        '} catch (err) {' +
-                            'console.error("Error updating help request:", err);' +
-                            'alert("Failed to update request.");' +
-                        '}' +
-                    '}' +
-                    '' +
-                    'async function deleteHelpRequest(requestId) {' +
-                        'if (!confirm("Delete this help request?")) return;' +
-                        'try {' +
-                            'await db.collection("helpRequests").doc(requestId).delete();' +
-                        '} catch (err) {' +
-                            'console.error("Error deleting help request:", err);' +
-                            'alert("Failed to delete request.");' +
-                        '}' +
-                    '}' +
-                    '' +
-                    'function renderRequests(requests) {' +
-                        'const list = document.getElementById("requestsList");' +
-                        'const filter = document.getElementById("statusFilter").value;' +
-                        'let filtered = requests;' +
-                        'if (filter !== "all") {' +
-                            'filtered = requests.filter(r => r.status === filter);' +
-                        '}' +
-                        'filtered.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));' +
-                        'if (filtered.length === 0) {' +
-                            'list.innerHTML = "<div class=\\"no-requests\\"><i class=\\"fas fa-headset\\"></i><p>No help requests found.</p></div>";' +
-                            'return;' +
-                        '}' +
-                        'let html = "";' +
-                        'filtered.forEach(r => {' +
-                            'const badgeClass = r.status === "pending" ? "help-badge-pending" : "help-badge-resolved";' +
-                            'html += "<div class=\\"help-card\\">"' +
-                                '+ "<div class=\\"help-header\\"><div class=\\"help-table\\"><i class=\\"fas fa-chair\\"></i> " + r.table + "</div><span class=\\"help-badge " + badgeClass + "\\">" + r.status.charAt(0).toUpperCase() + r.status.slice(1) + "</span></div>"' +
-                                '+ "<div class=\\"help-time\\">" + formatDate(r.timestamp) + "</div>"' +
-                                '+ "<div class=\\"help-actions\\">"' +
-                                    (r.status === "pending" ? '<button class="resolve" onclick="updateHelpStatus(\'' + r.id + '\', \'resolved\')"><i class="fas fa-check"></i> Mark Resolved</button>' : '') +
-                                    '<button class="delete" onclick="deleteHelpRequest(\'' + r.id + '\')"><i class="fas fa-trash"></i> Delete</button>' +
-                                '+ "</div>"' +
-                            '+ "</div>";' +
-                        '});' +
-                        'list.innerHTML = html;' +
-                    '}' +
-                    '' +
-                    'function loadRequests() {' +
-                        'db.collection("helpRequests").onSnapshot(snap => {' +
-                            'const requests = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));' +
-                            'renderRequests(requests);' +
-                        '}, err => {' +
-                            'console.error("Firestore error", err);' +
-                            'document.getElementById("requestsList").innerHTML = "<div class=\\"no-requests\\"><i class=\\"fas fa-exclamation-triangle\\"></i><p>Error loading help requests.</p></div>";' +
-                        '});' +
-                    '}' +
-                    '' +
-                    'document.getElementById("statusFilter").addEventListener("change", () => {' +
-                        'db.collection("helpRequests").get().then(snap => {' +
-                            'const requests = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));' +
-                            'renderRequests(requests);' +
-                        '});' +
-                    '});' +
-                    '' +
-                    'document.getElementById("refreshBtn").addEventListener("click", () => { loadRequests(); });' +
-                    '' +
-                    'loadRequests();' +
-                '<\/script>' +
-            '</body>' +
-            '</html>';
-            const win = window.open('', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
-            if (win) {
-                win.document.write(winHtml);
-                win.document.close();
-            } else {
-                showNotification('Pop‑up blocked. Please allow pop‑ups for this site.');
+        // ========== CORRECTED: OPEN VERTICAL HELP REQUESTS VIEW ==========
+function openHelpVerticalView() {
+    const winHtml = `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Vertical Help Requests View</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: "Poppins", sans-serif; background: #f8f9fa; margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h2 { color: #e63946; border-bottom: 2px solid #e9ecef; padding-bottom: 10px; margin-top: 0; }
+        .toolbar { margin-bottom: 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .toolbar select { padding: 8px; border-radius: 6px; border: 1px solid #ced4da; flex: 0 0 200px; }
+        button { padding: 8px 16px; border: none; border-radius: 6px; font-weight: 500; cursor: pointer; background: #e63946; color: white; transition: 0.2s; }
+        button:hover { background: #c1121f; }
+        button.secondary { background: #6c757d; }
+        button.secondary:hover { background: #495057; }
+        .requests-list { display: flex; flex-direction: column; gap: 20px; }
+        .help-card { background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); padding: 20px; border-left: 4px solid #e9c46a; }
+        .help-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; }
+        .help-table { font-size: 18px; font-weight: 600; color: #212529; display: flex; align-items: center; gap: 8px; }
+        .help-time { font-size: 14px; color: #6c757d; }
+        .help-badge { padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 500; }
+        .help-badge-pending { background: #fff3cd; color: #856404; }
+        .help-badge-resolved { background: #d4edda; color: #155724; }
+        .help-actions { margin-top: 15px; display: flex; gap: 10px; }
+        .help-actions button { background: #457b9d; }
+        .help-actions button.resolve { background: #2a9d8f; }
+        .help-actions button.delete { background: #dc3545; }
+        .no-requests { text-align: center; padding: 60px 20px; color: #6c757d; }
+        .no-requests i { font-size: 60px; margin-bottom: 20px; opacity: 0.5; }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"><\/script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"><\/script>
+</head>
+<body>
+    <div class="container">
+        <h2><i class="fas fa-headset"></i> Vertical Help Requests View</h2>
+        <div class="toolbar">
+            <select id="statusFilter">
+                <option value="all">All Requests</option>
+                <option value="pending">Pending</option>
+                <option value="resolved">Resolved</option>
+            </select>
+            <button id="refreshBtn"><i class="fas fa-sync-alt"></i> Refresh</button>
+            <button class="secondary" onclick="window.close()"><i class="fas fa-times"></i> Close</button>
+        </div>
+        <div id="requestsList" class="requests-list">
+            <div class="no-requests"><i class="fas fa-spinner fa-pulse"></i><p>Loading help requests...</p></div>
+        </div>
+    </div>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCtO20G2Ssl9cvB6CP1xfCh2Ldf4GMdGUg",
+            authDomain: "foodmenu-b1fc2.firebaseapp.com",
+            projectId: "foodmenu-b1fc2",
+            storageBucket: "foodmenu-b1fc2.firebasestorage.app",
+            messagingSenderId: "730100337020",
+            appId: "1:730100337020:web:dd3dc58846c8207a693cf9"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        function formatDate(iso) {
+            const d = new Date(iso);
+            return d.toLocaleString();
+        }
+
+        async function updateHelpStatus(requestId, newStatus) {
+            try {
+                await db.collection("helpRequests").doc(requestId).update({ status: newStatus });
+            } catch (err) {
+                console.error("Error updating help request:", err);
+                alert("Failed to update request.");
             }
         }
 
+        async function deleteHelpRequest(requestId) {
+            if (!confirm("Delete this help request?")) return;
+            try {
+                await db.collection("helpRequests").doc(requestId).delete();
+            } catch (err) {
+                console.error("Error deleting help request:", err);
+                alert("Failed to delete request.");
+            }
+        }
+
+        function renderRequests(requests) {
+            const list = document.getElementById("requestsList");
+            const filter = document.getElementById("statusFilter").value;
+            let filtered = requests;
+            if (filter !== "all") {
+                filtered = requests.filter(r => r.status === filter);
+            }
+            filtered.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+            if (filtered.length === 0) {
+                list.innerHTML = '<div class="no-requests"><i class="fas fa-headset"></i><p>No help requests found.</p></div>';
+                return;
+            }
+            let html = "";
+            filtered.forEach(r => {
+                const badgeClass = r.status === "pending" ? "help-badge-pending" : "help-badge-resolved";
+                html += '<div class="help-card">' +
+                    '<div class="help-header"><div class="help-table"><i class="fas fa-chair"></i> ' + r.table + '</div><span class="help-badge ' + badgeClass + '">' + r.status.charAt(0).toUpperCase() + r.status.slice(1) + '</span></div>' +
+                    '<div class="help-time">' + formatDate(r.timestamp) + '</div>' +
+                    '<div class="help-actions">' +
+                        (r.status === "pending" ? '<button class="resolve" onclick="updateHelpStatus(\'' + r.id + '\', \'resolved\')"><i class="fas fa-check"></i> Mark Resolved</button>' : '') +
+                        '<button class="delete" onclick="deleteHelpRequest(\'' + r.id + '\')"><i class="fas fa-trash"></i> Delete</button>' +
+                    '</div>' +
+                '</div>';
+            });
+            list.innerHTML = html;
+        }
+
+        function loadRequests() {
+            db.collection("helpRequests").onSnapshot(snap => {
+                const requests = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderRequests(requests);
+            }, err => {
+                console.error("Firestore error", err);
+                document.getElementById("requestsList").innerHTML = '<div class="no-requests"><i class="fas fa-exclamation-triangle"></i><p>Error loading help requests.</p></div>';
+            });
+        }
+
+        document.getElementById("statusFilter").addEventListener("change", () => {
+            db.collection("helpRequests").get().then(snap => {
+                const requests = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderRequests(requests);
+            });
+        });
+
+        document.getElementById("refreshBtn").addEventListener("click", () => { loadRequests(); });
+
+        loadRequests();
+    <\/script>
+</body>
+</html>`;
+    const win = window.open('', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
+    if (win) {
+        win.document.write(winHtml);
+        win.document.close();
+    } else {
+        showNotification('Pop‑up blocked. Please allow pop‑ups for this site.');
+    }
+}
         // ========== ADMIN DASHBOARD (updated with cumulativeStats and delete orders by table using adminAccessCode) ==========
         function loadAdminDashboardData() {
             document.getElementById('adminRestaurantName').value = state.restaurantInfo.name;
