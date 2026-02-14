@@ -738,18 +738,22 @@
                         </button>
                     </div>
                 </div>
-                <!-- Help Requests Management (updated to show payment requests) -->
+                <!-- Help Requests Management (updated with payment requests and vertical view button) -->
                 <div class="admin-content" id="helpRequestsTab">
                     <div class="admin-form-group">
                         <label class="admin-label">Filter by Status</label>
                         <select class="admin-select" id="helpRequestStatusFilter"><option value="all">All Requests</option><option value="pending">Pending</option><option value="resolved">Resolved</option></select>
+                    </div>
+                    <div style="margin-top: 20px; text-align: right;">
+                        <button class="btn btn-secondary" id="openHelpVerticalBtn">
+                            <i class="fas fa-external-link-alt"></i> Open Vertical Help Requests View
+                        </button>
                     </div>
                     <div id="adminHelpRequestsList" style="margin-top: 20px;"><p style="text-align: center; color: var(--gray); padding: 40px;">No help requests yet.</p></div>
                     <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid var(--light-gray);">
                         <h4 style="margin-bottom: 15px;"><i class="fas fa-trash-alt"></i> Delete Old Requests</h4>
                         <button class="btn btn-danger" id="deleteAllResolvedHelpBtn"><i class="fas fa-trash"></i> Delete All Resolved</button>
                     </div>
-                    <!-- Removed: Open Vertical Help Requests View button -->
                 </div>
                 <!-- Tables Management -->
                 <div class="admin-content" id="tablesTab">
@@ -1031,7 +1035,7 @@ VIP Table</textarea>
                     </button>
                 </div>
             </div>
-            <!-- Help Requests Modal -->
+            <!-- Help Requests Modal (with vertical view button) -->
             <div class="admin-content" id="helpRequestsTabModal">
                 <h3 style="margin-bottom: 20px;"><i class="fas fa-headset"></i> Help Requests</h3>
                 <div class="admin-form-group">
@@ -1042,8 +1046,12 @@ VIP Table</textarea>
                         <option value="resolved">Resolved</option>
                     </select>
                 </div>
+                <div style="margin-top: 20px; text-align: right;">
+                    <button class="btn btn-secondary" id="openHelpVerticalBtnModal">
+                        <i class="fas fa-external-link-alt"></i> Open Vertical Help Requests View
+                    </button>
+                </div>
                 <div id="adminHelpRequestsListModal" style="margin-top: 20px;"></div>
-                <!-- Removed: Open Vertical Help Requests View button -->
             </div>
             <!-- Tables Modal -->
             <div class="admin-content" id="tablesTabModal">
@@ -1311,7 +1319,7 @@ VIP Table</textarea>
 
         // ========== FIREBASE INITIALIZATION ==========
         const firebaseConfig = {
-            apiKey: "AIzaSyCtO20G2Ssl9cvB6CP1xfCh2Ldf4GMdGUgg",
+            apiKey: "AIzaSyCtO20G2Ssl9cvB6CP1xfCh2Ldf4GMdGUg",
             authDomain: "foodmenu-b1fc2.firebaseapp.com",
             projectId: "foodmenu-b1fc2",
             storageBucket: "foodmenu-b1fc2.firebasestorage.app",
@@ -2635,6 +2643,154 @@ VIP Table</textarea>
             }
         }
 
+        // ========== OPEN VERTICAL HELP REQUESTS VIEW (NEW) ==========
+        function openHelpVerticalView() {
+            const winHtml = '<!DOCTYPE html>' +
+            '<html>' +
+            '<head>' +
+                '<meta charset="UTF-8">' +
+                '<title>Vertical Help Requests View</title>' +
+                '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">' +
+                '<style>' +
+                    'body { font-family: "Poppins", sans-serif; background: #f8f9fa; margin: 0; padding: 20px; }' +
+                    '.container { max-width: 1200px; margin: 0 auto; }' +
+                    'h2 { color: #e63946; border-bottom: 2px solid #e9ecef; padding-bottom: 10px; margin-top: 0; }' +
+                    '.toolbar { margin-bottom: 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }' +
+                    '.toolbar select { padding: 8px; border-radius: 6px; border: 1px solid #ced4da; flex: 0 0 200px; }' +
+                    'button { padding: 8px 16px; border: none; border-radius: 6px; font-weight: 500; cursor: pointer; background: #e63946; color: white; transition: 0.2s; }' +
+                    'button:hover { background: #c1121f; }' +
+                    'button.secondary { background: #6c757d; }' +
+                    'button.secondary:hover { background: #495057; }' +
+                    '.requests-list { display: flex; flex-direction: column; gap: 20px; }' +
+                    '.request-card { background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); padding: 20px; border-left: 4px solid #e63946; }' +
+                    '.request-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; }' +
+                    '.request-title { font-size: 18px; font-weight: 600; color: #212529; }' +
+                    '.request-time { font-size: 14px; color: #6c757d; }' +
+                    '.status-badge { padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 500; }' +
+                    '.status-pending { background: #fff3cd; color: #856404; }' +
+                    '.status-resolved { background: #d4edda; color: #155724; }' +
+                    '.request-body { margin-bottom: 15px; }' +
+                    '.request-actions { margin-top: 15px; display: flex; gap: 10px; align-items: center; }' +
+                    '.request-actions button { background: #457b9d; }' +
+                    '.request-actions button:hover { background: #2c5a7a; }' +
+                    '.no-requests { text-align: center; padding: 60px 20px; color: #6c757d; }' +
+                    '.no-requests i { font-size: 60px; margin-bottom: 20px; opacity: 0.5; }' +
+                '</style>' +
+                '<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"><\/script>' +
+                '<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"><\/script>' +
+            '</head>' +
+            '<body>' +
+                '<div class="container">' +
+                    '<h2><i class="fas fa-headset"></i> Vertical Help Requests View</h2>' +
+                    '<div class="toolbar">' +
+                        '<select id="statusFilter">' +
+                            '<option value="all">All Requests</option>' +
+                            '<option value="pending">Pending</option>' +
+                            '<option value="resolved">Resolved</option>' +
+                        '</select>' +
+                        '<button id="refreshBtn"><i class="fas fa-sync-alt"></i> Refresh</button>' +
+                        '<button class="secondary" onclick="window.close()"><i class="fas fa-times"></i> Close</button>' +
+                    '</div>' +
+                    '<div id="requestsList" class="requests-list">' +
+                        '<div class="no-requests"><i class="fas fa-spinner fa-pulse"></i><p>Loading requests...</p></div>' +
+                    '</div>' +
+                '</div>' +
+                '<script>' +
+                    'const firebaseConfig = {' +
+                        'apiKey: "AIzaSyCtO20G2Ssl9cvB6CP1xfCh2Ldf4GMdGUg",' +
+                        'authDomain: "foodmenu-b1fc2.firebaseapp.com",' +
+                        'projectId: "foodmenu-b1fc2",' +
+                        'storageBucket: "foodmenu-b1fc2.firebasestorage.app",' +
+                        'messagingSenderId: "730100337020",' +
+                        'appId: "1:730100337020:web:dd3dc58846c8207a693cf9"' +
+                    '};' +
+                    'firebase.initializeApp(firebaseConfig);' +
+                    'const db = firebase.firestore();' +
+                    '' +
+                    'function formatDate(iso) {' +
+                        'const d = new Date(iso);' +
+                        'return d.toLocaleString();' +
+                    '}' +
+                    '' +
+                    'async function updateRequestStatus(requestId, newStatus) {' +
+                        'try {' +
+                            'await db.collection("helpRequests").doc(requestId).update({ status: newStatus });' +
+                        '} catch (err) {' +
+                            'console.error("Error updating request:", err);' +
+                            'alert("Failed to update request status.");' +
+                        '}' +
+                    '}' +
+                    '' +
+                    'async function deleteRequest(requestId) {' +
+                        'if (!confirm("Delete this help request?")) return;' +
+                        'try {' +
+                            'await db.collection("helpRequests").doc(requestId).delete();' +
+                        '} catch (err) {' +
+                            'console.error("Error deleting request:", err);' +
+                            'alert("Failed to delete request.");' +
+                        '}' +
+                    '}' +
+                    '' +
+                    'let allRequests = [];' +
+                    '' +
+                    'function renderRequests() {' +
+                        'const list = document.getElementById("requestsList");' +
+                        'const statusFilter = document.getElementById("statusFilter").value;' +
+                        'let filtered = allRequests;' +
+                        'if (statusFilter !== "all") {' +
+                            'filtered = filtered.filter(r => r.status === statusFilter);' +
+                        '}' +
+                        'if (filtered.length === 0) {' +
+                            'list.innerHTML = "<div class=\\"no-requests\\"><i class=\\"fas fa-headset\\"></i><p>No help requests found.</p></div>";' +
+                            'return;' +
+                        '}' +
+                        'filtered.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));' +
+                        'let html = "";' +
+                        'filtered.forEach(r => {' +
+                            'let badgeClass = r.status === "pending" ? "status-pending" : "status-resolved";' +
+                            'let badgeText = r.status.charAt(0).toUpperCase() + r.status.slice(1);' +
+                            'let icon = r.requestType === "payment" ? "💰" : "🆘";' +
+                            '' +
+                            'html += "<div class=\\"request-card\\">"' +
+                                '+ "<div class=\\"request-header\\"><div><span class=\\"request-title\\">" + icon + " " + r.table + "</span> <span class=\\"request-time\\">" + formatDate(r.timestamp) + "</span></div><span class=\\"status-badge " + badgeClass + "\\">" + badgeText + "</span></div>"' +
+                                '+ "<div class=\\"request-body\\">"' +
+                                    '+ (r.requestType === "payment" ? "<p><i class=\\"fas fa-credit-card\\"></i> Payment request</p>" : "<p><i class=\\"fas fa-question-circle\\"></i> Help request</p>")' +
+                                '+ "</div>"' +
+                                '+ "<div class=\\"request-actions\\">"' +
+                                    '+ (r.status === "pending" ? "<button onclick=\\"updateRequestStatus(\'" + r.id + "\', \'resolved\')\\" style=\\"background: #2a9d8f;\\"><i class=\\"fas fa-check\\"></i> Resolve</button>" : "")' +
+                                    '+ "<button onclick=\\"deleteRequest(\'" + r.id + "\')\\" style=\\"background: #dc3545;\\"><i class=\\"fas fa-trash\\"></i> Delete</button>"' +
+                                '+ "</div>"' +
+                            '+ "</div>";' +
+                        '});' +
+                        'list.innerHTML = html;' +
+                    '}' +
+                    '' +
+                    'function loadRequests() {' +
+                        'db.collection("helpRequests").onSnapshot(snap => {' +
+                            'allRequests = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));' +
+                            'renderRequests();' +
+                        '}, err => {' +
+                            'console.error("Firestore error", err);' +
+                            'document.getElementById("requestsList").innerHTML = "<div class=\\"no-requests\\"><i class=\\"fas fa-exclamation-triangle\\"></i><p>Error loading requests.</p></div>";' +
+                        '});' +
+                    '}' +
+                    '' +
+                    'document.getElementById("statusFilter").addEventListener("change", renderRequests);' +
+                    'document.getElementById("refreshBtn").addEventListener("click", () => { loadRequests(); });' +
+                    '' +
+                    'loadRequests();' +
+                '<\/script>' +
+            '</body>' +
+            '</html>';
+            const win = window.open('', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
+            if (win) {
+                win.document.write(winHtml);
+                win.document.close();
+            } else {
+                showNotification('Pop‑up blocked. Please allow pop‑ups for this site.');
+            }
+        }
+
         // ========== TABLE MANAGEMENT FUNCTIONS ==========
         function loadTablesForAdmin() {
             const container = document.getElementById('tablesListContainer');
@@ -2870,7 +3026,7 @@ VIP Table</textarea>
             saveCumulativeStats();
         }
 
-        // ========== ADMIN DASHBOARD (updated with tables, edit order, category en) ==========
+        // ========== ADMIN DASHBOARD (updated with tables, edit order, category en, help vertical button) ==========
         function loadAdminDashboardData() {
             document.getElementById('adminRestaurantName').value = state.restaurantInfo.name;
             document.getElementById('adminTaxRate').value = state.restaurantInfo.taxRate;
@@ -2953,7 +3109,7 @@ VIP Table</textarea>
                 updatePendingBadges();
             });
             document.getElementById('openOrdersVerticalBtn').addEventListener('click', openOrdersVerticalView);
-            // Removed: document.getElementById('openHelpVerticalBtn').addEventListener('click', openHelpVerticalView);
+            document.getElementById('openHelpVerticalBtn').addEventListener('click', openHelpVerticalView); // NEW
             document.getElementById('addTableBtn').addEventListener('click', ()=> showAdminChangePrompt(addTable));
             backToAdminBtn.addEventListener('click', function() {
                 state.currentTable = null;
@@ -3869,7 +4025,7 @@ VIP Table</textarea>
             }
         }
 
-        // --- MODAL ADMIN (updated with tables, categories en, edit order) ---
+        // --- MODAL ADMIN (updated with tables, categories en, edit order, help vertical button) ---
         function setupAdminPanel() {
             adminClose.addEventListener('click', ()=> adminPanel.style.display = 'none');
             document.querySelectorAll('#adminPanel .admin-tab').forEach(tab => {
@@ -3918,7 +4074,7 @@ VIP Table</textarea>
             });
             document.getElementById('helpRequestStatusFilterModal').addEventListener('change', loadHelpRequestsForAdminModal);
             document.getElementById('openOrdersVerticalBtnModal').addEventListener('click', openOrdersVerticalView);
-            // Removed: document.getElementById('openHelpVerticalBtnModal').addEventListener('click', openHelpVerticalView);
+            document.getElementById('openHelpVerticalBtnModal').addEventListener('click', openHelpVerticalView); // NEW
             document.getElementById('addTableBtnModal').addEventListener('click', ()=> showAdminChangePrompt(addTableModal));
         }
 
