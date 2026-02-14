@@ -2433,7 +2433,7 @@ VIP Table</textarea>
             }
         }
 
-        // ========== NEW FUNCTION: OPEN VERTICAL HELP REQUESTS VIEW IN SEPARATE WINDOW ==========
+        // ========== FIXED FUNCTION: OPEN VERTICAL HELP REQUESTS VIEW IN SEPARATE WINDOW ==========
         function openHelpVerticalView() {
             const winHtml = '<!DOCTYPE html>' +
             '<html>' +
@@ -2497,6 +2497,9 @@ VIP Table</textarea>
                     'firebase.initializeApp(firebaseConfig);' +
                     'const db = firebase.firestore();' +
                     '' +
+                    'let unsubscribe = null;' +
+                    'let lastRequests = [];' +
+                    '' +
                     'function formatDate(iso) {' +
                         'const d = new Date(iso);' +
                         'return d.toLocaleString();' +
@@ -2522,6 +2525,7 @@ VIP Table</textarea>
                     '}' +
                     '' +
                     'function renderRequests(requests) {' +
+                        'lastRequests = requests;' +
                         'const list = document.getElementById("requestsList");' +
                         'const filter = document.getElementById("statusFilter").value;' +
                         'let filtered = requests;' +
@@ -2549,7 +2553,8 @@ VIP Table</textarea>
                     '}' +
                     '' +
                     'function loadRequests() {' +
-                        'db.collection("helpRequests").onSnapshot(snap => {' +
+                        'if (unsubscribe) unsubscribe();' +
+                        'unsubscribe = db.collection("helpRequests").onSnapshot(snap => {' +
                             'const requests = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));' +
                             'renderRequests(requests);' +
                         '}, err => {' +
@@ -2559,10 +2564,7 @@ VIP Table</textarea>
                     '}' +
                     '' +
                     'document.getElementById("statusFilter").addEventListener("change", () => {' +
-                        'db.collection("helpRequests").get().then(snap => {' +
-                            'const requests = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));' +
-                            'renderRequests(requests);' +
-                        '});' +
+                        'renderRequests(lastRequests);' +
                     '});' +
                     '' +
                     'document.getElementById("refreshBtn").addEventListener("click", () => { loadRequests(); });' +
