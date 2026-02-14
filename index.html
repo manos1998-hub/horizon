@@ -588,10 +588,11 @@
                     <button class="admin-tab active" data-tab="restaurant">Restaurant Settings</button>
                     <button class="admin-tab" data-tab="menu">Menu Management (EL)</button>
                     <button class="admin-tab" data-tab="menuEn">Menu Management (EN)</button>
-                    <button class="admin-tab" data-tab="categories">Category Management</button>
+                    <button class="admin-tab" data-tab="categories">Category Management (EL)</button>
+                    <button class="admin-tab" data-tab="categoriesEn">Category Management (EN)</button> <!-- NEW -->
                     <button class="admin-tab" data-tab="orders">Order Management <span class="pending-badge" id="orderPendingBadge"><i class="fas fa-exclamation-circle"></i></span></button>
                     <button class="admin-tab" data-tab="helpRequests">🆘 Help Requests <span class="pending-badge" id="helpPendingBadge"><i class="fas fa-exclamation-circle"></i></span></button>
-                    <button class="admin-tab" data-tab="tables">📋 Tables</button> <!-- new tables tab -->
+                    <button class="admin-tab" data-tab="tables">📋 Tables</button>
                     <button class="admin-tab" data-tab="customization">Visual Customization</button>
                     <button class="admin-tab" data-tab="sound">🔊 Sound Effects</button>
                     <button class="admin-tab" data-tab="qr">Table QR Codes</button>
@@ -661,11 +662,11 @@
                             </div>
                         </div>
                         <div class="admin-form-group"><label class="admin-label">Tags (EN) (separate with commas)</label><input type="text" class="admin-input" id="editItemTagsEn" placeholder="Vegetarian, Popular, Spicy"></div>
-                        <!-- Options (English) -->
+                        <!-- Options (English) - now translation only, no structural changes -->
                         <div id="adminOptionsSectionEn" class="admin-options-section">
-                            <h4 style="margin-bottom:15px;"><i class="fas fa-tasks"></i> Options / Subcategories (EN)</h4>
+                            <h4 style="margin-bottom:15px;"><i class="fas fa-tasks"></i> Options / Subcategories (EN) - translate only</h4>
                             <div id="optionsGroupsContainerEn"></div>
-                            <button type="button" class="btn btn-secondary" id="addOptionGroupBtnEn"><i class="fas fa-plus"></i> Add Option Group</button>
+                            <!-- No Add Option Group button in EN mode -->
                         </div>
                         <div class="payment-actions">
                             <button class="btn btn-secondary" id="cancelEditBtnEn"><i class="fas fa-times"></i> Cancel</button>
@@ -673,18 +674,27 @@
                         </div>
                     </div>
                 </div>
-                <!-- Category Management -->
+                <!-- Category Management (EL) -->
                 <div class="admin-content" id="categoriesTab">
-                    <h3 style="margin-bottom: 20px;">Manage Categories</h3>
-                    <p style="margin-bottom: 25px; color: var(--gray);">Add, edit, or remove menu categories. Note: You cannot delete categories that have menu items assigned to them.</p>
+                    <h3 style="margin-bottom: 20px;">Manage Categories (Greek)</h3>
+                    <p style="margin-bottom: 25px; color: var(--gray);">Edit Greek display names. Drag to reorder. (English names can be edited in the English tab.)</p>
                     <div class="categories-management">
                         <div class="categories-list"><h4 style="margin-bottom: 15px;">Existing Categories</h4><div class="categories-list-container" id="categoriesListContainer"></div></div>
                         <div class="add-category-form">
                             <h4 style="margin-bottom: 15px;">Add New Category</h4>
-                            <div class="admin-form-group"><label class="admin-label">Category Name</label><input type="text" class="admin-input" id="newCategoryName" placeholder="e.g., Sides, Salads, Breakfast"></div>
-                            <div class="admin-form-group"><label class="admin-label">Display Name</label><input type="text" class="admin-input" id="newCategoryDisplayName" placeholder="e.g., Side Dishes"><small style="color: var(--gray);">How it will appear in the menu tabs</small></div>
+                            <div class="admin-form-group"><label class="admin-label">Category Name (ID)</label><input type="text" class="admin-input" id="newCategoryName" placeholder="e.g., sides, salads (used as ID)"></div>
+                            <div class="admin-form-group"><label class="admin-label">Display Name (EL)</label><input type="text" class="admin-input" id="newCategoryDisplayName" placeholder="e.g., Συνοδευτικά"></div>
+                            <div class="admin-form-group"><label class="admin-label">Display Name (EN)</label><input type="text" class="admin-input" id="newCategoryDisplayNameEn" placeholder="e.g., Side Dishes"></div>
                             <button class="btn btn-success" id="addCategoryBtn"><i class="fas fa-plus"></i> Add Category</button>
                         </div>
+                    </div>
+                </div>
+                <!-- NEW: Category Management (EN) -->
+                <div class="admin-content" id="categoriesEnTab">
+                    <h3 style="margin-bottom: 20px;">Manage Categories (English)</h3>
+                    <p style="margin-bottom: 25px; color: var(--gray);">Edit English display names. Structure is shared with Greek.</p>
+                    <div class="categories-management">
+                        <div class="categories-list"><h4 style="margin-bottom: 15px;">Existing Categories</h4><div class="categories-list-container" id="categoriesListContainerEn"></div></div>
                     </div>
                 </div>
                 <!-- Order Management (with two filters + edit button) -->
@@ -699,7 +709,7 @@
                                 <option value="ready">Ready</option>
                                 <option value="served">Served</option>
                                 <option value="cancelled">Cancelled</option>
-                                <option value="payed">Payed</option> <!-- new payed status -->
+                                <option value="payed">Payed</option>
                             </select>
                         </div>
                         <div style="flex: 1;">
@@ -745,7 +755,7 @@
                         </button>
                     </div>
                 </div>
-                <!-- NEW TAB: Tables Management -->
+                <!-- Tables Management -->
                 <div class="admin-content" id="tablesTab">
                     <h3 style="margin-bottom: 20px;"><i class="fas fa-chair"></i> Table Management</h3>
                     <p style="margin-bottom: 25px; color: var(--gray);">Add, edit, or remove restaurant tables. Click "Order for this table" to place an order on behalf of that table.</p>
@@ -921,7 +931,7 @@ VIP Table</textarea>
         </div>
     </section>
 
-    <!-- ========== ADMIN PANEL (MODAL) – UPDATED WITH TABLES TAB ========== -->
+    <!-- ========== ADMIN PANEL (MODAL) – UPDATED WITH TABLES TAB AND EN CATEGORY TAB ========== -->
     <div class="admin-panel" id="adminPanel">
         <div class="admin-container">
             <button class="admin-close" id="adminClose"><i class="fas fa-times"></i></button>
@@ -930,10 +940,11 @@ VIP Table</textarea>
                 <button class="admin-tab active" data-tab="restaurant">Restaurant Settings</button>
                 <button class="admin-tab" data-tab="menu">Menu (EL)</button>
                 <button class="admin-tab" data-tab="menuEn">Menu (EN)</button>
-                <button class="admin-tab" data-tab="categories">Categories</button>
+                <button class="admin-tab" data-tab="categories">Categories (EL)</button>
+                <button class="admin-tab" data-tab="categoriesEn">Categories (EN)</button> <!-- NEW -->
                 <button class="admin-tab" data-tab="orders">Orders <span class="pending-badge" id="orderPendingBadgeModal"><i class="fas fa-exclamation-circle"></i></span></button>
                 <button class="admin-tab" data-tab="helpRequests">🆘 Help <span class="pending-badge" id="helpPendingBadgeModal"><i class="fas fa-exclamation-circle"></i></span></button>
-                <button class="admin-tab" data-tab="tablesModal">📋 Tables</button> <!-- new tables tab in modal -->
+                <button class="admin-tab" data-tab="tablesModal">📋 Tables</button>
                 <button class="admin-tab" data-tab="customization">Visual</button>
                 <button class="admin-tab" data-tab="sound">🔊 Sound</button>
                 <button class="admin-tab" data-tab="qr">QR Codes</button>
@@ -966,19 +977,24 @@ VIP Table</textarea>
                 <div style="margin-bottom: 25px;"><button class="btn btn-success" id="addMenuItemBtnModalEn"><i class="fas fa-plus"></i> Add New Menu Item (EN)</button></div>
                 <div class="admin-grid" id="menuItemsListModalEn"></div>
             </div>
-            <!-- Category Management Modal -->
+            <!-- Category Management Modal (EL) -->
             <div class="admin-content" id="categoriesTabModal">
-                <h3 style="margin-bottom: 20px;">Manage Categories</h3>
-                <p style="margin-bottom: 25px; color: var(--gray);">Add, edit, or remove menu categories.</p>
+                <h3 style="margin-bottom: 20px;">Manage Categories (EL)</h3>
                 <div class="categories-management">
                     <div class="categories-list"><h4 style="margin-bottom: 15px;">Existing Categories</h4><div class="categories-list-container" id="categoriesListContainerModal"></div></div>
                     <div class="add-category-form">
                         <h4 style="margin-bottom: 15px;">Add New Category</h4>
-                        <div class="admin-form-group"><label class="admin-label">Category Name</label><input type="text" class="admin-input" id="newCategoryNameModal" placeholder="e.g., Sides, Salads, Breakfast"></div>
-                        <div class="admin-form-group"><label class="admin-label">Display Name</label><input type="text" class="admin-input" id="newCategoryDisplayNameModal" placeholder="e.g., Side Dishes"></div>
+                        <div class="admin-form-group"><label class="admin-label">Category Name (ID)</label><input type="text" class="admin-input" id="newCategoryNameModal" placeholder="e.g., sides"></div>
+                        <div class="admin-form-group"><label class="admin-label">Display Name (EL)</label><input type="text" class="admin-input" id="newCategoryDisplayNameModal" placeholder="e.g., Συνοδευτικά"></div>
+                        <div class="admin-form-group"><label class="admin-label">Display Name (EN)</label><input type="text" class="admin-input" id="newCategoryDisplayNameEnModal" placeholder="e.g., Side Dishes"></div>
                         <button class="btn btn-success" id="addCategoryBtnModal"><i class="fas fa-plus"></i> Add Category</button>
                     </div>
                 </div>
+            </div>
+            <!-- NEW: Category Management Modal (EN) -->
+            <div class="admin-content" id="categoriesEnTabModal">
+                <h3 style="margin-bottom: 20px;">Manage Categories (EN)</h3>
+                <div class="categories-list"><h4 style="margin-bottom: 15px;">Existing Categories</h4><div class="categories-list-container" id="categoriesListContainerEnModal"></div></div>
             </div>
             <!-- Order Management Modal (with payed status) -->
             <div class="admin-content" id="ordersTabModal">
@@ -1313,7 +1329,7 @@ VIP Table</textarea>
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // ========== STATE (updated with tables array) ==========
+        // ========== STATE (updated with tables array, displayNameEn for categories) ==========
         const state = {
             currentTable: null,
             cart: [],
@@ -1331,7 +1347,7 @@ VIP Table</textarea>
             menuItems: [],
             orders: [],
             helpRequests: [],
-            tables: [], // new: list of table names
+            tables: [],
             seenHelpRequests: new Set(),
             adminAccessCode: "3232",
             adminChangeCode: "6262",
@@ -1395,12 +1411,12 @@ VIP Table</textarea>
         ];
 
         const defaultCategories = [
-            { id: "pizza", name: "pizza", displayName: "Πίτσα", isDefault: true, displayOrder: 0 },
-            { id: "salads", name: "salads", displayName: "Σαλάτες", isDefault: true, displayOrder: 1 },
-            { id: "pasta", name: "pasta", displayName: "Ζυμαρικά", isDefault: true, displayOrder: 2 },
-            { id: "main", name: "main", displayName: "Κυρίως Πιάτα", isDefault: true, displayOrder: 3 },
-            { id: "desserts", name: "desserts", displayName: "Επιδόρπια", isDefault: true, displayOrder: 4 },
-            { id: "beverages", name: "beverages", displayName: "Ροφήματα", isDefault: true, displayOrder: 5 }
+            { id: "pizza", name: "pizza", displayName: "Πίτσα", displayNameEn: "Pizza", isDefault: true, displayOrder: 0 },
+            { id: "salads", name: "salads", displayName: "Σαλάτες", displayNameEn: "Salads", isDefault: true, displayOrder: 1 },
+            { id: "pasta", name: "pasta", displayName: "Ζυμαρικά", displayNameEn: "Pasta", isDefault: true, displayOrder: 2 },
+            { id: "main", name: "main", displayName: "Κυρίως Πιάτα", displayNameEn: "Main Courses", isDefault: true, displayOrder: 3 },
+            { id: "desserts", name: "desserts", displayName: "Επιδόρπια", displayNameEn: "Desserts", isDefault: true, displayOrder: 4 },
+            { id: "beverages", name: "beverages", displayName: "Ροφήματα", displayNameEn: "Beverages", isDefault: true, displayOrder: 5 }
         ];
 
         // ========== THEMES & FONTS (unchanged) ==========
@@ -1530,6 +1546,15 @@ VIP Table</textarea>
             }
             return choice.name;
         }
+        // New function for category display name
+        function getCategoryDisplayName(categoryId) {
+            const cat = state.categories.find(c => c.id === categoryId);
+            if (!cat) return categoryId;
+            if (state.currentLanguage === 'en' && cat.displayNameEn) {
+                return cat.displayNameEn;
+            }
+            return cat.displayName || categoryId;
+        }
 
         // ========== TRANSLATION FUNCTION ==========
         function applyTranslations() {
@@ -1564,7 +1589,7 @@ VIP Table</textarea>
             showNotification(`Language switched to ${state.currentLanguage === 'el' ? 'Greek' : 'English'}`);
         }
 
-        // ========== FIRESTORE SAVE / LOAD (including tables) ==========
+        // ========== FIRESTORE SAVE / LOAD (including tables and categories with displayNameEn) ==========
         async function saveRestaurantInfo() { try { await db.collection('settings').doc('restaurantInfo').set(state.restaurantInfo); } catch (e) { console.error(e); } }
         async function saveMenuItem(item) { try { await db.collection('menuItems').doc(item.id.toString()).set(item); } catch (e) { console.error(e); } }
         async function deleteMenuItemFirestore(id) { try { await db.collection('menuItems').doc(id.toString()).delete(); } catch (e) { console.error(e); } }
@@ -1576,11 +1601,10 @@ VIP Table</textarea>
         async function saveHelpRequest(request) { try { await db.collection('helpRequests').doc(request.id).set(request); } catch (e) { console.error(e); } }
         async function deleteHelpRequestFirestore(id) { try { await db.collection('helpRequests').doc(id).delete(); } catch (e) { console.error(e); } }
         async function saveCumulativeStats() { try { await db.collection('settings').doc('cumulativeStats').set(state.cumulativeStats); } catch (e) { console.error(e); } }
-        // New table functions
         async function saveTable(tableName) { try { await db.collection('tables').doc(tableName).set({ name: tableName }); } catch (e) { console.error(e); } }
         async function deleteTableFirestore(tableName) { try { await db.collection('tables').doc(tableName).delete(); } catch (e) { console.error(e); } }
 
-        // ========== INITIAL LOAD (updated to load tables) ==========
+        // ========== INITIAL LOAD (updated to load tables and ensure displayNameEn) ==========
         async function loadInitialData() {
             try {
                 const [restDoc, menuSnap, ordersSnap, catDoc, customDoc, soundDoc, helpSnap, statsDoc, tablesSnap] = await Promise.all([
@@ -1625,10 +1649,12 @@ VIP Table</textarea>
                 
                 if (catDoc.exists) {
                     state.categories = catDoc.data().list || [];
+                    // Ensure displayNameEn exists
+                    state.categories.forEach(c => { if (!c.displayNameEn) c.displayNameEn = c.displayName || c.name; });
                     state.categories.forEach((c,i)=> { if (c.displayOrder===undefined) c.displayOrder=i; });
                     state.categories.sort((a,b)=>(a.displayOrder||0)-(b.displayOrder||0));
                 } else {
-                    state.categories = [...defaultCategories];
+                    state.categories = JSON.parse(JSON.stringify(defaultCategories));
                     await db.collection('settings').doc('categories').set({ list: state.categories });
                 }
                 
@@ -1647,7 +1673,6 @@ VIP Table</textarea>
                 
                 state.helpRequests = helpSnap.docs.map(doc => {
                     const req = { id: doc.id, ...doc.data() };
-                    // Ensure requestType exists for backward compatibility
                     if (!req.requestType) req.requestType = 'help';
                     state.seenHelpRequests.add(req.id);
                     return req;
@@ -1727,7 +1752,7 @@ VIP Table</textarea>
             });
         }
 
-        // ========== REAL‑TIME LISTENERS (updated to include tables) ==========
+        // ========== REAL‑TIME LISTENERS (updated to include tables and categories) ==========
         function setupListeners() {
             db.collection('orders').onSnapshot(snap => {
                 snap.docChanges().forEach(change => {
@@ -1745,7 +1770,6 @@ VIP Table</textarea>
                     populateTableSelect('tableSelectForDelete');
                     if (adminPanel.style.display === 'flex') populateTableSelect('tableSelectForDeleteModal');
                 }
-                // Update request pay button visibility
                 updateRequestPayButton();
             });
             db.collection('menuItems').onSnapshot(snap => {
@@ -1786,6 +1810,7 @@ VIP Table</textarea>
                 if (doc.exists) {
                     const catData = doc.data();
                     state.categories = catData.list || [];
+                    state.categories.forEach(c => { if (!c.displayNameEn) c.displayNameEn = c.displayName || c.name; });
                     state.categories.forEach((c,i)=> { if (c.displayOrder===undefined) c.displayOrder=i; });
                     state.categories.sort((a,b)=>(a.displayOrder||0)-(b.displayOrder||0));
                 }
@@ -1797,7 +1822,7 @@ VIP Table</textarea>
                         sel.innerHTML = '';
                         state.categories.forEach(cat => {
                             const opt = document.createElement('option');
-                            opt.value = cat.id; opt.textContent = cat.displayName;
+                            opt.value = cat.id; opt.textContent = cat.displayName; // Greek in dropdown
                             sel.appendChild(opt);
                         });
                         if (cur && state.categories.some(c=>c.id===cur)) sel.value = cur;
@@ -1806,8 +1831,12 @@ VIP Table</textarea>
                 if (state.isAdminMode && document.querySelector('#adminDashboardSection.active-section')) {
                     const activeTab = document.querySelector('#adminDashboardSection .admin-tab.active')?.dataset?.tab;
                     if (activeTab === 'categories') loadCategoriesForAdmin();
+                    if (activeTab === 'categoriesEn') loadCategoriesForAdminEn();
                 }
-                if (adminPanel.style.display === 'flex') loadCategoriesForAdminModal();
+                if (adminPanel.style.display === 'flex') {
+                    loadCategoriesForAdminModal();
+                    loadCategoriesForAdminModalEn();
+                }
             });
             db.collection('helpRequests').onSnapshot(snap => {
                 snap.docChanges().forEach(change => {
@@ -1835,7 +1864,6 @@ VIP Table</textarea>
             db.collection('settings').doc('cumulativeStats').onSnapshot(doc => {
                 if (doc.exists) state.cumulativeStats = doc.data();
             });
-            // New listener for tables
             db.collection('tables').onSnapshot(snap => {
                 state.tables = snap.docs.map(doc => doc.data().name);
                 if (state.isAdminMode && document.querySelector('#adminDashboardSection.active-section')) {
@@ -1890,7 +1918,7 @@ VIP Table</textarea>
             categoryTabs.appendChild(all);
             sorted.forEach(cat => {
                 const tab = document.createElement('button');
-                tab.className = 'category-tab'; tab.setAttribute('data-category', cat.id); tab.textContent = cat.displayName;
+                tab.className = 'category-tab'; tab.setAttribute('data-category', cat.id); tab.textContent = getCategoryDisplayName(cat.id); // use language-aware display
                 tab.addEventListener('click', function() { document.querySelectorAll('.category-tab').forEach(t=>t.classList.remove('active')); this.classList.add('active'); displayMenuItems(cat.id); });
                 categoryTabs.appendChild(tab);
             });
@@ -1919,7 +1947,6 @@ VIP Table</textarea>
 
         // ========== CART FUNCTIONS ==========
         function addToCart(itemId) {
-            // Allow admin to add to cart only if they are in table mode (currentTable set and not "Admin")
             if (state.isAdminMode && (!state.currentTable || state.currentTable === "Admin")) return;
             const item = state.menuItems.find(i=>i.id===itemId);
             if (!item) return;
@@ -1998,7 +2025,6 @@ VIP Table</textarea>
         }
         function updateCart() {
             if (state.isAdminMode && (!state.currentTable || state.currentTable === "Admin")) {
-                // Hide cart when admin is not in table mode
                 cartFloating.style.display = 'none';
                 return;
             } else {
@@ -2087,7 +2113,6 @@ VIP Table</textarea>
             if (id==='cartSection' && state.currentTable && !state.isAdminMode) cartSubtitle.textContent = state.currentLanguage === 'el' ? `Η παραγγελία σας για ${state.currentTable}` : `Your order for ${state.currentTable}`;
             if (id==='menuSection' && state.currentTable && !state.isAdminMode) menuSubtitle.textContent = state.cart.length===0 ? (state.currentLanguage === 'el' ? `Επιλέξτε είδη για την παραγγελία σας για ${state.currentTable}` : `Select items for your order for ${state.currentTable}`) : (state.currentLanguage === 'el' ? `Συνεχίστε να προσθέτετε είδη στην παραγγελία σας για ${state.currentTable}` : `Continue adding items to your order for ${state.currentTable}`);
             if (id==='myOrdersSection' && state.currentTable && !state.isAdminMode) loadMyOrders();
-            // Show cart floating only if not in admin mode, or in admin mode with a valid current table (not "Admin")
             if (state.isAdminMode && state.currentTable && state.currentTable !== "Admin") {
                 cartFloating.style.display = 'flex';
             } else if (!state.isAdminMode && id !== 'scannerSection') {
@@ -2095,7 +2120,6 @@ VIP Table</textarea>
             } else {
                 cartFloating.style.display = 'none';
             }
-            // Update request pay button visibility
             updateRequestPayButton();
         }
         function loadMyOrders() {
@@ -2153,7 +2177,6 @@ VIP Table</textarea>
             } else {
                 adminFloating.style.display = 'none';
             }
-            // Update request pay button visibility
             updateRequestPayButton();
         }
         function autoLoginFromUrl() {
@@ -2173,7 +2196,6 @@ VIP Table</textarea>
                 requestPayBtn.style.display = 'none';
                 return;
             }
-            // Show button if there is any order with paymentTime='later' and status not 'payed' and not 'cancelled'
             const activeOrders = state.orders.filter(o => 
                 o.table === state.currentTable && 
                 o.paymentTime === 'later' && 
@@ -2189,14 +2211,13 @@ VIP Table</textarea>
 
         async function requestPay() {
             if (!state.currentTable || state.currentTable === "Admin" || state.isAdminMode) return;
-            // Create a help request with type 'payment'
             const requestId = 'pay_' + Date.now() + '_' + Math.random().toString(36).substring(2);
             const payRequest = {
                 id: requestId,
                 table: state.currentTable,
                 timestamp: new Date().toISOString(),
                 status: 'pending',
-                requestType: 'payment' // special type
+                requestType: 'payment'
             };
             state.helpRequests.push(payRequest);
             await saveHelpRequest(payRequest);
@@ -2251,7 +2272,6 @@ VIP Table</textarea>
             playSound(state.soundEffects.helpRequestSound);
             showNotification("Admin mode activated. Full administrative access granted.");
             startHelpSoundInterval();
-            // Hide request pay button
             requestPayBtn.style.display = 'none';
         }
         function exitAdminMode() {
@@ -2418,7 +2438,7 @@ VIP Table</textarea>
             showNotification(`PDF generated with ${tableNamesArray.length} QR code(s).`);
         }
 
-        // ========== OPEN VERTICAL ORDERS VIEW (updated with payed) ==========
+        // ========== OPEN VERTICAL ORDERS VIEW (updated with table filter) ==========
         function openOrdersVerticalView() {
             const winHtml = '<!DOCTYPE html>' +
             '<html>' +
@@ -2479,6 +2499,9 @@ VIP Table</textarea>
                             '<option value="cancelled">Cancelled</option>' +
                             '<option value="payed">Payed</option>' +
                         '</select>' +
+                        '<select id="tableFilter">' +
+                            '<option value="all">All Tables</option>' +
+                        '</select>' +
                         '<button id="refreshBtn"><i class="fas fa-sync-alt"></i> Refresh</button>' +
                         '<button class="secondary" onclick="window.close()"><i class="fas fa-times"></i> Close</button>' +
                     '</div>' +
@@ -2512,12 +2535,30 @@ VIP Table</textarea>
                         '}' +
                     '}' +
                     '' +
-                    'function renderOrders(orders) {' +
+                    'let allOrders = [];' +
+                    '' +
+                    'function populateTableFilter(orders) {' +
+                        'const tables = [...new Set(orders.map(o => o.table))].sort();' +
+                        'const select = document.getElementById("tableFilter");' +
+                        'select.innerHTML = \'<option value="all">All Tables</option>\';' +
+                        'tables.forEach(t => {' +
+                            'const opt = document.createElement("option");' +
+                            'opt.value = t;' +
+                            'opt.textContent = t;' +
+                            'select.appendChild(opt);' +
+                        '});' +
+                    '}' +
+                    '' +
+                    'function renderOrders() {' +
                         'const list = document.getElementById("ordersList");' +
-                        'const filter = document.getElementById("statusFilter").value;' +
-                        'let filtered = orders;' +
-                        'if (filter !== "all") {' +
-                            'filtered = orders.filter(o => o.status === filter);' +
+                        'const statusFilter = document.getElementById("statusFilter").value;' +
+                        'const tableFilter = document.getElementById("tableFilter").value;' +
+                        'let filtered = allOrders;' +
+                        'if (statusFilter !== "all") {' +
+                            'filtered = filtered.filter(o => o.status === statusFilter);' +
+                        '}' +
+                        'if (tableFilter !== "all") {' +
+                            'filtered = filtered.filter(o => o.table === tableFilter);' +
                         '}' +
                         'if (filtered.length === 0) {' +
                             'list.innerHTML = "<div class=\\"no-orders\\"><i class=\\"fas fa-clipboard-list\\"></i><p>No orders found.</p></div>";' +
@@ -2576,21 +2617,17 @@ VIP Table</textarea>
                     '' +
                     'function loadOrders() {' +
                         'db.collection("orders").onSnapshot(snap => {' +
-                            'const orders = snap.docs.map(doc => ({ orderNumber: doc.id, ...doc.data() }));' +
-                            'renderOrders(orders);' +
+                            'allOrders = snap.docs.map(doc => ({ orderNumber: doc.id, ...doc.data() }));' +
+                            'populateTableFilter(allOrders);' +
+                            'renderOrders();' +
                         '}, err => {' +
                             'console.error("Firestore error", err);' +
                             'document.getElementById("ordersList").innerHTML = "<div class=\\"no-orders\\"><i class=\\"fas fa-exclamation-triangle\\"></i><p>Error loading orders.</p></div>";' +
                         '});' +
                     '}' +
                     '' +
-                    'document.getElementById("statusFilter").addEventListener("change", () => {' +
-                        'db.collection("orders").get().then(snap => {' +
-                            'const orders = snap.docs.map(doc => ({ orderNumber: doc.id, ...doc.data() }));' +
-                            'renderOrders(orders);' +
-                        '});' +
-                    '});' +
-                    '' +
+                    'document.getElementById("statusFilter").addEventListener("change", renderOrders);' +
+                    'document.getElementById("tableFilter").addEventListener("change", renderOrders);' +
                     'document.getElementById("refreshBtn").addEventListener("click", () => { loadOrders(); });' +
                     '' +
                     'loadOrders();' +
@@ -2606,7 +2643,7 @@ VIP Table</textarea>
             }
         }
 
-        // ========== OPEN VERTICAL HELP REQUESTS VIEW (updated to show payment requests) ==========
+        // ========== OPEN VERTICAL HELP REQUESTS VIEW (unchanged) ==========
         function openHelpVerticalView() {
             const winHtml = '<!DOCTYPE html>' +
             '<html>' +
@@ -2703,7 +2740,7 @@ VIP Table</textarea>
                         'const filter = document.getElementById("statusFilter").value;' +
                         'let filtered = requests;' +
                         'if (filter !== "all") {' +
-                            'filtered = requests.filter(r => r.status === filter);' +
+                            'filtered = filtered.filter(r => r.status === filter);' +
                         '}' +
                         'filtered.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));' +
                         'if (filtered.length === 0) {' +
@@ -2782,7 +2819,6 @@ VIP Table</textarea>
             document.querySelectorAll('.order-for-table').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const table = this.dataset.table;
-                    // Set current table and show menu section
                     state.currentTable = table;
                     tableInfo.innerHTML = `<i class="fas fa-chair"></i> ${table}`;
                     menuSubtitle.textContent = state.currentLanguage === 'el' ? `Επιλέξτε είδη για να προσθέσετε στην παραγγελία σας για ${table}` : `Select items to add to your order for ${table}`;
@@ -2792,7 +2828,6 @@ VIP Table</textarea>
                     displayMenuItems('all');
                     myOrdersButton.style.display = 'flex';
                     showSection('menuSection');
-                    // Show back to admin button
                     backToAdminBtn.style.display = 'flex';
                 });
             });
@@ -2845,7 +2880,7 @@ VIP Table</textarea>
                     myOrdersButton.style.display = 'flex';
                     showSection('menuSection');
                     backToAdminBtn.style.display = 'flex';
-                    adminPanel.style.display = 'none'; // close modal
+                    adminPanel.style.display = 'none';
                 });
             });
             document.querySelectorAll('.delete-table-modal').forEach(btn => {
@@ -2902,7 +2937,7 @@ VIP Table</textarea>
 
         // ========== EDIT ORDER FUNCTIONS ==========
         function openEditOrderModal(order) {
-            state.currentEditOrder = JSON.parse(JSON.stringify(order)); // clone
+            state.currentEditOrder = JSON.parse(JSON.stringify(order));
             editOrderNumber.textContent = order.orderNumber;
             renderEditOrderItems();
             editOrderModal.style.display = 'flex';
@@ -2942,7 +2977,6 @@ VIP Table</textarea>
             });
             editOrderTotal.textContent = total.toFixed(2);
 
-            // Add event listeners
             list.querySelectorAll('.decrease-edit').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const idx = parseInt(this.dataset.index);
@@ -2972,15 +3006,12 @@ VIP Table</textarea>
 
         async function saveEditedOrder() {
             if (!state.currentEditOrder) return;
-            // Recalculate total
             const newTotal = state.currentEditOrder.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
             state.currentEditOrder.total = newTotal;
-            // Find the order in state.orders and update
             const idx = state.orders.findIndex(o => o.orderNumber === state.currentEditOrder.orderNumber);
             if (idx !== -1) {
                 state.orders[idx] = state.currentEditOrder;
                 await saveOrder(state.currentEditOrder);
-                // Recalculate cumulative stats
                 recalcCumulativeStats();
                 loadOrdersForAdmin();
                 if (adminPanel.style.display === 'flex') loadOrdersForAdminModal();
@@ -2997,7 +3028,7 @@ VIP Table</textarea>
             saveCumulativeStats();
         }
 
-        // ========== ADMIN DASHBOARD (updated with tables and edit order) ==========
+        // ========== ADMIN DASHBOARD (updated with tables, edit order, category en) ==========
         function loadAdminDashboardData() {
             document.getElementById('adminRestaurantName').value = state.restaurantInfo.name;
             document.getElementById('adminTaxRate').value = state.restaurantInfo.taxRate;
@@ -3007,12 +3038,13 @@ VIP Table</textarea>
             loadMenuItemsForAdmin();
             loadMenuItemsForAdminEn();
             loadCategoriesForAdmin();
+            loadCategoriesForAdminEn(); // new
             loadOrdersForAdmin();
             loadSystemStats();
             loadCustomizationSettings();
             loadSoundSettingsUI();
             loadHelpRequestsForAdmin();
-            loadTablesForAdmin(); // new
+            loadTablesForAdmin();
 
             document.querySelectorAll('#adminDashboardSection .admin-tab').forEach(tab => {
                 tab.addEventListener('click', function() {
@@ -3023,6 +3055,7 @@ VIP Table</textarea>
                     document.getElementById(tid+'Tab').classList.add('active');
                     if (tid==='customization') setTimeout(initializeCustomizationTab,100);
                     if (tid==='categories') setTimeout(()=>makeCategoriesDraggable('categoriesListContainer'),200);
+                    if (tid==='categoriesEn') setTimeout(loadCategoriesForAdminEn,100);
                     if (tid==='orders') { loadOrdersForAdmin(); populateTableSelect('tableSelectForDelete'); }
                     if (tid==='helpRequests') { loadHelpRequestsForAdmin(); }
                     if (tid==='sound') setTimeout(loadSoundSettingsUI,50);
@@ -3079,9 +3112,7 @@ VIP Table</textarea>
             });
             document.getElementById('openOrdersVerticalBtn').addEventListener('click', openOrdersVerticalView);
             document.getElementById('openHelpVerticalBtn').addEventListener('click', openHelpVerticalView);
-            // Tables management buttons
             document.getElementById('addTableBtn').addEventListener('click', ()=> showAdminChangePrompt(addTable));
-            // Back to admin button
             backToAdminBtn.addEventListener('click', function() {
                 state.currentTable = null;
                 showSection('adminDashboardSection');
@@ -3113,6 +3144,7 @@ VIP Table</textarea>
                 makeAdminGridDraggable('menuItemsList'); 
                 makeAdminGridDraggable('menuItemsListEn');
                 makeCategoriesDraggable('categoriesListContainer'); 
+                makeCategoriesDraggable('categoriesListContainerEn'); // new
                 populateTableSelect('tableSelectForDelete'); 
             },500);
         }
@@ -3308,7 +3340,7 @@ VIP Table</textarea>
             await deleteMenuItemFirestore(id);
         }
 
-        // --- MENU ADMIN (English) --- (unchanged)
+        // --- MENU ADMIN (English) - modified: no add/remove options, only translation ---
         function loadMenuItemsForAdminEn() {
             const list = document.getElementById('menuItemsListEn'); if (!list) return;
             list.innerHTML = '';
@@ -3390,16 +3422,11 @@ VIP Table</textarea>
                             <div class="admin-option-group-title">
                                 <i class="fas fa-layer-group"></i> 
                                 <input type="text" class="admin-input" style="width:150px;" placeholder="Group name (EN)" value="${g.nameEn || ''}" id="group_name_en_${gi}">
-                                <select class="admin-select" style="width:140px;" id="group_type_en_${gi}" disabled>
-                                    <option value="radio" ${g.type==='radio'?'selected':''}>Single choice</option>
-                                    <option value="checkbox" ${g.type==='checkbox'?'selected':''}>Multiple choice</option>
-                                    <option value="text" ${g.type==='text'?'selected':''}>Comment field</option>
-                                </select>
+                                <span style="margin-left:10px; font-size:12px; color:var(--gray);">(${g.type})</span>
                             </div>
-                            <button class="admin-small-btn btn-danger remove-group-en" data-index="${gi}"><i class="fas fa-trash"></i></button>
+                            <!-- No delete button in EN mode -->
                         </div>
                         <div id="choices_en_${gi}" class="choices-container"></div>
-                        ${g.type!=='text' ? '<button class="btn btn-secondary add-choice-btn-en" data-group-index="'+gi+'"><i class="fas fa-plus"></i> Add Choice</button>' : ''}
                     `;
                     container.appendChild(grp);
                     if (g.type !== 'text') {
@@ -3408,38 +3435,24 @@ VIP Table</textarea>
                             const row = document.createElement('div'); row.className = 'admin-choice-item';
                             row.innerHTML = `
                                 <input type="text" class="admin-input admin-choice-input" placeholder="Choice name (EN)" value="${c.nameEn || ''}" id="choice_name_en_${gi}_${ci}">
-                                <input type="number" class="admin-input admin-choice-price" placeholder="Price adj." step="0.01" value="${c.price || 0}" id="choice_price_en_${gi}_${ci}" disabled>
-                                <button class="admin-small-btn btn-danger remove-choice-en" data-group="${gi}" data-choice="${ci}"><i class="fas fa-times"></i></button>
+                                <span class="admin-choice-price" style="width:100px;">Price: $${(c.price || 0).toFixed(2)}</span>
+                                <!-- No delete button -->
                             `;
                             chc.appendChild(row);
                             row.querySelector(`#choice_name_en_${gi}_${ci}`).addEventListener('input', e => {
                                 if (!options[gi].choices[ci]) options[gi].choices[ci] = {};
                                 options[gi].choices[ci].nameEn = e.target.value;
                             });
-                            row.querySelector('.remove-choice-en').addEventListener('click', () => {
-                                options[gi].choices.splice(ci, 1);
-                                render();
-                            });
                         });
-                        grp.querySelector('.add-choice-btn-en').addEventListener('click', () => {
-                            options[gi].choices.push({ name: '', nameEn: '', price: 0 });
-                            render();
-                        });
+                        // No add choice button
                     }
-                    grp.querySelector('.remove-group-en').addEventListener('click', () => {
-                        options.splice(gi, 1);
-                        render();
-                    });
                     grp.querySelector(`#group_name_en_${gi}`).addEventListener('input', e => {
                         options[gi].nameEn = e.target.value;
                     });
                 });
             }
             render();
-            document.getElementById('addOptionGroupBtnEn').addEventListener('click', () => {
-                options.push({ id: 'opt_'+Date.now()+'_'+Math.random(), name: '', nameEn: '', type: 'radio', choices: [] });
-                render();
-            });
+            // No Add Option Group button in EN mode
         }
         async function saveMenuItemOptimisticEn() {
             const form = document.getElementById('editMenuItemFormEn');
@@ -3454,7 +3467,7 @@ VIP Table</textarea>
                 grps.forEach((g, gi) => {
                     const nameEnVal = g.querySelector(`#group_name_en_${gi}`)?.value;
                     if (!nameEnVal) return;
-                    const type = g.querySelector(`#group_type_en_${gi}`)?.value;
+                    const type = g.dataset.type || 'radio'; // not editable
                     const choices = [];
                     if (type !== 'text') {
                         const rows = g.querySelectorAll('.admin-choice-item');
@@ -3556,29 +3569,76 @@ VIP Table</textarea>
             await deleteMenuItemFirestore(id);
         }
 
-        // --- CATEGORY ADMIN --- (unchanged)
+        // --- CATEGORY ADMIN (EL) ---
         function loadCategoriesForAdmin() {
             const con = document.getElementById('categoriesListContainer'); con.innerHTML = '';
             if (state.categories.length===0) { con.innerHTML = '<p style="text-align:center; color:var(--gray); padding:20px;">No categories added yet.</p>'; return; }
             state.categories.sort((a,b)=>(a.displayOrder||0)-(b.displayOrder||0)).forEach(c => {
                 const cnt = state.menuItems.filter(i=>i.category===c.id).length;
                 const el = document.createElement('div'); el.className = 'category-item'; el.setAttribute('draggable','true'); el.dataset.categoryId = c.id;
-                el.innerHTML = `<div style="display:flex; align-items:center;"><i class="fas fa-grip-vertical drag-handle-category"></i><span class="category-item-name">${c.displayName}</span><span class="category-item-count">${cnt} item${cnt!==1?'s':''}</span></div><div class="admin-card-actions"><button class="admin-small-btn btn-danger delete-category" data-id="${c.id}"><i class="fas fa-trash"></i></button></div>`;
+                el.innerHTML = `<div style="display:flex; align-items:center;"><i class="fas fa-grip-vertical drag-handle-category"></i><span class="category-item-name">${c.displayName} <span style="font-size:12px; color:var(--gray);">(EN: ${c.displayNameEn || ''})</span></span><span class="category-item-count">${cnt} item${cnt!==1?'s':''}</span></div><div class="admin-card-actions"><button class="admin-small-btn btn-primary edit-category-el" data-id="${c.id}" data-displayname="${c.displayName}" data-displaynameen="${c.displayNameEn || ''}"><i class="fas fa-edit"></i></button><button class="admin-small-btn btn-danger delete-category" data-id="${c.id}"><i class="fas fa-trash"></i></button></div>`;
                 con.appendChild(el);
             });
             document.querySelectorAll('.delete-category').forEach(b=> b.addEventListener('click', function() { const id = this.dataset.id; showAdminChangePrompt(()=>deleteCategoryOptimistic(id)); }));
+            document.querySelectorAll('.edit-category-el').forEach(b=> b.addEventListener('click', function() {
+                const id = this.dataset.id;
+                const displayName = this.dataset.displayname;
+                const displayNameEn = this.dataset.displaynameen;
+                const newDisplayName = prompt("Edit Greek display name:", displayName);
+                if (newDisplayName !== null) {
+                    const newDisplayNameEn = prompt("Edit English display name:", displayNameEn);
+                    const cat = state.categories.find(c => c.id === id);
+                    if (cat) {
+                        cat.displayName = newDisplayName;
+                        cat.displayNameEn = newDisplayNameEn || '';
+                        saveCategories();
+                        loadCategoriesForAdmin();
+                        loadCategoriesForAdminEn();
+                        updateCategoryTabs();
+                        showNotification("Category updated.");
+                    }
+                }
+            }));
             makeCategoriesDraggable('categoriesListContainer');
         }
+        // NEW: Category Admin (EN) - just view and edit English names
+        function loadCategoriesForAdminEn() {
+            const con = document.getElementById('categoriesListContainerEn'); con.innerHTML = '';
+            if (state.categories.length===0) { con.innerHTML = '<p style="text-align:center; color:var(--gray); padding:20px;">No categories added yet.</p>'; return; }
+            state.categories.sort((a,b)=>(a.displayOrder||0)-(b.displayOrder||0)).forEach(c => {
+                const cnt = state.menuItems.filter(i=>i.category===c.id).length;
+                const el = document.createElement('div'); el.className = 'category-item'; el.setAttribute('draggable','true'); el.dataset.categoryId = c.id;
+                el.innerHTML = `<div style="display:flex; align-items:center;"><i class="fas fa-grip-vertical drag-handle-category"></i><span class="category-item-name">${c.displayNameEn || c.displayName}</span><span class="category-item-count">${cnt} item${cnt!==1?'s':''}</span></div><div class="admin-card-actions"><button class="admin-small-btn btn-primary edit-category-en" data-id="${c.id}" data-displaynameen="${c.displayNameEn || ''}"><i class="fas fa-edit"></i></button></div>`;
+                con.appendChild(el);
+            });
+            document.querySelectorAll('.edit-category-en').forEach(b=> b.addEventListener('click', function() {
+                const id = this.dataset.id;
+                const displayNameEn = this.dataset.displaynameen;
+                const newDisplayNameEn = prompt("Edit English display name:", displayNameEn);
+                if (newDisplayNameEn !== null) {
+                    const cat = state.categories.find(c => c.id === id);
+                    if (cat) {
+                        cat.displayNameEn = newDisplayNameEn;
+                        saveCategories();
+                        loadCategoriesForAdmin();
+                        loadCategoriesForAdminEn();
+                        updateCategoryTabs();
+                        showNotification("English category name updated.");
+                    }
+                }
+            }));
+            makeCategoriesDraggable('categoriesListContainerEn');
+        }
         async function addCategoryOptimistic() {
-            const ni = document.getElementById('newCategoryName'); const di = document.getElementById('newCategoryDisplayName');
-            const id = ni.value.trim().toLowerCase().replace(/\s+/g,'-'); const disp = di.value.trim() || ni.value.trim();
-            if (!id) { showNotification("Please enter a category name."); return; }
+            const ni = document.getElementById('newCategoryName'); const di = document.getElementById('newCategoryDisplayName'); const die = document.getElementById('newCategoryDisplayNameEn');
+            const id = ni.value.trim().toLowerCase().replace(/\s+/g,'-'); const disp = di.value.trim() || ni.value.trim(); const dispEn = die.value.trim() || disp;
+            if (!id) { showNotification("Please enter a category name (ID)."); return; }
             if (state.categories.some(c=>c.id===id)) { showNotification("Category already exists."); return; }
             const maxOrder = state.categories.reduce((m,c)=>Math.max(m,c.displayOrder||0),0);
-            state.categories.push({ id, name: id, displayName: disp, isDefault: false, displayOrder: maxOrder+1 });
+            state.categories.push({ id, name: id, displayName: disp, displayNameEn: dispEn, isDefault: false, displayOrder: maxOrder+1 });
             state.categories.sort((a,b)=>(a.displayOrder||0)-(b.displayOrder||0));
-            loadCategoriesForAdmin(); updateCategoryTabs();
-            ni.value = ''; di.value = '';
+            loadCategoriesForAdmin(); loadCategoriesForAdminEn(); updateCategoryTabs();
+            ni.value = ''; di.value = ''; die.value = '';
             showNotification(`Category "${disp}" added.`);
             await saveCategories();
         }
@@ -3588,11 +3648,10 @@ VIP Table</textarea>
             if (used>0) { showNotification(`Cannot delete "${cat.displayName}" – it has ${used} menu item(s).`); return; }
             if (!confirm(`Delete category "${cat.displayName}"?`)) return;
             state.categories = state.categories.filter(c=>c.id!==id);
-            loadCategoriesForAdmin(); updateCategoryTabs();
+            loadCategoriesForAdmin(); loadCategoriesForAdminEn(); updateCategoryTabs();
             showNotification(`Category "${cat.displayName}" deleted.`);
             await saveCategories();
         }
-        function getCategoryDisplayName(id) { const c = state.categories.find(c=>c.id===id); return c ? c.displayName : id; }
 
         // --- ORDER ADMIN (with edit button) ---
         function loadOrdersForAdmin() {
@@ -3618,8 +3677,8 @@ VIP Table</textarea>
                     case 'preparing': badge='<span class="order-status-badge status-preparing">Preparing</span>'; break; 
                     case 'ready': badge='<span class="order-status-badge status-ready">Ready</span>'; break; 
                     case 'served': badge='<span class="order-status-badge status-served">Served</span>'; break; 
-                    case 'cancelled': badge='<span class="order-status-badge status-cancelled">Cancelled</span>'; 
-                    case 'payed': badge='<span class="order-status-badge status-payed">Payed</span>';
+                    case 'cancelled': badge='<span class="order-status-badge status-cancelled">Cancelled</span>'; break;
+                    case 'payed': badge='<span class="order-status-badge status-payed">Payed</span>'; break;
                 }
                 let itemsHtml = '';
                 o.items.forEach(item => {
@@ -3667,7 +3726,7 @@ VIP Table</textarea>
             await Promise.all(toDelete.map(o=>deleteOrderFirestore(o.orderNumber)));
         }
 
-        // --- HELP REQUESTS ADMIN (updated with payment request icon) ---
+        // --- HELP REQUESTS ADMIN (unchanged) ---
         function loadHelpRequestsForAdmin() {
             const list = document.getElementById('adminHelpRequestsList');
             const filter = document.getElementById('helpRequestStatusFilter').value;
@@ -3770,7 +3829,7 @@ VIP Table</textarea>
                         await saveCumulativeStats();
                         await Promise.all(state.tables.map(t=>saveTable(t)));
                         updateRestaurantUI(); displayMenuItems('all'); updateCategoryTabs(); applyCustomization();
-                        loadMenuItemsForAdmin(); loadMenuItemsForAdminEn(); loadCategoriesForAdmin(); loadOrdersForAdmin(); loadSystemStats(); loadHelpRequestsForAdmin(); loadTablesForAdmin();
+                        loadMenuItemsForAdmin(); loadMenuItemsForAdminEn(); loadCategoriesForAdmin(); loadCategoriesForAdminEn(); loadOrdersForAdmin(); loadSystemStats(); loadHelpRequestsForAdmin(); loadTablesForAdmin();
                         showNotification("Data imported successfully.");
                     }
                 } catch { showNotification("Error importing data. Invalid file format."); }
@@ -3968,7 +4027,7 @@ VIP Table</textarea>
             }
         }
 
-        // --- MODAL ADMIN (updated with tables and edit order) ---
+        // --- MODAL ADMIN (updated with tables, categories en, edit order) ---
         function setupAdminPanel() {
             adminClose.addEventListener('click', ()=> adminPanel.style.display = 'none');
             document.querySelectorAll('#adminPanel .admin-tab').forEach(tab => {
@@ -3982,6 +4041,7 @@ VIP Table</textarea>
                     if (tid==='menu') setTimeout(()=>makeAdminGridDraggable('menuItemsListModal'),500);
                     if (tid==='menuEn') setTimeout(()=>{ loadMenuItemsForAdminModalEn(); makeAdminGridDraggable('menuItemsListModalEn'); },500);
                     if (tid==='categories') setTimeout(()=>makeCategoriesDraggable('categoriesListContainerModal'),200);
+                    if (tid==='categoriesEn') setTimeout(loadCategoriesForAdminModalEn,100);
                     if (tid==='orders') { loadOrdersForAdminModal(); populateTableSelect('tableSelectForDeleteModal'); }
                     if (tid==='helpRequests') { loadHelpRequestsForAdminModal(); }
                     if (tid==='tablesModal') { loadTablesForAdminModal(); }
@@ -3999,6 +4059,7 @@ VIP Table</textarea>
             loadMenuItemsForAdminModal();
             loadMenuItemsForAdminModalEn();
             loadCategoriesForAdminModal();
+            loadCategoriesForAdminModalEn(); // new
             document.getElementById('generateQRPDFBtnModal').addEventListener('click', function() {
                 const textarea = document.getElementById('tableNamesForQRModal');
                 const tableNames = textarea.value.split('\n').map(s => s.trim()).filter(s => s.length > 0);
@@ -4016,7 +4077,6 @@ VIP Table</textarea>
             document.getElementById('helpRequestStatusFilterModal').addEventListener('change', loadHelpRequestsForAdminModal);
             document.getElementById('openOrdersVerticalBtnModal').addEventListener('click', openOrdersVerticalView);
             document.getElementById('openHelpVerticalBtnModal').addEventListener('click', openHelpVerticalView);
-            // Tables modal buttons
             document.getElementById('addTableBtnModal').addEventListener('click', ()=> showAdminChangePrompt(addTableModal));
         }
 
@@ -4066,11 +4126,63 @@ VIP Table</textarea>
             state.categories.sort((a,b)=>(a.displayOrder||0)-(b.displayOrder||0)).forEach(c => {
                 const cnt = state.menuItems.filter(i=>i.category===c.id).length;
                 const el = document.createElement('div'); el.className = 'category-item'; el.setAttribute('draggable','true'); el.dataset.categoryId = c.id;
-                el.innerHTML = `<div style="display:flex; align-items:center;"><i class="fas fa-grip-vertical drag-handle-category"></i><span class="category-item-name">${c.displayName}</span><span class="category-item-count">${cnt} item${cnt!==1?'s':''}</span></div><div class="admin-card-actions"><button class="admin-small-btn btn-danger delete-category-modal" data-id="${c.id}"><i class="fas fa-trash"></i></button></div>`;
+                el.innerHTML = `<div style="display:flex; align-items:center;"><i class="fas fa-grip-vertical drag-handle-category"></i><span class="category-item-name">${c.displayName}</span><span class="category-item-count">${cnt} item${cnt!==1?'s':''}</span></div><div class="admin-card-actions"><button class="admin-small-btn btn-primary edit-category-modal" data-id="${c.id}" data-displayname="${c.displayName}" data-displaynameen="${c.displayNameEn||''}"><i class="fas fa-edit"></i></button><button class="admin-small-btn btn-danger delete-category-modal" data-id="${c.id}"><i class="fas fa-trash"></i></button></div>`;
                 con.appendChild(el);
             });
             document.querySelectorAll('.delete-category-modal').forEach(b=> b.addEventListener('click', function() { const id = this.dataset.id; showAdminChangePrompt(()=>deleteCategoryOptimistic(id)); }));
+            document.querySelectorAll('.edit-category-modal').forEach(b=> b.addEventListener('click', function() {
+                const id = this.dataset.id;
+                const displayName = this.dataset.displayname;
+                const displayNameEn = this.dataset.displaynameen;
+                const newDisplayName = prompt("Edit Greek display name:", displayName);
+                if (newDisplayName !== null) {
+                    const newDisplayNameEn = prompt("Edit English display name:", displayNameEn);
+                    const cat = state.categories.find(c => c.id === id);
+                    if (cat) {
+                        cat.displayName = newDisplayName;
+                        cat.displayNameEn = newDisplayNameEn || '';
+                        saveCategories();
+                        loadCategoriesForAdmin();
+                        loadCategoriesForAdminEn();
+                        loadCategoriesForAdminModal();
+                        loadCategoriesForAdminModalEn();
+                        updateCategoryTabs();
+                        showNotification("Category updated.");
+                    }
+                }
+            }));
             makeCategoriesDraggable('categoriesListContainerModal');
+        }
+        // NEW: Category Admin Modal (EN)
+        function loadCategoriesForAdminModalEn() {
+            const con = document.getElementById('categoriesListContainerEnModal'); if (!con) return;
+            con.innerHTML = '';
+            if (state.categories.length===0) { con.innerHTML = '<p style="text-align:center; color:var(--gray); padding:20px;">No categories added yet.</p>'; return; }
+            state.categories.sort((a,b)=>(a.displayOrder||0)-(b.displayOrder||0)).forEach(c => {
+                const cnt = state.menuItems.filter(i=>i.category===c.id).length;
+                const el = document.createElement('div'); el.className = 'category-item'; el.setAttribute('draggable','true'); el.dataset.categoryId = c.id;
+                el.innerHTML = `<div style="display:flex; align-items:center;"><i class="fas fa-grip-vertical drag-handle-category"></i><span class="category-item-name">${c.displayNameEn || c.displayName}</span><span class="category-item-count">${cnt} item${cnt!==1?'s':''}</span></div><div class="admin-card-actions"><button class="admin-small-btn btn-primary edit-category-en-modal" data-id="${c.id}" data-displaynameen="${c.displayNameEn||''}"><i class="fas fa-edit"></i></button></div>`;
+                con.appendChild(el);
+            });
+            document.querySelectorAll('.edit-category-en-modal').forEach(b=> b.addEventListener('click', function() {
+                const id = this.dataset.id;
+                const displayNameEn = this.dataset.displaynameen;
+                const newDisplayNameEn = prompt("Edit English display name:", displayNameEn);
+                if (newDisplayNameEn !== null) {
+                    const cat = state.categories.find(c => c.id === id);
+                    if (cat) {
+                        cat.displayNameEn = newDisplayNameEn;
+                        saveCategories();
+                        loadCategoriesForAdmin();
+                        loadCategoriesForAdminEn();
+                        loadCategoriesForAdminModal();
+                        loadCategoriesForAdminModalEn();
+                        updateCategoryTabs();
+                        showNotification("English category name updated.");
+                    }
+                }
+            }));
+            makeCategoriesDraggable('categoriesListContainerEnModal');
         }
 
         function loadOrdersForAdminModal() {
@@ -4285,7 +4397,6 @@ VIP Table</textarea>
                 } 
             });
             cancelChangeBtn.addEventListener('click', function() { adminChangePrompt.style.display = 'none'; adminChangeCodeInput.value = ''; state.pendingAdminAction = null; showNotification(state.currentLanguage === 'el' ? "Οι αλλαγές ακυρώθηκαν." : "Changes cancelled."); });
-            // Edit order modal buttons
             cancelEditOrderBtn.addEventListener('click', function() {
                 editOrderModal.style.display = 'none';
                 state.currentEditOrder = null;
@@ -4311,26 +4422,19 @@ VIP Table</textarea>
             state.cumulativeStats.totalRevenue += order.total;
             await saveCumulativeStats();
             showOrderConfirmation(order);
-            // Play checkout sound
             playSound(state.soundEffects.checkoutSound);
             await saveOrder(order);
             
-            // If in admin mode and current table is not "Admin", return to admin dashboard immediately
             if (state.isAdminMode && state.currentTable && state.currentTable !== "Admin") {
-                // Simulate back to admin click
                 state.currentTable = null;
                 showSection('adminDashboardSection');
                 backToAdminBtn.style.display = 'none';
                 cartFloating.style.display = 'none';
                 updateRequestPayButton();
-                // Also update table info
                 tableInfo.innerHTML = `<i class="fas fa-qrcode"></i> ${state.currentLanguage === 'el' ? 'Σαρώστε QR για έναρξη' : 'Scan QR to start'}`;
-                // Hide my orders button
                 myOrdersButton.style.display = 'none';
-                // Show admin floating icon (since we're in admin mode with no table)
                 adminFloating.style.display = 'flex';
             } else {
-                // Normal flow: show confirmation section
                 showSection('confirmationSection');
                 resetCart();
             }
@@ -4339,7 +4443,6 @@ VIP Table</textarea>
 
         initApp();
 
-        // ========== FAKE LOADING: HIDE AFTER 5 SECONDS ==========
         setTimeout(() => {
             const overlay = document.getElementById('loadingOverlay');
             if (overlay) {
