@@ -2880,7 +2880,7 @@ VIP Table</textarea>
                             'prepCol.innerHTML = "<div class=\\"no-orders\\">No take‑away orders preparing.</div>";' +
                         '} else {' +
                             'let html = "";' +
-                            'preparing.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)).forEach(o => {' +
+                            'preparing.sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp)).forEach(o => {' +
                                 'let itemsHtml = "";' +
                                 'o.items.forEach(item => {' +
                                     'itemsHtml += `<div>${item.quantity}× ${item.name}</div>`;' +
@@ -2899,7 +2899,7 @@ VIP Table</textarea>
                             'readyCol.innerHTML = "<div class=\\"no-orders\\">No take‑away orders ready.</div>";' +
                         '} else {' +
                             'let html = "";' +
-                            'ready.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)).forEach(o => {' +
+                            'ready.sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp)).forEach(o => {' +
                                 'let itemsHtml = "";' +
                                 'o.items.forEach(item => {' +
                                     'itemsHtml += `<div>${item.quantity}× ${item.name}</div>`;' +
