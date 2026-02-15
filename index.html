@@ -1584,13 +1584,26 @@ VIP Table</textarea>
             document.getElementById('langToggleText').textContent = lang === 'el' ? 'EN' : 'EL';
         }
 
-        // ========== LANGUAGE TOGGLE ==========
+        // ========== LANGUAGE TOGGLE (updated to also translate categories) ==========
         function toggleLanguage() {
             state.currentLanguage = state.currentLanguage === 'el' ? 'en' : 'el';
             applyTranslations();
-            if (document.querySelector('#menuSection.active-section')) {
-                const activeCat = document.querySelector('.category-tab.active')?.dataset?.category || 'all';
-                displayMenuItems(activeCat);
+            // Get currently active category
+            const activeTab = document.querySelector('.category-tab.active');
+            const activeCategory = activeTab ? activeTab.dataset.category : 'all';
+            // Re-render category tabs with new language
+            updateCategoryTabs(); // this resets tabs, but we'll reactivate the appropriate one
+            // Reactivate the previously active tab
+            const newActiveTab = document.querySelector(`.category-tab[data-category="${activeCategory}"]`);
+            if (newActiveTab) {
+                document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+                newActiveTab.classList.add('active');
+                displayMenuItems(activeCategory);
+            } else {
+                // fallback to 'all'
+                document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+                document.querySelector('.category-tab[data-category="all"]').classList.add('active');
+                displayMenuItems('all');
             }
             showNotification(`Language switched to ${state.currentLanguage === 'el' ? 'Greek' : 'English'}`);
         }
