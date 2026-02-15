@@ -81,7 +81,7 @@
         .category-tab { padding: 10px 20px; background-color: var(--card-bg); border: none; border-bottom: 3px solid transparent; font-weight: 500; cursor: pointer; white-space: nowrap; transition: all 0.3s; color: var(--text); }
         .category-tab.active { color: var(--primary); border-bottom: 3px solid var(--primary); }
         .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; margin-bottom: 40px; }
-        .menu-item { background-color: var(--card-bg); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); transition: transform 0.3s; }
+        .menu-item { background-color: var(--card-bg); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); transition: transform 0.3s; cursor: pointer; } /* added cursor pointer */
         .menu-item:hover { transform: translateY(-5px); }
         .item-image { height: 180px; background-color: var(--light-gray); background-size: cover; background-position: center; position: relative; }
         .item-content { padding: 20px; }
@@ -1938,7 +1938,7 @@ VIP Table</textarea>
                 return; 
             }
             filtered.forEach(item => {
-                const el = document.createElement('div'); el.className = 'menu-item';
+                const el = document.createElement('div'); el.className = 'menu-item';  // cursor:pointer added in CSS
                 const imgStyle = item.image ? `background-image: url('${item.image}')` : 'background-color: var(--light-gray)';
                 let optInd = '';
                 if (item.options && item.options.length) optInd = `<div class="item-options-indicator"><i class="fas fa-sliders-h"></i> ${state.currentLanguage === 'el' ? 'Με επιλογές' : 'With options'}</div>`;
@@ -1946,7 +1946,18 @@ VIP Table</textarea>
                 const itemDesc = getItemDescription(item);
                 const itemTags = getItemTags(item);
                 el.innerHTML = `<div class="item-image" style="${imgStyle}"></div><div class="item-content"><div class="item-header"><div class="item-name">${itemName}</div><div class="item-price">$${item.price.toFixed(2)}</div></div><div class="item-description">${itemDesc}</div>${optInd}<div class="item-footer"><div class="item-tags">${itemTags.map(t=>`<span class="item-tag">${t}</span>`).join('')}</div><button class="add-to-cart" data-id="${item.id}"><i class="fas fa-plus"></i></button></div></div>`;
-                el.querySelector('.add-to-cart').addEventListener('click', ()=> addToCart(item.id));
+                // Add click listener to the whole item (but ignore clicks on the button)
+                el.addEventListener('click', function(e) {
+                    // If the click target is the button or a child of the button, let the button handle it
+                    if (e.target.closest('.add-to-cart')) return;
+                    addToCart(item.id);
+                });
+                const btn = el.querySelector('.add-to-cart');
+                // Stop propagation on button click so the item click doesn't also fire
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    addToCart(item.id);
+                });
                 menuGrid.appendChild(el);
             });
         }
