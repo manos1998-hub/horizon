@@ -2454,7 +2454,7 @@ VIP Table</textarea>
             });
         }
 
-        // ========== DELETE ORDERS BY TABLE (unchanged) ==========
+        // ========== DELETE ORDERS BY TABLE (FIXED WITH ERROR HANDLING) ==========
         function populateTableSelect(selectId) {
             const sel = document.getElementById(selectId); if (!sel) return;
             const tables = [...new Set(state.orders.filter(o=>o.table&&o.table.toLowerCase()!=='admin').map(o=>o.table))].sort();
@@ -2469,20 +2469,25 @@ VIP Table</textarea>
             }
         }
         async function deleteOrdersForTable(tableName) {
-            if (!tableName) { showNotification('Please select a table.'); return; }
-            const toDelete = state.orders.filter(o=>o.table===tableName);
-            if (toDelete.length===0) { showNotification(`No orders for table "${tableName}".`); return; }
-            if (!confirm(`Delete ALL orders for table "${tableName}"?`)) return;
-            state.orders = state.orders.filter(o=>o.table!==tableName);
-            updatePendingBadges();
-            populateTableFilter();
-            populateTableFilterModal();
-            loadOrdersForAdmin();
-            if (adminPanel.style.display === 'flex') loadOrdersForAdminModal();
-            populateTableSelect('tableSelectForDelete');
-            populateTableSelect('tableSelectForDeleteModal');
-            showNotification(`Deleted ${toDelete.length} orders. Stats remain unchanged.`);
-            await Promise.all(toDelete.map(o=>deleteOrderFirestore(o.orderNumber)));
+            try {
+                if (!tableName) { showNotification('Please select a table.'); return; }
+                const toDelete = state.orders.filter(o=>o.table===tableName);
+                if (toDelete.length===0) { showNotification(`No orders for table "${tableName}".`); return; }
+                if (!confirm(`Delete ALL orders for table "${tableName}"?`)) return;
+                state.orders = state.orders.filter(o=>o.table!==tableName);
+                updatePendingBadges();
+                populateTableFilter();
+                populateTableFilterModal();
+                loadOrdersForAdmin();
+                if (adminPanel.style.display === 'flex') loadOrdersForAdminModal();
+                populateTableSelect('tableSelectForDelete');
+                populateTableSelect('tableSelectForDeleteModal');
+                showNotification(`Deleted ${toDelete.length} orders. Stats remain unchanged.`);
+                await Promise.all(toDelete.map(o=>deleteOrderFirestore(o.orderNumber)));
+            } catch (error) {
+                console.error('Delete error:', error);
+                showNotification('Error deleting orders: ' + error.message);
+            }
         }
 
         // ========== QR CODE PDF GENERATOR (unchanged) ==========
