@@ -2436,7 +2436,7 @@ VIP Table</textarea>
 
         // ========== NEW FUNCTION: DELETE SINGLE ORDER WITH CODE ==========
         async function deleteSingleOrderWithCode(orderId) {
-            const code = prompt("Enter 3232 code to delete this order:");
+            
             if (code !== state.adminAccessCode) {
                 alert("Incorrect code.");
                 return;
