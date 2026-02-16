@@ -53,6 +53,7 @@
         .header-center { display: flex; justify-content: center; align-items: center; flex: 1; gap: 15px; }
         .help-button { background-color: transparent; border: 2px solid var(--secondary); color: var(--secondary); padding: 8px 20px; border-radius: 50px; font-weight: 500; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 8px; font-size: 15px; }
         .help-button:hover { background-color: var(--secondary); color: var(--button-text); transform: translateY(-2px); box-shadow: 0 4px 8px rgba(69, 123, 157, 0.2); }
+        .help-button:disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
         .language-toggle { background-color: var(--primary); color: var(--button-text); border: none; padding: 8px 16px; border-radius: 50px; font-weight: 600; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 8px; font-size: 15px; }
         .language-toggle:hover { background-color: var(--primary-dark); transform: translateY(-2px); }
         .header-right { display: flex; justify-content: flex-end; align-items: center; flex: 1; gap: 15px; }
@@ -62,6 +63,7 @@
         .table-info i { margin-right: 8px; color: var(--secondary); }
         .request-pay-button { background-color: var(--danger); color: white; border: none; padding: 8px 16px; border-radius: 50px; font-weight: 600; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 8px; font-size: 15px; white-space: nowrap; }
         .request-pay-button:hover { background-color: #c82333; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(220,53,69,0.3); }
+        .request-pay-button:disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
         .back-to-admin { background-color: var(--dark); color: white; border: none; padding: 8px 16px; border-radius: 50px; font-weight: 500; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 8px; font-size: 15px; }
         .back-to-admin:hover { background-color: #343a40; }
         .app-section { display: none; padding: 30px 0; min-height: calc(100vh - 80px); background-color: var(--background); }
@@ -1422,8 +1424,11 @@ VIP Table</textarea>
             helpSoundInterval: null,
             cumulativeStats: { totalOrders: 0, totalRevenue: 0 },
             currentEditOrder: null,
-            helpCooldown: false,  // NEW: 2-minute cooldown for help requests
-            helpCooldownTimer: null
+            // Cooldown timers
+            helpCooldown: false,
+            helpCooldownTimer: null,
+            payCooldown: false,
+            payCooldownTimer: null
         };
 
         // ========== DEFAULT DATA (unchanged) ==========
@@ -1557,6 +1562,7 @@ VIP Table</textarea>
         const editOrderTotal = document.getElementById('editOrderTotal');
         const cancelEditOrderBtn = document.getElementById('cancelEditOrderBtn');
         const saveEditOrderBtn = document.getElementById('saveEditOrderBtn');
+        const needHelpBtn = document.getElementById('needHelpBtn');
 
         // NEW login elements
         const adminLoginPrompt = document.getElementById('adminLoginPrompt');
@@ -2248,7 +2254,7 @@ VIP Table</textarea>
             }
         }
 
-        // ========== REQUEST PAY BUTTON (UPDATED LOGIC) ==========
+        // ========== REQUEST PAY BUTTON (UPDATED LOGIC + COOLDOWN) ==========
         function updateRequestPayButton() {
             if (!state.currentTable || state.currentTable === "Admin" || state.isAdminMode) {
                 requestPayBtn.style.display = 'none';
@@ -2269,6 +2275,10 @@ VIP Table</textarea>
 
         async function requestPay() {
             if (!state.currentTable || state.currentTable === "Admin" || state.isAdminMode) return;
+            if (state.payCooldown) {
+                showNotification(state.currentLanguage === 'el' ? 'Παρακαλώ περιμένετε 2 λεπτά πριν ζητήσετε ξανά πληρωμή.' : 'Please wait 2 minutes before requesting payment again.');
+                return;
+            }
             const requestId = 'pay_' + Date.now() + '_' + Math.random().toString(36).substring(2);
             const payRequest = {
                 id: requestId,
@@ -2281,6 +2291,14 @@ VIP Table</textarea>
             await saveHelpRequest(payRequest);
             showNotification(state.currentLanguage === 'el' ? `Αίτημα πληρωμής για ${state.currentTable} στάλθηκε.` : `Payment request for ${state.currentTable} sent.`);
             playSound(state.soundEffects.helpRequestSound);
+            // Activate cooldown
+            state.payCooldown = true;
+            requestPayBtn.disabled = true;
+            if (state.payCooldownTimer) clearTimeout(state.payCooldownTimer);
+            state.payCooldownTimer = setTimeout(() => {
+                state.payCooldown = false;
+                requestPayBtn.disabled = false;
+            }, 120000);
         }
 
         // ========== HELP REQUEST (with 2-minute cooldown) ==========
@@ -2309,9 +2327,7 @@ VIP Table</textarea>
             // Activate cooldown
             state.helpCooldown = true;
             headerHelpButton.disabled = true;
-            const needHelpBtn = document.getElementById('needHelpBtn');
             if (needHelpBtn) needHelpBtn.disabled = true;
-            // Set timeout to reset after 2 minutes (120000 ms)
             if (state.helpCooldownTimer) clearTimeout(state.helpCooldownTimer);
             state.helpCooldownTimer = setTimeout(() => {
                 state.helpCooldown = false;
