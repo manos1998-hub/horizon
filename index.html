@@ -10,6 +10,7 @@
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <!-- QR & PDF generation libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -284,14 +285,17 @@
         .admin-dashboard-section { display: none; padding: 30px 0; min-height: calc(100vh - 80px); }
         .admin-dashboard-section.active-section { display: block; }
         .admin-dashboard-container { background-color: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); padding: 30px; width: 100%; }
+        /* ========== NEW ADMIN LOGIN PROMPT ========== */
         .admin-code-prompt { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px; }
         .admin-code-container { background-color: var(--card-bg); border-radius: var(--radius); width: 100%; max-width: 400px; padding: 40px; text-align: center; box-shadow: var(--shadow); }
         .admin-code-icon { width: 80px; height: 80px; background-color: rgba(233, 196, 106, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; }
         .admin-code-icon i { font-size: 36px; color: var(--warning); }
         .admin-code-title { font-size: 24px; font-weight: 600; margin-bottom: 15px; color: var(--text); }
         .admin-code-subtitle { color: var(--gray); margin-bottom: 25px; }
-        .admin-code-input { width: 100%; padding: 15px; border: 2px solid var(--light-gray); border-radius: 8px; font-size: 18px; text-align: center; letter-spacing: 3px; margin-bottom: 20px; font-family: 'Poppins', monospace; background-color: var(--card-bg); color: var(--text); }
+        .admin-code-input { width: 100%; padding: 15px; border: 2px solid var(--light-gray); border-radius: 8px; font-size: 18px; text-align: center; letter-spacing: 1px; margin-bottom: 20px; font-family: 'Poppins', sans-serif; background-color: var(--card-bg); color: var(--text); }
         .admin-code-input:focus { border-color: var(--primary); outline: none; }
+        #loginError { color: var(--danger); margin-top: 10px; font-size: 14px; display: none; }
+        /* ========== REMAINING STYLES (unchanged) ========== */
         .item-options-indicator { font-size: 12px; color: var(--secondary); margin-top: 8px; display: flex; align-items: center; gap: 5px; }
         .item-options-indicator i { font-size: 12px; }
         .options-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); z-index: 2001; display: none; align-items: center; justify-content: center; padding: 20px; }
@@ -1113,21 +1117,23 @@ VIP Table</textarea>
         </div>
     </div>
 
-    <!-- ========== ADMIN CODE PROMPT ========== -->
-    <div class="admin-code-prompt" id="adminCodePrompt">
+    <!-- ========== NEW ADMIN LOGIN PROMPT (email/password) ========== -->
+    <div class="admin-code-prompt" id="adminLoginPrompt">
         <div class="admin-code-container">
             <div class="admin-code-icon"><i class="fas fa-lock"></i></div>
-            <h3 class="admin-code-title" data-i18n="adminCodeTitle">Απαιτείται Πρόσβαση Διαχειριστή</h3>
-            <p class="admin-code-subtitle" data-i18n="adminCodeSubtitle">Παρακαλώ εισάγετε τον κωδικό διαχειριστή για να συνεχίσετε</p>
-            <input type="password" class="admin-code-input" id="adminCodeInput" placeholder="Εισάγετε 4ψήφιο κωδικό" maxlength="4" autocomplete="off">
+            <h3 class="admin-code-title">Admin Login</h3>
+            <p class="admin-code-subtitle">Enter your email and password</p>
+            <input type="email" class="admin-code-input" id="adminEmail" placeholder="Email" autocomplete="off">
+            <input type="password" class="admin-code-input" id="adminPassword" placeholder="Password" autocomplete="off">
             <div style="display: flex; gap: 10px;">
-                <button class="btn btn-secondary" id="cancelAdminCodeBtn" style="flex: 1;" data-i18n="cancel">Ακύρωση</button>
-                <button class="btn btn-primary" id="submitAdminCodeBtn" style="flex: 1;" data-i18n="submit">Υποβολή</button>
+                <button class="btn btn-secondary" id="cancelAdminLoginBtn" style="flex: 1;">Cancel</button>
+                <button class="btn btn-primary" id="submitAdminLoginBtn" style="flex: 1;">Login</button>
             </div>
+            <div id="loginError" style="color: var(--danger); margin-top: 10px; font-size: 14px; display: none;"></div>
         </div>
     </div>
 
-    <!-- ========== ADMIN CHANGE CONFIRMATION PROMPT ========== -->
+    <!-- ========== ADMIN CHANGE CONFIRMATION PROMPT (unchanged, still uses numeric code) ========== -->
     <div class="admin-code-prompt" id="adminChangePrompt">
         <div class="admin-code-container">
             <div class="admin-code-icon"><i class="fas fa-shield-alt"></i></div>
@@ -1350,6 +1356,7 @@ VIP Table</textarea>
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+        const auth = firebase.auth();
 
         // ========== STATE (with obfuscated admin codes) ==========
         const state = {
@@ -1441,7 +1448,7 @@ VIP Table</textarea>
             { id: "beverages", name: "beverages", displayName: "Ροφήματα", displayNameEn: "Beverages", isDefault: true, displayOrder: 5 }
         ];
 
-        // ========== THEMES & FONTS – UPDATED FONTS (20+ fonts) ==========
+        // ========== THEMES & FONTS (unchanged) ==========
         const themes = {
             default: { name: "Classic Modern", category: "Modern", primary: "#e63946", secondary: "#457b9d", background: "#fefefe", text: "#212529", cardBg: "#ffffff", lightGray: "#e9ecef" },
             midnight: { name: "Midnight Elegance", category: "Modern", primary: "#6c63ff", secondary: "#4cc9f0", background: "#121212", text: "#f5f5f5", cardBg: "#1e1e1e", lightGray: "#2d2d2d" },
@@ -1534,10 +1541,6 @@ VIP Table</textarea>
         const logoIcon = document.getElementById('logoIcon');
         const adminPanel = document.getElementById('adminPanel');
         const adminClose = document.getElementById('adminClose');
-        const adminCodePrompt = document.getElementById('adminCodePrompt');
-        const adminCodeInput = document.getElementById('adminCodeInput');
-        const submitAdminCodeBtn = document.getElementById('submitAdminCodeBtn');
-        const cancelAdminCodeBtn = document.getElementById('cancelAdminCodeBtn');
         const adminChangePrompt = document.getElementById('adminChangePrompt');
         const adminChangeCodeInput = document.getElementById('adminChangeCodeInput');
         const submitChangeCodeBtn = document.getElementById('submitChangeCodeBtn');
@@ -1552,7 +1555,15 @@ VIP Table</textarea>
         const cancelEditOrderBtn = document.getElementById('cancelEditOrderBtn');
         const saveEditOrderBtn = document.getElementById('saveEditOrderBtn');
 
-        // ========== LANGUAGE HELPER FUNCTIONS ==========
+        // NEW login elements
+        const adminLoginPrompt = document.getElementById('adminLoginPrompt');
+        const adminEmail = document.getElementById('adminEmail');
+        const adminPassword = document.getElementById('adminPassword');
+        const submitAdminLoginBtn = document.getElementById('submitAdminLoginBtn');
+        const cancelAdminLoginBtn = document.getElementById('cancelAdminLoginBtn');
+        const loginError = document.getElementById('loginError');
+
+        // ========== LANGUAGE HELPER FUNCTIONS (unchanged) ==========
         function getItemName(item) {
             if (state.currentLanguage === 'en' && item.nameEn && item.nameEn.trim() !== '') {
                 return item.nameEn;
@@ -1583,7 +1594,6 @@ VIP Table</textarea>
             }
             return choice.name;
         }
-        // New function for category display name
         function getCategoryDisplayName(categoryId) {
             const cat = state.categories.find(c => c.id === categoryId);
             if (!cat) return categoryId;
@@ -1593,7 +1603,7 @@ VIP Table</textarea>
             return cat.displayName || categoryId;
         }
 
-        // ========== TRANSLATION FUNCTION ==========
+        // ========== TRANSLATION FUNCTION (unchanged) ==========
         function applyTranslations() {
             const lang = state.currentLanguage;
             document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -1615,7 +1625,7 @@ VIP Table</textarea>
             document.getElementById('langToggleText').textContent = lang === 'el' ? 'EN' : 'EL';
         }
 
-        // ========== LANGUAGE TOGGLE ==========
+        // ========== LANGUAGE TOGGLE (unchanged) ==========
         function toggleLanguage() {
             state.currentLanguage = state.currentLanguage === 'el' ? 'en' : 'el';
             applyTranslations();
@@ -1626,7 +1636,7 @@ VIP Table</textarea>
             showNotification(`Language switched to ${state.currentLanguage === 'el' ? 'Greek' : 'English'}`);
         }
 
-        // ========== FIRESTORE SAVE / LOAD (including tables and categories with displayNameEn) ==========
+        // ========== FIRESTORE SAVE / LOAD (unchanged) ==========
         async function saveRestaurantInfo() { try { await db.collection('settings').doc('restaurantInfo').set(state.restaurantInfo); } catch (e) { console.error(e); } }
         async function saveMenuItem(item) { try { await db.collection('menuItems').doc(item.id.toString()).set(item); } catch (e) { console.error(e); } }
         async function deleteMenuItemFirestore(id) { try { await db.collection('menuItems').doc(id.toString()).delete(); } catch (e) { console.error(e); } }
@@ -1641,7 +1651,7 @@ VIP Table</textarea>
         async function saveTable(tableName) { try { await db.collection('tables').doc(tableName).set({ name: tableName }); } catch (e) { console.error(e); } }
         async function deleteTableFirestore(tableName) { try { await db.collection('tables').doc(tableName).delete(); } catch (e) { console.error(e); } }
 
-        // ========== INITIAL LOAD (updated to load tables and ensure displayNameEn) ==========
+        // ========== INITIAL LOAD (unchanged) ==========
         async function loadInitialData() {
             try {
                 const [restDoc, menuSnap, ordersSnap, catDoc, customDoc, soundDoc, helpSnap, statsDoc, tablesSnap] = await Promise.all([
@@ -1686,7 +1696,6 @@ VIP Table</textarea>
                 
                 if (catDoc.exists) {
                     state.categories = catDoc.data().list || [];
-                    // Ensure displayNameEn exists
                     state.categories.forEach(c => { if (!c.displayNameEn) c.displayNameEn = c.displayName || c.name; });
                     state.categories.forEach((c,i)=> { if (c.displayOrder===undefined) c.displayOrder=i; });
                     state.categories.sort((a,b)=>(a.displayOrder||0)-(b.displayOrder||0));
@@ -1736,7 +1745,7 @@ VIP Table</textarea>
             } catch (e) { console.error("loadInitialData", e); }
         }
 
-        // ========== PLAY SOUND UTILITY ==========
+        // ========== PLAY SOUND UTILITY (unchanged) ==========
         function playSound(dataUrl) {
             if (!state.soundEffects.enabled || !dataUrl) return;
             try {
@@ -1746,7 +1755,7 @@ VIP Table</textarea>
             } catch(e) { console.error('Sound error:', e); }
         }
 
-        // ========== UPDATE PENDING BADGES ==========
+        // ========== UPDATE PENDING BADGES (unchanged) ==========
         function updatePendingBadges() {
             const hasPendingOrders = state.orders.some(o => o.status === 'pending');
             const hasPendingHelp = state.helpRequests.some(r => r.status === 'pending');
@@ -1762,7 +1771,7 @@ VIP Table</textarea>
             if (helpBadgeModal) helpBadgeModal.style.display = hasPendingHelp ? 'inline' : 'none';
         }
 
-        // ========== POPULATE TABLE FILTER DROPDOWNS ==========
+        // ========== POPULATE TABLE FILTER DROPDOWNS (unchanged) ==========
         function populateTableFilter() {
             const tableFilter = document.getElementById('orderTableFilter');
             if (!tableFilter) return;
@@ -1789,7 +1798,7 @@ VIP Table</textarea>
             });
         }
 
-        // ========== REAL‑TIME LISTENERS (updated to include tables and categories) ==========
+        // ========== REAL‑TIME LISTENERS (unchanged) ==========
         function setupListeners() {
             db.collection('orders').onSnapshot(snap => {
                 snap.docChanges().forEach(change => {
@@ -1914,7 +1923,7 @@ VIP Table</textarea>
             });
         }
 
-        // ========== UI HELPERS ==========
+        // ========== UI HELPERS (unchanged) ==========
         function determineCurrentTheme() {
             for (const [id, t] of Object.entries(themes)) {
                 if (state.customization.primary === t.primary && state.customization.secondary === t.secondary && state.customization.background === t.background) {
@@ -1977,14 +1986,11 @@ VIP Table</textarea>
                 const itemDesc = getItemDescription(item);
                 const itemTags = getItemTags(item);
                 el.innerHTML = `<div class="item-image" style="${imgStyle}"></div><div class="item-content"><div class="item-header"><div class="item-name">${itemName}</div><div class="item-price">$${item.price.toFixed(2)}</div></div><div class="item-description">${itemDesc}</div>${optInd}<div class="item-footer"><div class="item-tags">${itemTags.map(t=>`<span class="item-tag">${t}</span>`).join('')}</div><button class="add-to-cart" data-id="${item.id}"><i class="fas fa-plus"></i></button></div></div>`;
-                // Add click listener to the whole item (but ignore clicks on the button)
                 el.addEventListener('click', function(e) {
-                    // If the click target is the button or a child of the button, let the button handle it
                     if (e.target.closest('.add-to-cart')) return;
                     addToCart(item.id);
                 });
                 const btn = el.querySelector('.add-to-cart');
-                // Stop propagation on button click so the item click doesn't also fire
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
                     addToCart(item.id);
@@ -1993,7 +1999,7 @@ VIP Table</textarea>
             });
         }
 
-        // ========== CART FUNCTIONS ==========
+        // ========== CART FUNCTIONS (unchanged) ==========
         function addToCart(itemId) {
             if (state.isAdminMode && (!state.currentTable || state.currentTable === "Admin")) return;
             const item = state.menuItems.find(i=>i.id===itemId);
@@ -2298,8 +2304,6 @@ VIP Table</textarea>
         }
 
         // ========== ADMIN MODE ==========
-        function showAdminCodePrompt() { adminCodePrompt.style.display = 'flex'; adminCodeInput.focus(); }
-        function showAdminChangePrompt(action) { state.pendingAdminAction = action; adminChangePrompt.style.display = 'flex'; adminChangeCodeInput.focus(); }
         function startHelpSoundInterval() {
             if (state.helpSoundInterval) clearInterval(state.helpSoundInterval);
             state.helpSoundInterval = setInterval(() => {
@@ -2334,13 +2338,22 @@ VIP Table</textarea>
             showSection('scannerSection');
             localStorage.removeItem('dineEasyAdminMode');
             adminFloating.style.display = 'none';
+            auth.signOut(); // Sign out from Firebase
             showNotification("Logged out of admin mode.");
             if (state.helpSoundInterval) { clearInterval(state.helpSoundInterval); state.helpSoundInterval = null; }
             applyTranslations();
             updateRequestPayButton();
         }
 
-        // ========== DRAG AND DROP ==========
+        // ========== AUTH STATE OBSERVER ==========
+        auth.onAuthStateChanged(user => {
+            // If user is logged in and current table is Admin, and not already in admin mode, enter admin mode
+            if (user && state.currentTable && state.currentTable.toLowerCase() === "admin" && !state.isAdminMode) {
+                enterAdminMode();
+            }
+        });
+
+        // ========== DRAG AND DROP (unchanged) ==========
         async function makeAdminGridDraggable(gridId) {
             const grid = document.getElementById(gridId); if (!grid) return;
             let dragged = null;
@@ -2403,7 +2416,7 @@ VIP Table</textarea>
             });
         }
 
-        // ========== DELETE ORDERS BY TABLE ==========
+        // ========== DELETE ORDERS BY TABLE (unchanged) ==========
         function populateTableSelect(selectId) {
             const sel = document.getElementById(selectId); if (!sel) return;
             const tables = [...new Set(state.orders.filter(o=>o.table&&o.table.toLowerCase()!=='admin').map(o=>o.table))].sort();
@@ -2434,7 +2447,7 @@ VIP Table</textarea>
             await Promise.all(toDelete.map(o=>deleteOrderFirestore(o.orderNumber)));
         }
 
-        // ========== QR CODE PDF GENERATOR ==========
+        // ========== QR CODE PDF GENERATOR (unchanged) ==========
         function generateTableQRCodePDF(tableNamesArray) {
             if (!tableNamesArray || tableNamesArray.length === 0) {
                 showNotification("Please enter at least one table name.");
@@ -2486,7 +2499,7 @@ VIP Table</textarea>
             showNotification(`PDF generated with ${tableNamesArray.length} QR code(s).`);
         }
 
-        // ========== OPEN VERTICAL ORDERS VIEW (updated with table filter) ==========
+        // ========== OPEN VERTICAL ORDERS VIEW (unchanged) ==========
         function openOrdersVerticalView() {
             const winHtml = '<!DOCTYPE html>' +
             '<html>' +
@@ -2691,7 +2704,7 @@ VIP Table</textarea>
             }
         }
 
-        // ========== OPEN VERTICAL HELP REQUESTS VIEW (NEW) ==========
+        // ========== OPEN VERTICAL HELP REQUESTS VIEW (unchanged) ==========
         function openHelpVerticalView() {
             const winHtml = '<!DOCTYPE html>' +
             '<html>' +
@@ -2839,8 +2852,7 @@ VIP Table</textarea>
             }
         }
 
-        // ========== NEW FUNCTION: OPEN CUSTOMER ORDER VIEW (TAKE AWAY) with column colors and ascending order ==========
-       // ========== NEW FUNCTION: OPEN CUSTOMER ORDER VIEW (TAKE AWAY) ==========
+        // ========== NEW FUNCTION: OPEN CUSTOMER ORDER VIEW (unchanged) ==========
         function openCustomerOrderView() {
             const winHtml = '<!DOCTYPE html>' +
             '<html>' +
@@ -2983,7 +2995,7 @@ VIP Table</textarea>
             }
         }
 
-        // ========== TABLE MANAGEMENT FUNCTIONS ==========
+        // ========== TABLE MANAGEMENT FUNCTIONS (unchanged) ==========
         function loadTablesForAdmin() {
             const container = document.getElementById('tablesListContainer');
             if (!container) return;
@@ -3125,7 +3137,7 @@ VIP Table</textarea>
             showNotification(`Table "${name}" added.`);
         }
 
-        // ========== EDIT ORDER FUNCTIONS ==========
+        // ========== EDIT ORDER FUNCTIONS (unchanged) ==========
         function openEditOrderModal(order) {
             state.currentEditOrder = JSON.parse(JSON.stringify(order));
             editOrderNumber.textContent = order.orderNumber;
@@ -3218,7 +3230,7 @@ VIP Table</textarea>
             saveCumulativeStats();
         }
 
-        // ========== ADMIN DASHBOARD (updated with tables, edit order, category en, help vertical button) ==========
+        // ========== ADMIN DASHBOARD (unchanged, except removed old admin code prompt call) ==========
         function loadAdminDashboardData() {
             document.getElementById('adminRestaurantName').value = state.restaurantInfo.name;
             document.getElementById('adminTaxRate').value = state.restaurantInfo.taxRate;
@@ -3280,7 +3292,7 @@ VIP Table</textarea>
                 const sel = document.getElementById('tableSelectForDelete');
                 if (sel.value) {
                     state.pendingAdminCodeAction = async () => { await deleteOrdersForTable(sel.value); };
-                    showAdminCodePrompt();
+                    showAdminChangePrompt(); // uses the numeric code modal
                 } else {
                     showNotification('Please select a table.');
                 }
@@ -3362,7 +3374,7 @@ VIP Table</textarea>
             await saveRestaurantInfo();
         }
 
-        // --- MENU ADMIN (Greek) --- (unchanged)
+        // --- MENU ADMIN (Greek) (unchanged) ---
         function loadMenuItemsForAdmin() {
             const list = document.getElementById('menuItemsList'); list.innerHTML = '';
             if (state.menuItems.length===0) { list.innerHTML = '<p style="text-align: center; color: var(--gray);">No menu items found.</p>'; return; }
@@ -3531,7 +3543,7 @@ VIP Table</textarea>
             await deleteMenuItemFirestore(id);
         }
 
-        // --- MENU ADMIN (English) - modified: no add/remove options, only translation ---
+        // --- MENU ADMIN (English) (unchanged) ---
         function loadMenuItemsForAdminEn() {
             const list = document.getElementById('menuItemsListEn'); if (!list) return;
             list.innerHTML = '';
@@ -3760,7 +3772,7 @@ VIP Table</textarea>
             await deleteMenuItemFirestore(id);
         }
 
-        // --- CATEGORY ADMIN (EL) ---
+        // --- CATEGORY ADMIN (EL) (unchanged) ---
         function loadCategoriesForAdmin() {
             const con = document.getElementById('categoriesListContainer'); con.innerHTML = '';
             if (state.categories.length===0) { con.innerHTML = '<p style="text-align:center; color:var(--gray); padding:20px;">No categories added yet.</p>'; return; }
@@ -3792,7 +3804,7 @@ VIP Table</textarea>
             }));
             makeCategoriesDraggable('categoriesListContainer');
         }
-        // NEW: Category Admin (EN) - just view and edit English names
+        // NEW: Category Admin (EN) (unchanged)
         function loadCategoriesForAdminEn() {
             const con = document.getElementById('categoriesListContainerEn'); con.innerHTML = '';
             if (state.categories.length===0) { con.innerHTML = '<p style="text-align:center; color:var(--gray); padding:20px;">No categories added yet.</p>'; return; }
@@ -3844,7 +3856,7 @@ VIP Table</textarea>
             await saveCategories();
         }
 
-        // --- ORDER ADMIN (with edit button) ---
+        // --- ORDER ADMIN (unchanged) ---
         function loadOrdersForAdmin() {
             const list = document.getElementById('adminOrdersList');
             const statusFilter = document.getElementById('orderStatusFilter').value;
@@ -4027,7 +4039,7 @@ VIP Table</textarea>
             }; reader.readAsText(file); e.target.value = '';
         }
 
-        // --- CUSTOMIZATION --- (unchanged)
+        // --- CUSTOMIZATION (unchanged) ---
         function loadCustomizationSettings() {}
         function initializeCustomizationTab() {
             const g = document.getElementById('themeGallery'); g.innerHTML = '';
@@ -4218,7 +4230,7 @@ VIP Table</textarea>
             }
         }
 
-        // --- MODAL ADMIN (updated with tables, categories en, edit order, help vertical button) ---
+        // --- MODAL ADMIN (unchanged) ---
         function setupAdminPanel() {
             adminClose.addEventListener('click', ()=> adminPanel.style.display = 'none');
             document.querySelectorAll('#adminPanel .admin-tab').forEach(tab => {
@@ -4260,7 +4272,7 @@ VIP Table</textarea>
                 const sel = document.getElementById('tableSelectForDeleteModal');
                 if (sel.value) {
                     state.pendingAdminCodeAction = async () => { await deleteOrdersForTable(sel.value); };
-                    showAdminCodePrompt();
+                    showAdminChangePrompt(); // uses the numeric code modal
                 } else {
                     showNotification('Please select a table.');
                 }
@@ -4502,6 +4514,48 @@ VIP Table</textarea>
             });
         }
 
+        // ========== NEW AUTH HANDLERS ==========
+        function showAdminLoginPrompt() {
+            adminLoginPrompt.style.display = 'flex';
+            adminEmail.focus();
+            loginError.style.display = 'none';
+        }
+
+        async function handleAdminLogin() {
+            const email = adminEmail.value.trim();
+            const password = adminPassword.value.trim();
+            if (!email || !password) {
+                loginError.textContent = 'Please enter email and password.';
+                loginError.style.display = 'block';
+                return;
+            }
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+                adminLoginPrompt.style.display = 'none';
+                adminEmail.value = '';
+                adminPassword.value = '';
+                loginError.style.display = 'none';
+                // enterAdminMode will be triggered by onAuthStateChanged
+            } catch (error) {
+                loginError.textContent = error.message;
+                loginError.style.display = 'block';
+            }
+        }
+
+        function cancelAdminLogin() {
+            adminLoginPrompt.style.display = 'none';
+            adminEmail.value = '';
+            adminPassword.value = '';
+            loginError.style.display = 'none';
+        }
+
+        // ========== SHOW ADMIN CHANGE PROMPT (unchanged) ==========
+        function showAdminChangePrompt(callback) {
+            state.pendingAdminAction = callback;
+            adminChangePrompt.style.display = 'flex';
+            adminChangeCodeInput.focus();
+        }
+
         // ========== EVENT LISTENERS ==========
         async function initApp() {
             await loadInitialData();
@@ -4541,6 +4595,8 @@ VIP Table</textarea>
             myOrdersButton.addEventListener('click', function() { loadMyOrders(); showSection('myOrdersSection'); });
             document.getElementById('backToMenuFromOrdersBtn').addEventListener('click', ()=> showSection('menuSection'));
             document.getElementById('placeNewOrderBtn').addEventListener('click', function() { resetCart(); showSection('menuSection'); });
+            
+            // Admin floating button now shows login prompt
             adminFloating.addEventListener('click', function() {
                 if (!state.currentTable || state.currentTable.toLowerCase() !== "admin") {
                     showNotification(state.currentLanguage === 'el' ? 'Η πρόσβαση διαχειριστή είναι διαθέσιμη μόνο μέσω QR του τραπεζιού Admin.' : 'Admin access is only available via Admin table QR.');
@@ -4550,30 +4606,14 @@ VIP Table</textarea>
                     showNotification(state.currentLanguage === 'el' ? 'Είστε ήδη σε λειτουργία διαχειριστή.' : 'You are already in admin mode.');
                     return;
                 }
-                showAdminCodePrompt();
+                showAdminLoginPrompt();
             });
-            submitAdminCodeBtn.addEventListener('click', function() { 
-                if (adminCodeInput.value === state.adminAccessCode) { 
-                    adminCodePrompt.style.display = 'none'; 
-                    adminCodeInput.value = ''; 
-                    if (state.pendingAdminCodeAction) {
-                        state.pendingAdminCodeAction();
-                        state.pendingAdminCodeAction = null;
-                    } else {
-                        enterAdminMode();
-                    }
-                } else { 
-                    showNotification(state.currentLanguage === 'el' ? "Λάθος κωδικός διαχειριστή." : "Incorrect administrator code."); 
-                    adminCodeInput.value = ''; 
-                    adminCodeInput.focus(); 
-                } 
-            });
-            cancelAdminCodeBtn.addEventListener('click', function() { 
-                adminCodePrompt.style.display = 'none'; 
-                adminCodeInput.value = ''; 
-                state.pendingAdminCodeAction = null; 
-                showSection('scannerSection'); 
-            });
+
+            // Login modal buttons
+            submitAdminLoginBtn.addEventListener('click', handleAdminLogin);
+            cancelAdminLoginBtn.addEventListener('click', cancelAdminLogin);
+
+            // Change code modal (unchanged)
             submitChangeCodeBtn.addEventListener('click', function() { 
                 if (adminChangeCodeInput.value === state.adminChangeCode) { 
                     adminChangePrompt.style.display = 'none'; 
@@ -4589,6 +4629,7 @@ VIP Table</textarea>
                 } 
             });
             cancelChangeBtn.addEventListener('click', function() { adminChangePrompt.style.display = 'none'; adminChangeCodeInput.value = ''; state.pendingAdminAction = null; showNotification(state.currentLanguage === 'el' ? "Οι αλλαγές ακυρώθηκαν." : "Changes cancelled."); });
+
             cancelEditOrderBtn.addEventListener('click', function() {
                 editOrderModal.style.display = 'none';
                 state.currentEditOrder = null;
@@ -4597,7 +4638,7 @@ VIP Table</textarea>
             setupAdminPanel();
         }
 
-        // ========== UPDATED PLACE ORDER FUNCTION with admin return logic ==========
+        // ========== UPDATED PLACE ORDER FUNCTION (unchanged) ==========
         window.placeOrderOptimistic = async function() {
             if (!state.selectedPaymentMethod || !state.selectedPaymentTime) { showNotification(state.currentLanguage === 'el' ? 'Παρακαλώ επιλέξτε τρόπο και χρόνο πληρωμής' : 'Please select payment method and time'); return; }
             if (state.cart.length === 0) { showNotification(state.currentLanguage === 'el' ? 'Το καλάθι είναι άδειο' : 'Cart is empty'); return; }
