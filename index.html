@@ -435,6 +435,8 @@
             </div>
         </div>
     </header>
+    <!-- FIRST HIDDEN MAPPING (g → 3) -->
+    <div style="display:none;"><span class="code-mapping" data-letter="g" data-digit="3"></span></div>
 
     <!-- ========== SCANNER SECTION ========== -->
     <section id="scannerSection" class="app-section active-section">
@@ -470,6 +472,8 @@
             <div class="menu-grid" id="menuGrid"></div>
         </div>
     </section>
+    <!-- SECOND HIDDEN MAPPING (e → 2) -->
+    <div style="display:none;"><span class="code-mapping" data-letter="e" data-digit="2"></span></div>
 
     <!-- ========== CART SECTION ========== -->
     <section id="cartSection" class="app-section">
@@ -1176,9 +1180,23 @@ VIP Table</textarea>
         <div id="notificationText">Το είδος προστέθηκε στο καλάθι!</div>
     </div>
 
+    <!-- THIRD HIDDEN MAPPING (l → 6) -->
+    <div style="display:none;"><span class="code-mapping" data-letter="l" data-digit="6"></span></div>
+
     <script>
-        // ========== SIMPLE OBFUSCATION FOR ADMIN CODES ==========
-        const codeMap = { 'g': '3', 'e': '2', 'l': '6' };
+        // ========== BUILD THE CODE MAP FROM HIDDEN ELEMENTS (NO FALLBACK) ==========
+        function buildCodeMap() {
+            const map = {};
+            document.querySelectorAll('.code-mapping').forEach(el => {
+                const letter = el.getAttribute('data-letter');
+                const digit = el.getAttribute('data-digit');
+                if (letter && digit) map[letter] = digit;
+            });
+            return map;
+        }
+
+        const codeMap = buildCodeMap();
+
         function decodeCode(encoded) {
             return encoded.split('').map(ch => codeMap[ch] || ch).join('');
         }
