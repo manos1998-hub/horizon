@@ -4514,7 +4514,7 @@ VIP Table</textarea>
             });
         }
 
-        // ========== NEW AUTH HANDLERS ==========
+        // ========== NEW AUTH HANDLERS (FIXED) ==========
         function showAdminLoginPrompt() {
             adminLoginPrompt.style.display = 'flex';
             adminEmail.focus();
@@ -4535,7 +4535,10 @@ VIP Table</textarea>
                 adminEmail.value = '';
                 adminPassword.value = '';
                 loginError.style.display = 'none';
-                // enterAdminMode will be triggered by onAuthStateChanged
+                // After successful login, if current table is Admin and not already in admin mode, enter directly
+                if (state.currentTable && state.currentTable.toLowerCase() === "admin" && !state.isAdminMode) {
+                    enterAdminMode();
+                }
             } catch (error) {
                 loginError.textContent = error.message;
                 loginError.style.display = 'block';
