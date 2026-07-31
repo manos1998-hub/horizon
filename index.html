@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Βυθόμετρο Pro – v4 (οριστικό)</title>
+    <title>Βυθόμετρο Pro – v4 (σταθερό)</title>
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -306,72 +306,36 @@
         });
 
         // ====================================================================
-        //  4. FETCH DEPTH – Η ΟΡΙΣΤΙΚΗ ΛΥΣΗ ΜΕ 3 ΣΤΡΑΤΗΓΙΚΕΣ
+        //  4. FETCH DEPTH – ΝΕΑ ΣΤΑΘΕΡΗ ΕΚΔΟΣΗ ΜΕ OPEN-METEO
         // ====================================================================
         async function fetchDepth(lat, lon) {
+            // Στρογγυλοποίηση για καλύτερη απόδοση
             const rLat = Math.round(lat * 100000) / 100000;
             const rLon = Math.round(lon * 100000) / 100000;
-
-            // Στρατηγική 1: allorigins.win/raw (με POST)
-            const url1 = `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://api.opentopodata.org/v1/gebco?locations=${rLat},${rLon}`)}`;
+            
+            // Open-Meteo Elevation API – υποστηρίζει CORS, δωρεάν, χωρίς κλειδί
+            const url = `https://api.open-meteo.com/v1/elevation?latitude=${rLat}&longitude=${rLon}`;
+            
             try {
-                const res = await fetch(url1, { 
-                    method: 'GET',
-                    signal: AbortSignal.timeout(12000) 
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.results && data.results[0] && data.results[0].elevation !== null) {
-                        const depth = Math.abs(data.results[0].elevation);
+                const response = await fetch(url, { signal: AbortSignal.timeout(10000) });
+                if (!response.ok) {
+                    console.warn('Open-Meteo απέτυχε με status:', response.status);
+                    return null;
+                }
+                const data = await response.json();
+                if (data.elevation && data.elevation.length > 0) {
+                    const elevation = data.elevation[0];
+                    // Το βάθος είναι η απόλυτη τιμή του υψομέτρου (αρνητικό για θάλασσα)
+                    if (elevation !== undefined && elevation !== null) {
+                        const depth = Math.abs(elevation);
                         if (depth > 0.1) return depth;
                     }
                 }
-            } catch (e) { console.warn('Στρ.1 απέτυχε:', e.message); }
-
-            // Στρατηγική 2: allorigins.win/get (με wrapper)
-            const url2 = `https://api.allorigins.win/get?url=${encodeURIComponent(`https://api.opentopodata.org/v1/gebco?locations=${rLat},${rLon}`)}`;
-            try {
-                const res = await fetch(url2, { signal: AbortSignal.timeout(12000) });
-                if (res.ok) {
-                    const wrapper = await res.json();
-                    if (wrapper.contents) {
-                        const data = JSON.parse(wrapper.contents);
-                        if (data.results && data.results[0] && data.results[0].elevation !== null) {
-                            const depth = Math.abs(data.results[0].elevation);
-                            if (depth > 0.1) return depth;
-                        }
-                    }
-                }
-            } catch (e) { console.warn('Στρ.2 απέτυχε:', e.message); }
-
-            // Στρατηγική 3: corsproxy.io (με απλό concatenation)
-            const url3 = `https://corsproxy.io/?https://api.opentopodata.org/v1/gebco?locations=${rLat},${rLon}`;
-            try {
-                const res = await fetch(url3, { signal: AbortSignal.timeout(12000) });
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.results && data.results[0] && data.results[0].elevation !== null) {
-                        const depth = Math.abs(data.results[0].elevation);
-                        if (depth > 0.1) return depth;
-                    }
-                }
-            } catch (e) { console.warn('Στρ.3 απέτυχε:', e.message); }
-
-            // Στρατηγική 4: Open-Elevation via allorigins.win/raw
-            const url4 = `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://api.open-elevation.com/api/v1/lookup?locations=${rLat},${rLon}`)}`;
-            try {
-                const res = await fetch(url4, { signal: AbortSignal.timeout(12000) });
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.results && data.results[0] && data.results[0].elevation !== undefined) {
-                        const depth = Math.abs(data.results[0].elevation);
-                        if (depth > 0.1) return depth;
-                    }
-                }
-            } catch (e) { console.warn('Στρ.4 απέτυχε:', e.message); }
-
-            // Αν όλα απέτυχαν
-            return null;
+                return null;
+            } catch (error) {
+                console.warn('Σφάλμα κατά την ανάκτηση βάθους:', error.message);
+                return null;
+            }
         }
 
         // ====================================================================
@@ -651,8 +615,8 @@
         // ====================================================================
         updateChartAndHistory();
         setTimeout(() => { if (currentPos) map.flyTo(currentPos, 16); }, 1500);
-        console.log('🚤 Βυθόμετρο Pro v4 – οριστικό!');
-        console.log('💡 4 στρατηγικές για βάθος – αναμονή έως 12 sec');
+        console.log('🚤 Βυθόμετρο Pro v4 – με Open-Meteo API (σταθερό)');
+        console.log('💡 Κλικ στον χάρτη = βάθος σημείου (εκτός σχεδίασης)');
     </script>
 </body>
 </html>
