@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Βυθόμετρο Ultimate – v7 (σταθερό)</title>
+    <title>Βυθόμετρο Ultimate – v7</title>
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -107,8 +107,18 @@
         .chart-wrapper { height: 140px; margin-top: 6px; }
         .chart-wrapper canvas { width: 100% !important; height: 100% !important; }
 
-        #waypointsList { max-height: 100px; overflow-y: auto; font-size: 0.75rem; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 4px 8px; margin: 4px 0; }
-        #waypointsList span { display: inline-block; background: #1a3a5a; padding: 2px 8px; border-radius: 20px; margin: 2px 4px 2px 0; font-size: 0.65rem; }
+        #waypointsList {
+            max-height: 120px; overflow-y: auto; font-size: 0.75rem;
+            background: rgba(0,0,0,0.2); border-radius: 8px; padding: 4px 8px; margin: 4px 0;
+        }
+        #waypointsList .wp-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 2px 4px; border-bottom: 1px solid rgba(255,255,255,0.05);
+            cursor: grab;
+        }
+        #waypointsList .wp-item:hover { background: rgba(255,255,255,0.05); }
+        #waypointsList .wp-item .wp-depth { color: #00e5ff; font-weight: 600; }
+        #waypointsList .wp-item .wp-del { cursor: pointer; color: #ff4d6d; padding: 0 6px; }
 
         #overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 2500; display: none; }
         #overlay.show { display: block; }
@@ -117,16 +127,9 @@
         .custom-marker-inner { background: #ff4444; border-radius: 50%; border: 3px solid white; width: 16px; height: 16px; box-shadow: 0 0 20px rgba(255,68,68,0.9); }
         .depth-popup { font-size: 0.9rem; }
         .depth-popup strong { color: #00e5ff; }
+        .depth-popup .sub { font-size: 0.8rem; color: #88bbdd; }
 
-        .gauge-container { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
-        .gauge-item { text-align: center; flex: 1; min-width: 80px; }
-        .gauge-item .gauge-value { font-size: 1.6rem; font-weight: 700; }
-        .gauge-item .gauge-label { font-size: 0.6rem; text-transform: uppercase; color: #88bbdd; letter-spacing: 0.5px; }
-        .gauge-item .gauge-bar { height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; margin-top: 4px; overflow: hidden; }
-        .gauge-item .gauge-bar .fill { height: 100%; border-radius: 10px; transition: width 0.5s; }
-
-        .weather-row { display: flex; gap: 8px; flex-wrap: wrap; font-size: 0.85rem; }
-        .weather-row .item { background: rgba(0,0,0,0.2); padding: 4px 12px; border-radius: 20px; display: flex; align-items: center; gap: 6px; }
+        .wp-marker { background: #ffaa00; border-radius: 50%; border: 2px solid white; width: 10px; height: 10px; }
 
         @media (max-width: 600px) {
             #drawer { width: 100vw; left: -100vw; padding: 12px; }
@@ -134,8 +137,6 @@
             .badge { font-size: 0.65rem; padding: 3px 10px; }
             .badge .value { font-size: 0.9rem; }
             #menuToggle { font-size: 22px; padding: 4px 10px; }
-            .gauge-container { gap: 6px; }
-            .gauge-item .gauge-value { font-size: 1.2rem; }
         }
     </style>
 </head>
@@ -149,7 +150,6 @@
         <div class="badge"><span class="label">Ταχύτητα</span><span class="value speed" id="speedDisplay">-- km/h</span></div>
         <div class="badge"><span class="label">Θέση</span><span class="value latlon" id="latlonDisplay">--</span></div>
         <div class="badge"><span class="label">Ακρίβεια</span><span class="value" id="accuracyDisplay" style="font-size:0.8rem;">-- μ</span></div>
-        <div class="badge" id="weatherBadge" style="display:none;"><span class="label">Καιρός</span><span class="value" id="weatherDisplay" style="font-size:0.9rem;">--</span></div>
     </div>
 
     <button id="menuToggle" aria-label="Menu">☰</button>
@@ -161,7 +161,6 @@
             <button class="tab-btn" data-tab="tabRoute">🗺️ Διαδρομή</button>
             <button class="tab-btn" data-tab="tabFuel">⛽ Καύσιμα</button>
             <button class="tab-btn" data-tab="tabHistory">📈 Ιστορικό</button>
-            <button class="tab-btn" data-tab="tabWeather">🌤️ Καιρός</button>
         </div>
 
         <div id="tabDashboard" class="tab-content active">
@@ -171,48 +170,34 @@
                 <div class="info-line"><span class="lbl">Μήκος</span><span class="val" id="dashLon">--</span></div>
                 <div class="info-line"><span class="lbl">Υψόμετρο</span><span class="val" id="dashAlt">-- μ</span></div>
                 <div class="info-line"><span class="lbl">Ακρίβεια</span><span class="val" id="dashAcc">-- μ</span></div>
-                <div class="info-line"><span class="lbl">Ταχύτητα</span><span class="val" id="dashSpeed">-- km/h</span></div>
             </div>
             <div class="card">
                 <div class="card-title">📡 Κατάσταση</div>
                 <div id="statusMessage" style="font-size:0.95rem; color:#ffaa00;">Αναζήτηση GPS...</div>
             </div>
-            <div class="card">
-                <div class="card-title">📊 Μετρήσεις</div>
-                <div class="gauge-container">
-                    <div class="gauge-item">
-                        <div class="gauge-value" id="gaugeDepth" style="color:#00e5ff;">--</div>
-                        <div class="gauge-label">Βάθος (μ)</div>
-                        <div class="gauge-bar"><div class="fill" id="gaugeDepthBar" style="width:0%; background:#00e5ff;"></div></div>
-                    </div>
-                    <div class="gauge-item">
-                        <div class="gauge-value" id="gaugeSpeed" style="color:#ffb74d;">--</div>
-                        <div class="gauge-label">Ταχύτητα (km/h)</div>
-                        <div class="gauge-bar"><div class="fill" id="gaugeSpeedBar" style="width:0%; background:#ffb74d;"></div></div>
-                    </div>
-                </div>
-            </div>
             <button class="btn btn-outline" id="centerBtn">🎯 Κέντρο στη θέση μου</button>
-            <button class="btn btn-outline" id="refreshWeatherBtn">🌤️ Ανανέωση καιρού</button>
         </div>
 
         <div id="tabRoute" class="tab-content">
             <div class="card">
                 <div class="card-title">✏️ Σχεδίαση διαδρομής</div>
-                <p style="font-size:0.75rem; color:#99bbdd;">Κάνε κλικ στον χάρτη (με ενεργή σχεδίαση).</p>
+                <p style="font-size:0.75rem; color:#99bbdd;">Κάνε κλικ στον χάρτη (με ενεργή σχεδίαση) για προσθήκη σημείων. Σύρε τα σημεία για αναδιάταξη.</p>
                 <div id="waypointsList"><span style="color:#6688aa;">(κανένα σημείο)</span></div>
                 <div class="row">
                     <div><span class="lbl">Σύνολο (km)</span><div class="card-value" id="routeKm" style="font-size:1.2rem;">0.00</div></div>
                     <div><span class="lbl">Ναυτικά μίλια</span><div class="card-value" id="routeNm" style="font-size:1.2rem;">0.00</div></div>
                 </div>
                 <div class="row">
-                    <div><span class="lbl">ΕΤΑ (με τρέχουσα ταχύτητα)</span><div class="card-value" id="routeEta" style="font-size:1.0rem;">--</div></div>
+                    <div><span class="lbl">Ελάχιστο βάθος</span><div class="card-value" id="routeMinDepth" style="font-size:1.0rem; color:#ffaa00;">--</div></div>
+                    <div><span class="lbl">Μέγιστο βάθος</span><div class="card-value" id="routeMaxDepth" style="font-size:1.0rem; color:#00e5ff;">--</div></div>
                 </div>
                 <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:6px;">
                     <button class="btn btn-outline btn-sm" id="toggleDrawMode">✏️ Ενεργοποίηση</button>
                     <button class="btn btn-danger btn-sm" id="clearRouteBtn">🗑️ Καθαρισμός</button>
+                    <button class="btn btn-outline btn-sm" id="reverseRouteBtn">🔄 Αντιστροφή</button>
                     <button class="btn btn-outline btn-sm" id="saveRouteBtn">💾 Αποθήκευση</button>
                     <button class="btn btn-outline btn-sm" id="exportRouteBtn">📤 Export GeoJSON</button>
+                    <button class="btn btn-outline btn-sm" id="exportGpxBtn">📤 Export GPX</button>
                 </div>
             </div>
             <div class="card">
@@ -221,6 +206,10 @@
                     <span style="color:#6688aa;">(καμία)</span>
                 </div>
                 <button class="btn btn-outline btn-sm" id="loadSavedRouteBtn" style="margin-top:4px;">📥 Φόρτωση επιλεγμένης</button>
+            </div>
+            <div class="card">
+                <div class="card-title">📊 Προφίλ βάθους</div>
+                <div class="chart-wrapper"><canvas id="depthProfileCanvas"></canvas></div>
             </div>
         </div>
 
@@ -253,33 +242,6 @@
                 </div>
             </div>
         </div>
-
-        <div id="tabWeather" class="tab-content">
-            <div class="card">
-                <div class="card-title">🌤️ Πρόγνωση καιρού</div>
-                <div id="weatherInfo" style="font-size:0.9rem;">
-                    <div class="weather-row">
-                        <div class="item"><i class="fas fa-wind"></i> Άνεμος: <span id="wWind">--</span> km/h</div>
-                        <div class="item"><i class="fas fa-compass"></i> Κατεύθυνση: <span id="wDir">--</span>°</div>
-                    </div>
-                    <div class="weather-row">
-                        <div class="item"><i class="fas fa-water"></i> Κύμα: <span id="wWave">--</span> m</div>
-                        <div class="item"><i class="fas fa-temperature-high"></i> Θερμοκρασία: <span id="wTemp">--</span> °C</div>
-                    </div>
-                    <div class="weather-row">
-                        <div class="item"><i class="fas fa-cloud-rain"></i> Βροχόπτωση: <span id="wRain">--</span> mm</div>
-                        <div class="item"><i class="fas fa-eye"></i> Ορατότητα: <span id="wVis">--</span> km</div>
-                    </div>
-                </div>
-                <button class="btn btn-outline btn-sm" id="refreshWeatherBtn2" style="margin-top:8px;">🔄 Ανανέωση</button>
-            </div>
-            <div class="card">
-                <div class="card-title">📍 Σημεία Ενδιαφέροντος (POIs)</div>
-                <p style="font-size:0.75rem; color:#99bbdd;">Λιμάνια, μαρίνες, φάροι</p>
-                <button class="btn btn-outline btn-sm" id="togglePoiBtn">📍 Εμφάνιση POIs</button>
-                <div id="poiCount" style="font-size:0.7rem; color:#88bbdd; margin-top:4px;">0 σημεία</div>
-            </div>
-        </div>
     </div>
 
     <script>
@@ -287,14 +249,12 @@
         //  1. MAP
         // ====================================================================
         const map = L.map('map', { center: [37.9838, 23.7275], zoom: 13 });
-
         const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' });
         const openSea = L.tileLayer('https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png', { attribution: '&copy; OpenSeaMap', opacity: 0.7, maxZoom: 18 });
         const esriOcean = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}', { attribution: 'Tiles &copy; Esri', maxZoom: 13, opacity: 0.6 });
         const esriSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Tiles &copy; Esri', maxZoom: 18 });
         const cartoDb = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; CartoDB', maxZoom: 19 });
-
-        L.control.layers({ 'OSM': osm, 'OpenSeaMap': openSea, 'ESRI Ocean': esriOcean, 'ESRI Satellite': esriSat, 'CartoDB': cartoDb }, {}, { collapsed: false }).addTo(map);
+        L.control.layers({ 'OpenStreetMap': osm, 'OpenSeaMap': openSea, 'ESRI Ocean': esriOcean, 'ESRI Satellite': esriSat, 'CartoDB': cartoDb }, {}, { collapsed: false }).addTo(map);
         osm.addTo(map);
 
         // ====================================================================
@@ -308,7 +268,6 @@
         const dashLon = document.getElementById('dashLon');
         const dashAlt = document.getElementById('dashAlt');
         const dashAcc = document.getElementById('dashAcc');
-        const dashSpeed = document.getElementById('dashSpeed');
         const statusMsg = document.getElementById('statusMessage');
 
         const drawer = document.getElementById('drawer');
@@ -322,11 +281,14 @@
         const waypointsList = document.getElementById('waypointsList');
         const routeKm = document.getElementById('routeKm');
         const routeNm = document.getElementById('routeNm');
-        const routeEta = document.getElementById('routeEta');
+        const routeMinDepth = document.getElementById('routeMinDepth');
+        const routeMaxDepth = document.getElementById('routeMaxDepth');
         const clearRouteBtn = document.getElementById('clearRouteBtn');
         const toggleDrawBtn = document.getElementById('toggleDrawMode');
+        const reverseRouteBtn = document.getElementById('reverseRouteBtn');
         const saveRouteBtn = document.getElementById('saveRouteBtn');
         const exportRouteBtn = document.getElementById('exportRouteBtn');
+        const exportGpxBtn = document.getElementById('exportGpxBtn');
         const savedRoutesList = document.getElementById('savedRoutesList');
         const loadSavedRouteBtn = document.getElementById('loadSavedRouteBtn');
 
@@ -338,8 +300,9 @@
         const fuelLiters = document.getElementById('fuelLiters');
         const useRouteDistBtn = document.getElementById('useRouteDistBtn');
 
-        const ctx = document.getElementById('depthChartCanvas').getContext('2d');
-        const depthChart = new Chart(ctx, {
+        // Charts
+        const ctxDepth = document.getElementById('depthChartCanvas').getContext('2d');
+        const depthChart = new Chart(ctxDepth, {
             type: 'line',
             data: { labels: [], datasets: [{ label: 'Βάθος (μ)', data: [], borderColor: '#00e5ff', backgroundColor: 'rgba(0,229,255,0.15)', tension: 0.2, pointRadius: 2, borderWidth: 2, fill: true }] },
             options: {
@@ -350,19 +313,17 @@
         });
         const historyList = document.getElementById('historyList');
 
-        const wWind = document.getElementById('wWind');
-        const wDir = document.getElementById('wDir');
-        const wWave = document.getElementById('wWave');
-        const wTemp = document.getElementById('wTemp');
-        const wRain = document.getElementById('wRain');
-        const wVis = document.getElementById('wVis');
-        const weatherBadge = document.getElementById('weatherBadge');
-        const weatherDisplay = document.getElementById('weatherDisplay');
-
-        const gaugeDepth = document.getElementById('gaugeDepth');
-        const gaugeDepthBar = document.getElementById('gaugeDepthBar');
-        const gaugeSpeed = document.getElementById('gaugeSpeed');
-        const gaugeSpeedBar = document.getElementById('gaugeSpeedBar');
+        // Profile chart
+        const ctxProfile = document.getElementById('depthProfileCanvas').getContext('2d');
+        const profileChart = new Chart(ctxProfile, {
+            type: 'line',
+            data: { labels: [], datasets: [{ label: 'Βάθος (μ)', data: [], borderColor: '#ffaa00', backgroundColor: 'rgba(255,170,0,0.15)', tension: 0.3, pointRadius: 3, borderWidth: 2, fill: true }] },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { labels: { color: '#e0f0ff' } } },
+                scales: { x: { ticks: { color: '#88c8ff', maxTicksLimit: 10 }, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { reverse: true, ticks: { color: '#88c8ff' }, grid: { color: 'rgba(255,255,255,0.05)' } } }
+            }
+        });
 
         // ====================================================================
         //  3. DRAWER / MENU
@@ -381,126 +342,58 @@
             });
         });
 
+        document.getElementById('centerBtn').addEventListener('click', () => {
+            if (currentPos) { map.flyTo(currentPos, 16); statusMsg.textContent = 'Κέντρο στη θέση σας'; statusMsg.style.color = '#00e5ff'; } 
+            else { statusMsg.textContent = 'Η θέση δεν είναι ακόμα γνωστή'; statusMsg.style.color = '#ffaa00'; }
+        });
+
         // ====================================================================
-        //  4. FETCH DEPTH – ΒΕΛΤΙΩΜΕΝΗ ΕΚΔΟΣΗ ΜΕ 2 API
+        //  4. FETCH DEPTH (MULTI-API FALLBACK)
         // ====================================================================
         async function fetchDepth(lat, lon) {
             const rLat = Math.round(lat * 100000) / 100000;
             const rLon = Math.round(lon * 100000) / 100000;
-            
-            const endpoints = [
-                `https://api.open-meteo.com/v1/elevation?latitude=${rLat}&longitude=${rLon}`,
-                `https://api.open-elevation.com/api/v1/lookup?locations=${rLat},${rLon}`
-            ];
 
-            for (let url of endpoints) {
-                try {
-                    const response = await fetch(url, { signal: AbortSignal.timeout(10000) });
-                    if (!response.ok) continue;
-                    const data = await response.json();
-                    let elevation = null;
-                    if (data.elevation && data.elevation.length > 0) {
-                        elevation = data.elevation[0];
-                    } else if (data.results && data.results.length > 0) {
-                        elevation = data.results[0].elevation;
-                    }
-                    if (elevation !== null && elevation !== undefined) {
-                        const depth = Math.abs(elevation);
+            // 1. Open-Meteo (κύριο)
+            const url1 = `https://api.open-meteo.com/v1/elevation?latitude=${rLat}&longitude=${rLon}`;
+            try {
+                const res = await fetch(url1, { signal: AbortSignal.timeout(8000) });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.elevation && data.elevation.length > 0 && data.elevation[0] !== null && data.elevation[0] !== undefined) {
+                        const depth = Math.abs(data.elevation[0]);
                         if (depth > 0.5) return depth;
                         else return 0;
                     }
-                } catch (error) {
-                    console.warn('Depth endpoint failed:', error.message);
                 }
-            }
+            } catch (e) { console.warn('Open-Meteo failed:', e.message); }
+
+            // 2. OpenTopoData μέσω proxy (εφεδρικό)
+            const url2 = `https://corsproxy.io/?${encodeURIComponent(`https://api.opentopodata.org/v1/gebco?locations=${rLat},${rLon}`)}`;
+            try {
+                const res = await fetch(url2, { signal: AbortSignal.timeout(8000) });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.results && data.results[0] && data.results[0].elevation !== null) {
+                        const depth = Math.abs(data.results[0].elevation);
+                        if (depth > 0.5) return depth;
+                        else return 0;
+                    }
+                }
+            } catch (e) { console.warn('OpenTopoData failed:', e.message); }
+
             return null;
         }
 
         // ====================================================================
-        //  5. FETCH WEATHER
-        // ====================================================================
-        async function fetchWeather(lat, lon) {
-            const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,wind_speed_10m,wind_direction_10m,precipitation,weather_code&daily=sunrise,sunset&timezone=auto&forecast_days=1`;
-            try {
-                const response = await fetch(url, { signal: AbortSignal.timeout(10000) });
-                if (!response.ok) return null;
-                return await response.json();
-            } catch (error) {
-                console.warn('Weather error:', error.message);
-                return null;
-            }
-        }
-
-        // ====================================================================
-        //  6. POIs
-        // ====================================================================
-        let poiLayer = null;
-        let poiVisible = false;
-
-        async function fetchPOIs(lat, lon, radius = 5000) {
-            const bbox = `${lon-radius/111000},${lat-radius/111000},${lon+radius/111000},${lat+radius/111000}`;
-            const query = `[out:json][timeout:25];(node["seamark:type"~"harbour|marina|light_house|buoy"]({{bbox}}););out;`;
-            const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query.replace('{{bbox}}', bbox))}`;
-            try {
-                const response = await fetch(url, { signal: AbortSignal.timeout(15000) });
-                if (!response.ok) return [];
-                const data = await response.json();
-                return data.elements || [];
-            } catch (error) {
-                console.warn('POI error:', error.message);
-                return [];
-            }
-        }
-
-        function displayPOIs(elements) {
-            if (poiLayer) { map.removeLayer(poiLayer); poiLayer = null; }
-            if (!elements || elements.length === 0) {
-                document.getElementById('poiCount').textContent = '0 σημεία';
-                return;
-            }
-            const markers = [];
-            elements.forEach(el => {
-                if (el.lat && el.lon) {
-                    const icon = L.divIcon({ className: 'poi-marker', iconSize: [12, 12] });
-                    const marker = L.marker([el.lat, el.lon], { icon })
-                        .bindPopup(`<strong>${el.tags?.['name'] || 'POI'}</strong><br>${el.tags?.['seamark:type'] || 'Unknown'}`);
-                    markers.push(marker);
-                }
-            });
-            poiLayer = L.layerGroup(markers).addTo(map);
-            document.getElementById('poiCount').textContent = `${markers.length} σημεία`;
-        }
-
-        // ====================================================================
-        //  7. GPS
+        //  5. GPS
         // ====================================================================
         let userMarker = null, accuracyCircle = null, watchId = null, currentPos = null;
-        let routePoints = [], routePolyline = null, drawModeActive = false;
+        let routePoints = [], routePolyline = null, routeMarkers = [], drawModeActive = false;
         let depthHistory = [];
         let savedRoutes = JSON.parse(localStorage.getItem('savedRoutes')) || [];
         let isFetchingDepth = false;
-        let currentWeather = null;
-        let currentSpeed = 0;
         let currentDepth = null;
-
-        function updateGauges(depth, speed) {
-            if (depth !== null && depth !== undefined) {
-                gaugeDepth.textContent = depth.toFixed(1);
-                const pct = Math.min(depth / 50 * 100, 100);
-                gaugeDepthBar.style.width = pct + '%';
-            } else {
-                gaugeDepth.textContent = '--';
-                gaugeDepthBar.style.width = '0%';
-            }
-            if (speed !== null && speed !== undefined) {
-                gaugeSpeed.textContent = speed.toFixed(1);
-                const pct = Math.min(speed / 50 * 100, 100);
-                gaugeSpeedBar.style.width = pct + '%';
-            } else {
-                gaugeSpeed.textContent = '--';
-                gaugeSpeedBar.style.width = '0%';
-            }
-        }
 
         function onLocationFound(position) {
             const lat = position.coords.latitude;
@@ -509,7 +402,6 @@
             const speed = position.coords.speed ? position.coords.speed * 3.6 : 0;
             const altitude = position.coords.altitude || 0;
             currentPos = [lat, lon];
-            currentSpeed = speed;
 
             latlonDisplay.textContent = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
             speedDisplay.textContent = `${speed.toFixed(1)} km/h`;
@@ -518,7 +410,6 @@
             dashLon.textContent = lon.toFixed(6);
             dashAlt.textContent = `${altitude.toFixed(1)} μ`;
             dashAcc.textContent = `${Math.round(accuracy)} μ`;
-            dashSpeed.textContent = `${speed.toFixed(1)} km/h`;
             statusMsg.textContent = 'Λήψη βάθους...';
             statusMsg.style.color = '#ffaa00';
 
@@ -536,57 +427,22 @@
                 accuracyCircle.setRadius(accuracy);
             }
 
-            updateETA();
-
             if (!isFetchingDepth) {
                 isFetchingDepth = true;
                 fetchDepth(lat, lon).then(depth => {
                     isFetchingDepth = false;
                     currentDepth = depth;
                     if (depth !== null && depth >= 0) {
-                        if (depth === 0) {
-                            depthDisplay.textContent = '0 μ (ξηρά)';
-                            statusMsg.textContent = 'Στην ξηρά';
-                            statusMsg.style.color = '#ffaa00';
-                        } else {
-                            depthDisplay.textContent = `${depth.toFixed(1)} μ`;
-                            statusMsg.textContent = 'Ενημερώθηκε';
-                            statusMsg.style.color = '#00e5ff';
+                        if (depth === 0) { depthDisplay.textContent = '0 μ (ξηρά)'; statusMsg.textContent = 'Στην ξηρά'; statusMsg.style.color = '#ffaa00'; }
+                        else { depthDisplay.textContent = `${depth.toFixed(1)} μ`; statusMsg.textContent = 'Ενημερώθηκε'; statusMsg.style.color = '#00e5ff'; 
                             const now = new Date();
                             const t = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0') + ':' + now.getSeconds().toString().padStart(2,'0');
                             depthHistory.push({ time: t, depth: depth });
                             if (depthHistory.length > 50) depthHistory.shift();
                             updateChartAndHistory();
                         }
-                    } else {
-                        depthDisplay.textContent = '-- μ';
-                        statusMsg.textContent = 'Αποτυχία βάθους';
-                        statusMsg.style.color = '#ff4444';
-                    }
-                    updateGauges(depth, speed);
-                }).catch(() => {
-                    isFetchingDepth = false;
-                    depthDisplay.textContent = '-- μ';
-                    statusMsg.textContent = 'Σφάλμα βάθους';
-                    statusMsg.style.color = '#ff4444';
-                    updateGauges(null, speed);
-                });
-            } else {
-                updateGauges(currentDepth, speed);
-            }
-
-            if (!currentWeather || Date.now() - currentWeather._timestamp > 600000) {
-                fetchWeather(lat, lon).then(weather => {
-                    if (weather) {
-                        currentWeather = weather;
-                        currentWeather._timestamp = Date.now();
-                        updateWeatherDisplay(weather);
-                    }
-                });
-            }
-
-            if (poiVisible) {
-                fetchPOIs(lat, lon).then(elements => displayPOIs(elements));
+                    } else { depthDisplay.textContent = '-- μ'; statusMsg.textContent = 'Αποτυχία βάθους'; statusMsg.style.color = '#ff4444'; }
+                }).catch(() => { isFetchingDepth = false; depthDisplay.textContent = '-- μ'; statusMsg.textContent = 'Σφάλμα βάθους'; statusMsg.style.color = '#ff4444'; });
             }
         }
 
@@ -609,46 +465,7 @@
         }
 
         // ====================================================================
-        //  8. WEATHER DISPLAY
-        // ====================================================================
-        function updateWeatherDisplay(weather) {
-            if (!weather || !weather.current) return;
-            const c = weather.current;
-            wWind.textContent = c.wind_speed_10m?.toFixed(1) || '--';
-            wDir.textContent = c.wind_direction_10m?.toFixed(0) || '--';
-            wTemp.textContent = c.temperature_2m?.toFixed(1) || '--';
-            wRain.textContent = c.precipitation?.toFixed(1) || '--';
-            wWave.textContent = '--';
-            wVis.textContent = '--';
-            weatherBadge.style.display = 'inline-flex';
-            const windSpeed = c.wind_speed_10m?.toFixed(1) || '--';
-            weatherDisplay.textContent = `${windSpeed} km/h`;
-        }
-
-        // ====================================================================
-        //  9. ETA
-        // ====================================================================
-        function updateETA() {
-            if (routePoints.length < 2 || currentSpeed < 0.5) {
-                routeEta.textContent = '--';
-                return;
-            }
-            const totalNm = parseFloat(routeNm.textContent) || 0;
-            if (totalNm <= 0) { routeEta.textContent = '--'; return; }
-            const hours = totalNm / (currentSpeed / 1.852);
-            if (hours > 24) {
-                const days = Math.floor(hours / 24);
-                const hrs = hours % 24;
-                routeEta.textContent = `${days}η ${hrs.toFixed(1)}ω`;
-            } else if (hours > 1) {
-                routeEta.textContent = `${hours.toFixed(1)} ώρες`;
-            } else {
-                routeEta.textContent = `${(hours*60).toFixed(0)} λεπτά`;
-            }
-        }
-
-        // ====================================================================
-        //  10. ROUTE
+        //  6. ROUTE - ENHANCED
         // ====================================================================
         function haversineKm(p1, p2) {
             const R = 6371;
@@ -658,25 +475,100 @@
             return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         }
 
-        function updateRouteDisplay() {
+        async function updateRouteDisplay() {
             if (routePoints.length === 0) {
                 waypointsList.innerHTML = '<span style="color:#6688aa;">(κανένα σημείο)</span>';
                 routeKm.textContent = '0.00';
                 routeNm.textContent = '0.00';
-                routeEta.textContent = '--';
+                routeMinDepth.textContent = '--';
+                routeMaxDepth.textContent = '--';
                 if (routePolyline) { map.removeLayer(routePolyline); routePolyline = null; }
+                routeMarkers.forEach(m => map.removeLayer(m));
+                routeMarkers = [];
+                profileChart.data.labels = [];
+                profileChart.data.datasets[0].data = [];
+                profileChart.update();
                 return;
             }
+
+            // Εμφάνιση λίστας
             let html = '';
-            routePoints.forEach((p,i) => { html += `<span>${i+1}: ${p.lat.toFixed(4)}, ${p.lng.toFixed(4)}</span>`; });
+            routePoints.forEach((p, i) => {
+                html += `<div class="wp-item" data-idx="${i}">
+                            <span>${i+1}. ${p.lat.toFixed(4)}, ${p.lng.toFixed(4)}</span>
+                            <span class="wp-depth">${p.depth !== undefined ? p.depth.toFixed(1)+' μ' : '...'}</span>
+                            <span class="wp-del" data-idx="${i}">✕</span>
+                        </div>`;
+            });
             waypointsList.innerHTML = html;
+
+            // Delete handlers
+            waypointsList.querySelectorAll('.wp-del').forEach(el => {
+                el.addEventListener('click', function() {
+                    const idx = parseInt(this.dataset.idx);
+                    routePoints.splice(idx, 1);
+                    updateRouteDisplay();
+                });
+            });
+
+            // Drag & Drop (απλή έκδοση με click για μετακίνηση)
+            // Θα χρησιμοποιήσουμε απλή λειτουργία: κλικ σε σημείο για μετακίνηση προς τα πάνω/κάτω
+            waypointsList.querySelectorAll('.wp-item').forEach(el => {
+                el.addEventListener('dblclick', function() {
+                    const idx = parseInt(this.dataset.idx);
+                    if (idx > 0) {
+                        [routePoints[idx], routePoints[idx-1]] = [routePoints[idx-1], routePoints[idx]];
+                        updateRouteDisplay();
+                    }
+                });
+            });
+
+            // Υπολογισμός αποστάσεων
             let totalKm = 0;
-            for (let i=1; i<routePoints.length; i++) totalKm += haversineKm(routePoints[i-1], routePoints[i]);
+            let depths = [];
+            for (let i=1; i<routePoints.length; i++) {
+                totalKm += haversineKm(routePoints[i-1], routePoints[i]);
+            }
             const totalNm = totalKm * 0.539957;
             routeKm.textContent = totalKm.toFixed(2);
             routeNm.textContent = totalNm.toFixed(2);
-            updateETA();
+
+            // Ανάκτηση βάθους για κάθε σημείο (αν δεν έχει ήδη)
+            let depthPromises = [];
+            routePoints.forEach((p, i) => {
+                if (p.depth === undefined) {
+                    depthPromises.push(fetchDepth(p.lat, p.lng).then(d => {
+                        routePoints[i].depth = d;
+                        return d;
+                    }));
+                } else {
+                    depthPromises.push(Promise.resolve(p.depth));
+                }
+            });
+
+            const allDepths = await Promise.all(depthPromises);
+            const validDepths = allDepths.filter(d => d !== null && d >= 0);
+            if (validDepths.length > 0) {
+                const minDepth = Math.min(...validDepths);
+                const maxDepth = Math.max(...validDepths);
+                routeMinDepth.textContent = minDepth === 0 ? '0 μ (ξηρά)' : minDepth.toFixed(1) + ' μ';
+                routeMaxDepth.textContent = maxDepth.toFixed(1) + ' μ';
+            } else {
+                routeMinDepth.textContent = '--';
+                routeMaxDepth.textContent = '--';
+            }
+
+            // Ενημέρωση προφίλ βάθους
+            const labels = routePoints.map((_, i) => `Σ${i+1}`);
+            profileChart.data.labels = labels;
+            profileChart.data.datasets[0].data = allDepths.map(d => d !== null && d >= 0 ? d : null);
+            profileChart.update();
+
+            // Σχεδίαση polyline & markers
             if (routePolyline) map.removeLayer(routePolyline);
+            routeMarkers.forEach(m => map.removeLayer(m));
+            routeMarkers = [];
+
             if (routePoints.length > 1) {
                 routePolyline = L.polyline(routePoints, { color: '#ffaa00', weight: 4, opacity: 0.8 }).addTo(map);
                 if (routePoints.length > 2) {
@@ -684,41 +576,53 @@
                     map.flyToBounds(bounds, { padding: [40,40], maxZoom: 14 });
                 }
             } else {
-                routePolyline = L.marker(routePoints[0]).addTo(map);
+                routePolyline = null;
             }
+
+            // Markers για κάθε σημείο
+            routePoints.forEach((p, i) => {
+                const depthText = p.depth !== undefined && p.depth !== null && p.depth >= 0 ? p.depth.toFixed(1) + ' μ' : '...';
+                const marker = L.marker([p.lat, p.lng], {
+                    icon: L.divIcon({ className: 'wp-marker', iconSize: [10, 10] })
+                }).addTo(map)
+                .bindPopup(`<strong>Σημείο ${i+1}</strong><br>Πλάτος: ${p.lat.toFixed(5)}<br>Μήκος: ${p.lng.toFixed(5)}<br>Βάθος: ${depthText}`);
+                routeMarkers.push(marker);
+            });
         }
 
         // ====================================================================
-        //  11. CLICK ON MAP
+        //  7. MAP CLICK
         // ====================================================================
         map.on('click', function(e) {
             if (drawModeActive) {
-                routePoints.push(e.latlng);
+                const lat = e.latlng.lat, lng = e.latlng.lng;
+                routePoints.push({ lat, lng });
                 updateRouteDisplay();
                 statusMsg.textContent = `Σημείο ${routePoints.length} προστέθηκε`;
                 statusMsg.style.color = '#ffaa00';
                 return;
             }
 
+            // Κλικ για βάθος σημείου
             const lat = e.latlng.lat, lng = e.latlng.lng;
             const popup = L.popup()
                 .setLatLng([lat, lng])
-                .setContent(`<div class="depth-popup"><strong>📍 Σημείο</strong><br>Πλάτος: ${lat.toFixed(5)}<br>Μήκος: ${lng.toFixed(5)}<br><strong>Βάθος: </strong><span class="depth-loading">⟳ Αναζήτηση...</span></div>`)
+                .setContent(`<div class="depth-popup"><strong>📍 Σημείο</strong><br>Πλάτος: ${lat.toFixed(5)}<br>Μήκος: ${lng.toFixed(5)}<br><strong>Βάθος: </strong>⟳ Αναζήτηση...</div>`)
                 .openOn(map);
 
             fetchDepth(lat, lng).then(depth => {
                 let depthText;
-                if (depth === null) depthText = '❌ μη διαθέσιμο';
+                if (depth === null) depthText = '❌ μη διαθέσιμο (χωρίς δεδομένα)';
                 else if (depth === 0) depthText = '0 μ (ξηρά)';
                 else depthText = `${depth.toFixed(1)} μ`;
                 popup.setContent(`<div class="depth-popup"><strong>📍 Σημείο</strong><br>Πλάτος: ${lat.toFixed(5)}<br>Μήκος: ${lng.toFixed(5)}<br><strong>Βάθος: </strong>${depthText}</div>`);
             }).catch(() => {
-                popup.setContent(`<div class="depth-popup"><strong>📍 Σημείο</strong><br>Πλάτος: ${lat.toFixed(5)}<br>Μήκος: ${lng.toFixed(5)}<br><strong>Βάθος: </strong>❌ σφάλμα</div>`);
+                popup.setContent(`<div class="depth-popup"><strong>📍 Σημείο</strong><br>Πλάτος: ${lat.toFixed(5)}<br>Μήκος: ${lng.toFixed(5)}<br><strong>Βάθος: </strong>❌ σφάλμα σύνδεσης</div>`);
             });
         });
 
         // ====================================================================
-        //  12. ROUTE CONTROLS
+        //  8. ROUTE CONTROLS
         // ====================================================================
         toggleDrawBtn.addEventListener('click', function() {
             drawModeActive = !drawModeActive;
@@ -732,24 +636,29 @@
         clearRouteBtn.addEventListener('click', function() {
             routePoints = [];
             if (routePolyline) { map.removeLayer(routePolyline); routePolyline = null; }
+            routeMarkers.forEach(m => map.removeLayer(m));
+            routeMarkers = [];
             updateRouteDisplay();
             statusMsg.textContent = 'Διαδρομή καθαρίστηκε';
             statusMsg.style.color = '#00e5ff';
         });
 
-        document.getElementById('centerBtn').addEventListener('click', () => {
-            if (currentPos) { map.flyTo(currentPos, 16); statusMsg.textContent = 'Κέντρο στη θέση σας'; statusMsg.style.color = '#00e5ff'; } 
-            else { statusMsg.textContent = 'Η θέση δεν είναι ακόμα γνωστή'; statusMsg.style.color = '#ffaa00'; }
+        reverseRouteBtn.addEventListener('click', function() {
+            if (routePoints.length < 2) { alert('Χρειάζονται τουλάχιστον 2 σημεία.'); return; }
+            routePoints.reverse();
+            updateRouteDisplay();
+            statusMsg.textContent = 'Διαδρομή αντιστράφηκε';
+            statusMsg.style.color = '#00e5ff';
         });
 
         // ====================================================================
-        //  13. SAVE / LOAD ROUTE
+        //  9. SAVE / LOAD / EXPORT
         // ====================================================================
         saveRouteBtn.addEventListener('click', function() {
             if (routePoints.length < 2) { alert('Πρέπει να έχεις τουλάχιστον 2 σημεία.'); return; }
             const name = prompt('Δώσε όνομα διαδρομής:', `Διαδρομή ${savedRoutes.length+1}`);
             if (!name) return;
-            savedRoutes.push({ name, points: routePoints.map(p => ({lat: p.lat, lng: p.lng})), date: new Date().toLocaleString() });
+            savedRoutes.push({ name, points: routePoints.map(p => ({lat: p.lat, lng: p.lng, depth: p.depth})), date: new Date().toLocaleString() });
             localStorage.setItem('savedRoutes', JSON.stringify(savedRoutes));
             updateSavedRoutesList();
             statusMsg.textContent = `Διαδρομή "${name}" αποθηκεύτηκε`;
@@ -777,14 +686,33 @@
             statusMsg.style.color = '#00e5ff';
         });
 
+        exportGpxBtn.addEventListener('click', function() {
+            if (routePoints.length < 2) { alert('Η διαδρομή πρέπει να έχει τουλάχιστον 2 σημεία.'); return; }
+            let gpx = `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Vathometro" xmlns="http://www.topografix.com/GPX/1/1">
+<trk><name>Διαδρομή</name><trkseg>`;
+            routePoints.forEach(p => {
+                gpx += `<trkpt lat="${p.lat}" lon="${p.lng}"></trkpt>`;
+            });
+            gpx += `</trkseg></trk></gpx>`;
+            const blob = new Blob([gpx], { type: 'application/gpx+xml' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `route_${new Date().toISOString().slice(0,10)}.gpx`;
+            a.click();
+            URL.revokeObjectURL(url);
+            statusMsg.textContent = 'GPX εξήχθη';
+            statusMsg.style.color = '#00e5ff';
+        });
+
         function updateSavedRoutesList() {
             if (savedRoutes.length === 0) { savedRoutesList.innerHTML = '<span style="color:#6688aa;">(καμία αποθηκευμένη)</span>'; return; }
             let html = '';
             savedRoutes.forEach((r, i) => {
                 const pts = r.points.length;
-                const km = pts > 1 ? haversineKm(r.points[0], r.points[pts-1]) : 0;
                 html += `<div style="padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.05); display:flex; justify-content:space-between; align-items:center;">
-                            <span><strong>${r.name}</strong> (${pts} σημεία, ${(km*0.539957).toFixed(1)} nm)</span>
+                            <span><strong>${r.name}</strong> (${pts} σημεία)</span>
                             <button class="btn btn-outline btn-sm" data-idx="${i}" style="width:auto; padding:2px 10px; margin:0;">Φόρτωση</button>
                             <button class="btn btn-danger btn-sm" data-delidx="${i}" style="width:auto; padding:2px 10px; margin:0; background:#ff4d6d; color:#fff; border:none;">✕</button>
                         </div>`;
@@ -795,7 +723,7 @@
                     const idx = parseInt(this.dataset.idx);
                     const route = savedRoutes[idx];
                     if (!route) return;
-                    routePoints = route.points.map(p => ({lat: p.lat, lng: p.lng}));
+                    routePoints = route.points.map(p => ({lat: p.lat, lng: p.lng, depth: p.depth}));
                     updateRouteDisplay();
                     statusMsg.textContent = `Φορτώθηκε η διαδρομή "${route.name}"`;
                     statusMsg.style.color = '#00e5ff';
@@ -806,7 +734,7 @@
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
                     const idx = parseInt(this.dataset.delidx);
-                    if (confirm(`Διαγραφή της διαδρομής "${savedRoutes[idx].name}";`)) {
+                    if (confirm(`Διαγραφή "${savedRoutes[idx].name}";`)) {
                         savedRoutes.splice(idx, 1);
                         localStorage.setItem('savedRoutes', JSON.stringify(savedRoutes));
                         updateSavedRoutesList();
@@ -825,7 +753,7 @@
             const idx = parseInt(choice) - 1;
             if (idx >= 0 && idx < savedRoutes.length) {
                 const route = savedRoutes[idx];
-                routePoints = route.points.map(p => ({lat: p.lat, lng: p.lng}));
+                routePoints = route.points.map(p => ({lat: p.lat, lng: p.lng, depth: p.depth}));
                 updateRouteDisplay();
                 statusMsg.textContent = `Φορτώθηκε η διαδρομή "${route.name}"`;
                 statusMsg.style.color = '#00e5ff';
@@ -835,7 +763,7 @@
         updateSavedRoutesList();
 
         // ====================================================================
-        //  14. FUEL
+        //  10. FUEL
         // ====================================================================
         calcFuelBtn.addEventListener('click', function() {
             const cons = parseFloat(fuelCons.value) || 0;
@@ -855,7 +783,7 @@
         });
 
         // ====================================================================
-        //  15. HISTORY CHART
+        //  11. HISTORY CHART
         // ====================================================================
         function updateChartAndHistory() {
             depthChart.data.labels = depthHistory.map(d => d.time);
@@ -874,46 +802,14 @@
         }
 
         // ====================================================================
-        //  16. WEATHER & POI CONTROLS
-        // ====================================================================
-        document.getElementById('refreshWeatherBtn').addEventListener('click', () => {
-            if (currentPos) {
-                fetchWeather(currentPos[0], currentPos[1]).then(weather => {
-                    if (weather) { currentWeather = weather; currentWeather._timestamp = Date.now(); updateWeatherDisplay(weather); }
-                });
-            }
-        });
-        document.getElementById('refreshWeatherBtn2').addEventListener('click', () => {
-            document.getElementById('refreshWeatherBtn').click();
-        });
-
-        document.getElementById('togglePoiBtn').addEventListener('click', function() {
-            poiVisible = !poiVisible;
-            this.textContent = poiVisible ? '🔄 Απόκρυψη POIs' : '📍 Εμφάνιση POIs';
-            if (poiVisible && currentPos) {
-                fetchPOIs(currentPos[0], currentPos[1]).then(elements => displayPOIs(elements));
-            } else if (!poiVisible && poiLayer) {
-                map.removeLayer(poiLayer);
-                poiLayer = null;
-                document.getElementById('poiCount').textContent = '0 σημεία (απόκρυψη)';
-            }
-        });
-
-        // ====================================================================
-        //  17. INIT
+        //  12. INIT
         // ====================================================================
         updateChartAndHistory();
         setTimeout(() => { if (currentPos) map.flyTo(currentPos, 16); }, 1500);
-        console.log('🚤 Βυθόμετρο Ultimate v7 – Σταθερό με 2 API για βάθος');
+        console.log('🚤 Βυθόμετρο Ultimate v7 – Enhanced Route!');
+        console.log('📦 Features: Multi-API Depth, Route with depth profile, GPX export, Reverse, Drag&Drop');
         console.log('💡 Κλικ στον χάρτη = βάθος σημείου (εκτός σχεδίασης)');
-
-        setInterval(() => {
-            if (currentPos) {
-                fetchWeather(currentPos[0], currentPos[1]).then(weather => {
-                    if (weather) { currentWeather = weather; currentWeather._timestamp = Date.now(); updateWeatherDisplay(weather); }
-                });
-            }
-        }, 600000);
+        console.log('🔄 Double-click on waypoint in list to move up');
     </script>
 </body>
 </html>
